@@ -11,7 +11,7 @@
   "scripts": {
     "install:all": "npm install && npm run install:frontend && npm run install:backend && npm run install:ai",
     "install:frontend": "cd frontend && npm install",
-    "install:backend": "cd backend && npm install", 
+    "install:backend": "cd backend && npm install",
     "install:ai": "cd ai-services && pip install -r requirements.txt",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:ai\" \"npm run dev:frontend\"",
     "dev:frontend": "cd frontend && npm start",
@@ -35,6 +35,7 @@
     "clean:backend": "cd backend && rm -rf node_modules dist"
   },
   "devDependencies": {
+    "axios": "^1.12.2",
     "concurrently": "^8.2.2"
   },
   "engines": {

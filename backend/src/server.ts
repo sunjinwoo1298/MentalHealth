@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+
+// Load environment variables FIRST
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -5,7 +10,6 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import dotenv from 'dotenv';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -22,13 +26,15 @@ import { logger } from './utils/logger';
 import { validateRequest } from './middleware/validation';
 
 // Import services
-import { DatabaseService } from './services/database';
+import { DatabaseService, db } from './services/database';
 import { RedisService } from './services/redis';
 import { SocketService } from './services/socket';
 
-dotenv.config();
-
 const app = express();
+
+// Trust proxy for rate limiting and security
+app.set('trust proxy', 1);
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -107,7 +113,6 @@ app.use('/api/interventions', authMiddleware, interventionRoutes);
 
 // Socket.IO connection handling
 const socketService = new SocketService(io);
-socketService.initialize();
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
@@ -129,8 +134,7 @@ process.on('SIGTERM', async () => {
   });
   
   // Close database connections
-  await DatabaseService.disconnect();
-  await RedisService.disconnect();
+  await db.close();
   
   process.exit(0);
 });
@@ -142,8 +146,7 @@ process.on('SIGINT', async () => {
     logger.info('HTTP server closed');
   });
   
-  await DatabaseService.disconnect();
-  await RedisService.disconnect();
+  await db.close();
   
   process.exit(0);
 });

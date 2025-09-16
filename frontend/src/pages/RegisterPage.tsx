@@ -35,7 +35,7 @@ export default function RegisterPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard')
+      navigate('/onboarding')
     }
   }, [isAuthenticated, navigate])
 
@@ -125,7 +125,7 @@ export default function RegisterPage() {
       console.log('Attempting registration with:', { ...formData, password: '[HIDDEN]' })
       await register(formData)
       // Only set success if we get here without error
-      setSuccess('Account created successfully! Redirecting to dashboard...')
+      setSuccess('Account created successfully! Redirecting to onboarding...')
       // Navigation will happen automatically via useEffect when isAuthenticated changes
     } catch (error) {
       // Error is already handled by the auth context, just clear success message

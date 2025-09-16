@@ -6,6 +6,9 @@ import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import Dashboard from './pages/Dashboard'
 import OnboardingFlow from './pages/OnboardingFlow'
+import ProfilePage from './pages/ProfilePage'
+import PrivacyPage from './pages/PrivacyPage'
+import SettingsPage from './pages/SettingsPage'
 import './App.css'
 
 function App() {
@@ -19,6 +22,9 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Router>
     </AuthProvider>

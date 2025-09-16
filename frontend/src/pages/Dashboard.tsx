@@ -114,6 +114,21 @@ export default function Dashboard() {
             </button>
           </div>
 
+          {/* Profile Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Profile Settings</h3>
+              <span className="text-2xl">⚙️</span>
+            </div>
+            <p className="text-gray-600 mb-4">Manage your profile and preferences</p>
+            <button 
+              onClick={() => navigate('/profile')}
+              className="w-full bg-gradient-to-r from-gray-600 to-slate-600 text-white py-2 px-4 rounded-lg hover:from-gray-700 hover:to-slate-700 transition-all"
+            >
+              Edit Profile
+            </button>
+          </div>
+
           {/* Professional Help Card */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between mb-4">

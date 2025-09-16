@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import Navigation from '../components/Navigation/Navigation'
 
 // Modern Age Group Card Component with enhanced animations
 function AgeGroupCard({ icon, title, description, ages, link, index }: {
@@ -205,6 +208,8 @@ function TestimonialCard({ quote, attribution, role, index }: {
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const navigate = useNavigate()
+  const { isAuthenticated, user, logout } = useAuth()
   
   useEffect(() => {
     setIsLoaded(true)
@@ -220,6 +225,11 @@ export default function HomePage() {
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
+
+  const handleLogout = async () => {
+    await logout()
+    // User will be redirected automatically when isAuthenticated changes
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 overflow-x-hidden">
@@ -243,46 +253,14 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Modern Header Section */}
-      <header className="relative bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-white/20">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo with animation */}
-            <div className="flex items-center space-x-3 group">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-                <span className="text-white font-bold text-xl">🧠</span>
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                MindCare
-              </span>
-            </div>
-            
-            {/* Navigation Links with hover effects */}
-            <div className="hidden md:flex items-center space-x-8">
-              {['Who We Serve', 'Services', 'How It Works', 'About'].map((item, index) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(' ', '-')}`}
-                  className="relative text-gray-600 hover:text-blue-600 transition-all duration-300 font-medium group"
-                >
-                  {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-green-600 group-hover:w-full transition-all duration-300"></span>
-                </a>
-              ))}
-            </div>
-
-            {/* CTA Buttons with enhanced styling */}
-            <div className="flex items-center space-x-4">
-              <button className="hidden sm:block border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                Sign In
-              </button>
-              <button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                Get Started
-              </button>
-            </div>
-          </div>
-        </nav>
-      </header>
+      {/* Navigation */}
+      <Navigation 
+        isAuthenticated={isAuthenticated}
+        user={user || undefined}
+        onLogin={() => navigate('/login')}
+        onRegister={() => navigate('/register')}
+        onLogout={handleLogout}
+      />
 
       {/* Enhanced Hero Section */}
       <section className={`relative pt-20 pb-24 px-4 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>

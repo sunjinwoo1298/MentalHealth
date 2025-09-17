@@ -141,19 +141,19 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto">
           {/* Enhanced Header Section */}
           <div className="text-center mb-12 fadeInUp" style={{ animationDelay: '0.1s' }}>
-            <div className="inline-flex items-center space-x-3 bg-gray-900/80 backdrop-blur-sm rounded-full px-8 py-4 mb-6 shadow-xl border border-gray-700/30">
+            <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-pink-500/20 to-teal-500/20 backdrop-blur-md rounded-full px-8 py-4 mb-6 shadow-xl border border-pink-400/30 hover:border-teal-400/50 transition-all duration-300">
               <span className="text-3xl animate-bounce">✨</span>
-              <span className="text-xl font-semibold bg-gradient-to-r from-pink-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="text-xl font-semibold bg-gradient-to-r from-pink-300 to-teal-300 bg-clip-text text-transparent">
                 {getGreeting()}, {user?.username || 'Friend'}!
               </span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 hover-lift">
+            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-pink-100 to-teal-100 bg-clip-text text-transparent mb-4 hover-lift">
               Your Wellness Dashboard
             </h1>
-            <p className="text-xl text-gray-200 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-100 max-w-2xl mx-auto font-medium">
               Ready for another step in your wellness journey?
             </p>
-            <div className="mt-4 text-base text-gray-300 font-medium">
+            <div className="mt-4 text-base text-pink-200/80 font-medium bg-white/5 rounded-full px-6 py-2 inline-block border border-white/10">
               {currentTime.toLocaleDateString('en-IN', { 
                 weekday: 'long', 
                 year: 'numeric', 

@@ -1020,41 +1020,122 @@ p, .text-base, body {
   color: var(--text-muted);
 }
 
-/* Card and section specific typography */
+/* Card and section specific typography - Enhanced Visibility */
 .service-card-content h3 {
   font-size: 1.5rem; /* 24px */
   line-height: 1.3;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700; /* Increased weight */
+  color: #1A202C; /* Darker, more visible color */
   margin-bottom: 1rem;
 }
 
 .service-card-content p {
   font-size: 1rem; /* 16px */
   line-height: 1.6;
-  color: var(--text-body);
+  color: #2D3748; /* Darker body text */
   margin-bottom: 1.5rem;
+  font-weight: 500; /* Slightly bolder */
 }
 
 .service-card-content li {
   font-size: 0.875rem; /* 14px */
   line-height: 1.5;
-  color: var(--text-muted);
+  color: #4A5568; /* Better contrast than muted */
+  font-weight: 500; /* Added weight for visibility */
 }
 
-/* Process steps typography */
-.process-step-title {
-  font-size: 1.125rem; /* 18px */
-  line-height: 1.4;
-  font-weight: 600;
-  color: var(--text-primary);
+/* Enhanced service card content container */
+.service-card-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.95); /* Slight background for better text contrast */
+  border-radius: 1rem;
+  padding: 0.5rem; /* Small padding to create separation */
+}
+
+/* Service card title enhancement */
+.service-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1A202C;
+  margin-bottom: 1rem;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); /* Subtle text shadow for better readability */
+}
+
+/* Service card description enhancement */
+.service-card-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #2D3748;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+/* Service card feature list enhancement */
+.service-card-features li {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #4A5568;
+  font-weight: 500;
   margin-bottom: 0.5rem;
+}
+
+/* Process steps typography - Enhanced Visibility */
+.process-step-title {
+  font-size: 1.25rem; /* 20px - Increased */
+  line-height: 1.4;
+  font-weight: 700; /* Bolder */
+  color: #1A202C; /* Darker, more visible */
+  margin-bottom: 0.5rem;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .process-step-description {
   font-size: 1rem; /* 16px */
   line-height: 1.5;
-  color: var(--text-body);
+  color: #2D3748; /* Darker body text */
+  font-weight: 500; /* Slightly bolder */
+}
+
+/* Process step container enhancement */
+.process-step {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Process step number enhancement */
+.process-step-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1A202C;
+  background: linear-gradient(135deg, var(--primary-magenta), var(--secondary-blue));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Process heading enhancement */
+.process-heading {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1A202C;
+  text-align: center;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.process-subheading {
+  font-size: 1.25rem;
+  color: #2D3748;
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 3rem;
 }
 
 /* Enhanced Accessibility Styles */
@@ -2616,12 +2697,67 @@ html {
   border-color: rgba(var(--secondary-sage-rgb), 0.2);
 }
 
+/* Enhanced text visibility for statistics and trust indicators */
 .text-stats-lavender {
-  color: var(--primary-lavender);
+  color: #5B4C83; /* Darker, more visible lavender */
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .text-stats-sage {
-  color: var(--secondary-sage);
+  color: #4A6741; /* Darker, more visible sage */
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Trust badge text enhancement */
+.trust-badge-text {
+  color: #1A202C;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Statistics numbers enhancement */
+.stats-number {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1A202C;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.stats-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2D3748;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Enhanced headings for better visibility */
+.section-heading {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1A202C;
+  text-align: center;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.section-subheading {
+  font-size: 1.25rem;
+  color: #2D3748;
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+
+/* Button text enhancement */
+.btn-text {
+  font-weight: 600;
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive Horizontal Scrolling Container with Scroll Snap */
@@ -2866,4 +3002,156 @@ html {
     gap: 1rem;
     animation-duration: 45s;
   }
+}
+
+/* ========================================
+   COMPREHENSIVE TEXT VISIBILITY FIXES
+   ======================================== */
+
+/* Global text enhancements for better visibility */
+.card-text, 
+.card-title,
+.card-description,
+.card-content h3,
+.card-content p,
+.card-content li {
+  color: #1A202C !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Specific overrides for very light text */
+.text-gray-500,
+.text-gray-400,
+.text-gray-300 {
+  color: #4A5568 !important;
+  font-weight: 500 !important;
+}
+
+/* Service and process card content enhancement */
+.service-card h3,
+.process-card h3 {
+  color: #1A202C !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+}
+
+.service-card p,
+.process-card p {
+  color: #2D3748 !important;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+}
+
+.service-card li,
+.process-card li {
+  color: #4A5568 !important;
+  font-weight: 500 !important;
+}
+
+/* Trust indicators and badges */
+.trust-indicator,
+.badge-text {
+  color: #1A202C !important;
+  font-weight: 600 !important;
+}
+
+/* Statistics and numbers */
+.stat-number {
+  color: #1A202C !important;
+  font-weight: 800 !important;
+}
+
+.stat-label {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+}
+
+/* Final text visibility verification */
+* {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   SPECIFIC SECTION TEXT VISIBILITY FIXES
+   ======================================== */
+
+/* Trust Badges Section Enhancement */
+.trust-badges h3,
+.trust-badges .font-bold {
+  color: #1A202C !important;
+  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.trust-badges p,
+.trust-badges .text-sm {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Features Section Enhancement (Family Support, AI Integration etc.) */
+.features-section h3,
+.features-section .text-xl,
+.features-section .text-lg {
+  color: #1A202C !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.features-section p,
+.features-section .text-base,
+.features-section .text-sm {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Crisis Support Section Enhancement */
+.crisis-support h3,
+.crisis-support .font-bold,
+.emergency-support h3 {
+  color: #1A202C !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.crisis-support p,
+.emergency-support p {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Call-to-Action Buttons Enhancement */
+.cta-section button,
+.cta-buttons button,
+.btn-primary,
+.btn-secondary {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Cultural Context Section */
+.cultural-context h3,
+.cultural-understanding h3 {
+  color: #1A202C !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.cultural-context p,
+.cultural-understanding p {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
 }

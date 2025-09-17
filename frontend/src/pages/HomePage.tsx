@@ -364,7 +364,7 @@ export default function HomePage() {
             
             {/* Enhanced Service Cards - Horizontal Scrolling with Accessibility */}
             <div 
-              className="horizontal-scroll-container mb-20"
+              className="features-section horizontal-scroll-container mb-20"
               role="region"
               aria-labelledby="services-heading"
               aria-describedby="services-description"
@@ -779,7 +779,7 @@ export default function HomePage() {
             </div>
 
             {/* Trust Badges */}
-            <div className="grid md:grid-cols-4 gap-8 mb-16">
+            <div className="trust-badges grid md:grid-cols-4 gap-8 mb-16">
               {[
                 { icon: "🏆", title: "Award Winning", subtitle: "Top Mental Health Platform 2024" },
                 { icon: "🔒", title: "100% Confidential", subtitle: "HIPAA Compliant & Secure" },
@@ -787,7 +787,7 @@ export default function HomePage() {
                 { icon: "🇮🇳", title: "Made for India", subtitle: "Cultural Context & Local Understanding" }
               ].map((badge, index) => (
                 <div key={index} className="text-center group scroll-reveal">
-                  <div className="w-16 h-16 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg hover-scale smooth-transition border border-primary-blue/20">
+                  <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg hover-scale smooth-transition border border-primary-blue/20">
                     {badge.icon}
                   </div>
                   <h3 className="font-bold text-text-primary mb-1">{badge.title}</h3>
@@ -800,7 +800,7 @@ export default function HomePage() {
             <div className="bg-gradient-to-br from-accent-teal-50 to-primary-blue-50 rounded-3xl p-8 lg:p-12 scroll-reveal">
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 {/* Cultural Understanding */}
-                <div>
+                <div className="cultural-understanding">
                   <h3 className="text-2xl lg:text-3xl font-bold text-text-primary mb-6">
                     Understanding Your Cultural Context
                   </h3>
@@ -830,7 +830,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Emergency Support */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/50">
+                <div className="emergency-support bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/50">
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 bg-crisis-red/10 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4">
                       🆘
@@ -866,7 +866,7 @@ export default function HomePage() {
               <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
                 Join thousands of young people who've found their path to better mental health with culturally sensitive, professional support.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="cta-buttons flex flex-col sm:flex-row gap-4 justify-center">
                 <button className="group bg-gradient-to-r from-primary-blue to-primary-blue-dark text-white px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-blue focus:ring-opacity-50 shadow-xl relative overflow-hidden">
                   <span className="relative z-10">Begin Your Healing Journey</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-secondary-green to-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

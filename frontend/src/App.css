@@ -1040,13 +1040,285 @@ button:active,
   }
 }
 
+/* Who We Serve Section - Soothing & Accessible Design */
+.who-we-serve-section {
+  background: linear-gradient(180deg, #F8F9FB 0%, #FFFFFF 100%);
+  position: relative;
+  padding: 4rem 0 6rem 0;
+  overflow: hidden;
+}
+
+.who-we-serve-section .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.who-we-serve-section::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--bg-gradient-hero);
+  z-index: 1;
+}
+
+/* Decorative background elements */
+.who-we-serve-section::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -100px;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.08), rgba(33, 150, 243, 0.08));
+  border-radius: 50%;
+  animation: float-gentle 6s ease-in-out infinite;
+  z-index: 0;
+}
+
+.who-we-serve-decorative-blob {
+  position: absolute;
+  top: 20%;
+  left: -80px;
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(45deg, rgba(76, 175, 80, 0.06), rgba(33, 150, 243, 0.06));
+  border-radius: 50%;
+  animation: float-gentle 8s ease-in-out infinite reverse;
+  z-index: 0;
+}
+
+/* Heading styles */
+.who-we-serve-heading {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #222C3A;
+  text-align: center;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.who-we-serve-subheading {
+  font-size: 1.25rem;
+  color: #444857;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 3rem auto;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Audience group cards container */
+.audience-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  justify-items: center;
+  padding: 0;
+  width: 100%;
+}
+
+/* Audience group cards */
+.audience-card {
+  background: #FFFFFF;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(34, 44, 58, 0.08);
+  border: 1px solid rgba(34, 44, 58, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  width: 100%;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.audience-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(233, 30, 99, 0.02) 0%, 
+    rgba(33, 150, 243, 0.02) 50%, 
+    rgba(76, 175, 80, 0.02) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.audience-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(34, 44, 58, 0.12);
+}
+
+.audience-card:hover::before {
+  opacity: 1;
+}
+
+.audience-card:focus-within {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Card icons */
+.audience-card-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--primary-magenta), var(--secondary-blue));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Card text */
+.audience-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222C3A;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.audience-card-ages {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-magenta);
+  background: rgba(233, 30, 99, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+}
+
+.audience-card-description {
+  font-size: 1.125rem;
+  color: #444857;
+  line-height: 1.6;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .who-we-serve-section {
+    padding: 3rem 0 4rem 0;
+  }
+  
+  .who-we-serve-section .container {
+    padding: 0 1rem;
+  }
+  
+  .who-we-serve-heading {
+    font-size: 2rem;
+  }
+  
+  .who-we-serve-subheading {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+  }
+  
+  .audience-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0;
+    max-width: 100%;
+  }
+  
+  .audience-card {
+    padding: 1.5rem;
+    min-height: 240px;
+    margin-bottom: 0;
+    max-width: 100%;
+  }
+  
+  .audience-card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .audience-card {
+    min-height: 300px;
+    padding: 2rem;
+  }
+  
+  .audience-card:hover {
+    transform: none;
+  }
+  
+  .audience-card:active {
+    transform: scale(0.98);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .who-we-serve-heading {
+    color: #000000;
+  }
+  
+  .audience-card-title {
+    color: #000000;
+  }
+  
+  .audience-card-description {
+    color: #333333;
+  }
+  
+  .audience-card {
+    border: 2px solid #000000;
+  }
+}
+
 /* Animation Delays for better UX */
+.animation-delay-500 {
+  animation-delay: 0.5s;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
 .animation-delay-2000 {
   animation-delay: 2s;
 }
 
 .animation-delay-4000 {
   animation-delay: 4s;
+}
+
+/* Gentle floating animation for decorative elements */
+@keyframes float-gentle {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-10px) rotate(2deg); 
+  }
 }
 
 /* Dyslexia-Friendly Mode */

@@ -273,41 +273,71 @@ export default function HomePage() {
         </section>
 
         {/* Who We Serve Section */}
-        <section id="who-we-serve" className="py-16 lg:py-24 bg-white" role="region" aria-labelledby="who-we-serve-heading">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 id="who-we-serve-heading" className="text-3xl lg:text-5xl font-bold text-text-primary mb-6">
-                Who We Serve
-              </h2>
-              <p className="text-xl text-text-secondary max-w-3xl mx-auto leading-relaxed">
-                Tailored mental health support for every stage of youth development.
+      {/* Who We Serve Section */}
+      <section 
+        className="who-we-serve-section" 
+        id="who-we-serve"
+        role="region" 
+        aria-labelledby="who-we-serve-heading"
+      >
+        <div className="who-we-serve-decorative-blob" aria-hidden="true"></div>
+        <div className="container">
+          <h2 id="who-we-serve-heading" className="who-we-serve-heading">
+            Tailored Support for Every Stage
+          </h2>
+          <p className="who-we-serve-subheading">
+            Our platform adapts to the unique needs and challenges at every stage of youth development, 
+            providing age-appropriate resources and culturally relevant support.
+          </p>
+          
+          <div className="audience-cards-grid relative z-10">
+            <div 
+              className="audience-card fade-in-up"
+              role="article"
+              aria-labelledby="children-title"
+              tabIndex={0}
+            >
+              <span className="audience-card-icon" aria-hidden="true">🌱</span>
+              <h3 id="children-title" className="audience-card-title">Children</h3>
+              <span className="audience-card-ages">Ages 8-12</span>
+              <p className="audience-card-description">
+                Building emotional awareness through interactive stories, simple coping strategies, 
+                and safe expression tools designed for developing minds.
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                { icon: "🧒", title: "Children", description: "Building emotional foundations and coping skills.", ages: "Ages 6-12" },
-                { icon: "🧑‍🎓", title: "Teens", description: "Navigating academic pressure and social expectations.", ages: "Ages 13-17" },
-                { icon: "👨‍💼", title: "Young Adults", description: "Managing career stress and life transitions.", ages: "Ages 18-25" }
-              ].map((group) => (
-                <article key={group.title} className="group relative bg-white rounded-lg shadow-soft border border-neutral-200 card-hover smooth-transition scroll-reveal">
-                  <div className="p-6">
-                    <div className="flex items-center mb-4">
-                      <span className="text-4xl mr-3 icon-float">{group.icon}</span>
-                      <div>
-                        <h3 className="text-xl font-semibold text-text-primary mb-1">{group.title}</h3>
-                        <span className="text-sm text-primary-blue font-medium bg-primary-blue-50 px-2 py-1 rounded-full hover-scale">{group.ages}</span>
-                      </div>
-                    </div>
-                    <p className="text-text-secondary leading-relaxed">{group.description}</p>
-                  </div>
-                </article>
-              ))}
+            <div 
+              className="audience-card fade-in-up animation-delay-500"
+              role="article"
+              aria-labelledby="teens-title"
+              tabIndex={0}
+            >
+              <span className="audience-card-icon" aria-hidden="true">🌸</span>
+              <h3 id="teens-title" className="audience-card-title">Teens</h3>
+              <span className="audience-card-ages">Ages 13-17</span>
+              <p className="audience-card-description">
+                Navigating identity, relationships, and academic pressure with peer support, 
+                stress management tools, and confidential guidance.
+              </p>
+            </div>
+            
+            <div 
+              className="audience-card fade-in-up animation-delay-1000"
+              role="article"
+              aria-labelledby="young-adults-title"
+              tabIndex={0}
+            >
+              <span className="audience-card-icon" aria-hidden="true">🌳</span>
+              <h3 id="young-adults-title" className="audience-card-title">Young Adults</h3>
+              <span className="audience-card-ages">Ages 18-25</span>
+              <p className="audience-card-description">
+                Transitioning to independence with career guidance, relationship counseling, 
+                and mental health resources for life's major decisions.
+              </p>
             </div>
           </div>
-        </section>
-
-        {/* Enhanced Services Section */}
+        </div>
+      </section>        {/* Enhanced Services Section */}
         <section id="services" className="py-20 lg:py-32 bg-neutral-50 relative overflow-hidden" role="region" aria-labelledby="services-heading">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5" aria-hidden="true">

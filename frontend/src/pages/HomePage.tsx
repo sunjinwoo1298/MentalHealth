@@ -1,282 +1,137 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect } from 'react'
 
-// Modern Age Group Card Component with enhanced animations
-function AgeGroupCard({ icon, title, description, ages, link, index }: {
-  icon: string
-  title: string
-  description: string
-  ages: string
-  link: string
-  index: number
-}) {
-  const [isVisible, setIsVisible] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), index * 150) // Staggered animation
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current)
-    }
-
-    return () => observer.disconnect()
-  }, [index])
-
-  return (
-    <div 
-      ref={cardRef}
-      className={`relative bg-gradient-to-br from-white to-blue-50/30 p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-blue-100/50 hover:border-blue-300 group cursor-pointer backdrop-blur-sm transform ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-      }`}
-      style={{ transitionDelay: `${index * 100}ms` }}
-    >
-      {/* Gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-green-500/0 group-hover:from-blue-500/5 group-hover:to-green-500/5 rounded-2xl transition-all duration-500"></div>
-      
-      {/* Floating icon with modern animation */}
-      <div className="relative z-10">
-        <div className="text-5xl mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 filter drop-shadow-lg">
-          {icon}
-        </div>
-        <div className="space-y-3">
-          <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
-            {title}
-          </h3>
-          <p className="text-sm text-blue-600 font-semibold bg-blue-100 px-3 py-1 rounded-full inline-block">
-            {ages}
-          </p>
-          <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-            {description}
-          </p>
-          <a href={link} className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold text-sm group-hover:translate-x-1 transition-all duration-300">
-            Learn more 
-            <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
+// Loading component for better UX
+const LoadingCard = () => (
+  <div className="bg-white rounded-lg p-6 shadow-soft border border-neutral-200">
+    <div className="animate-pulse">
+      <div className="flex items-center mb-4">
+        <div className="w-12 h-12 bg-neutral-200 rounded-full mr-3"></div>
+        <div>
+          <div className="h-4 bg-neutral-200 rounded w-24 mb-2"></div>
+          <div className="h-3 bg-neutral-200 rounded w-16"></div>
         </div>
       </div>
-    </div>
-  )
-}
-
-// Modern Service Card Component with enhanced animations
-function ServiceCard({ icon, title, description, index }: {
-  icon: string
-  title: string
-  description: string
-  index: number
-}) {
-  const [isVisible, setIsVisible] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), index * 100)
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current)
-    }
-
-    return () => observer.disconnect()
-  }, [index])
-
-  return (
-    <div 
-      ref={cardRef}
-      className={`relative bg-gradient-to-br from-white via-green-50/20 to-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-700 border border-green-100/50 hover:border-green-300 group overflow-hidden transform ${
-        isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-12 opacity-0 scale-95'
-      }`}
-    >
-      {/* Animated background elements */}
-      <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-green-200/20 to-blue-200/20 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-      <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-      
-      <div className="relative z-10">
-        <div className="text-5xl mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 filter drop-shadow-lg">
-          {icon}
-        </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-green-700 transition-colors duration-300">
-          {title}
-        </h3>
-        <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-          {description}
-        </p>
-        
-        {/* Hover reveal button */}
-        <div className="mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:shadow-lg transition-all duration-300">
-            Learn More
-          </button>
-        </div>
+      <div className="space-y-2">
+        <div className="h-3 bg-neutral-200 rounded"></div>
+        <div className="h-3 bg-neutral-200 rounded w-3/4"></div>
       </div>
     </div>
-  )
-}
-
-// Modern Treatment Card Component
-function TreatmentCard({ condition, index }: { condition: string; index: number }) {
-  const [isVisible, setIsVisible] = useState(false)
-  
-  useEffect(() => {
-    setTimeout(() => setIsVisible(true), index * 50)
-  }, [index])
-
-  return (
-    <div className={`bg-gradient-to-r from-blue-50 via-white to-green-50 px-6 py-4 rounded-2xl border border-blue-200/50 hover:border-blue-400 hover:shadow-lg transition-all duration-500 cursor-pointer group transform ${
-      isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-    }`}>
-      <span className="text-gray-700 font-medium group-hover:text-blue-700 transition-colors duration-300">
-        {condition}
-      </span>
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-green-500/0 group-hover:from-blue-500/5 group-hover:to-green-500/5 rounded-2xl transition-all duration-300"></div>
-    </div>
-  )
-}
-
-// Modern Testimonial Card Component
-function TestimonialCard({ quote, attribution, role, index }: {
-  quote: string
-  attribution: string
-  role: string
-  index: number
-}) {
-  const [isVisible, setIsVisible] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), index * 200)
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current)
-    }
-
-    return () => observer.disconnect()
-  }, [index])
-
-  return (
-    <div 
-      ref={cardRef}
-      className={`relative bg-gradient-to-br from-white to-purple-50/30 p-8 rounded-2xl shadow-lg hover:shadow-2xl border border-purple-100/50 hover:border-purple-300 transition-all duration-700 group overflow-hidden transform ${
-        isVisible ? 'translate-y-0 opacity-100 rotate-0' : 'translate-y-8 opacity-0 rotate-1'
-      }`}
-    >
-      {/* Quote decoration */}
-      <div className="absolute top-4 left-4 text-6xl text-purple-200 group-hover:text-purple-300 transition-colors duration-300 font-serif">"</div>
-      
-      <div className="relative z-10 pt-8">
-        <p className="text-gray-700 leading-relaxed mb-6 italic text-lg group-hover:text-gray-800 transition-colors duration-300">
-          {quote}
-        </p>
-        <div className="border-t border-purple-100 pt-4">
-          <p className="font-bold text-gray-800 group-hover:text-purple-700 transition-colors duration-300">
-            {attribution}
-          </p>
-          <p className="text-sm text-purple-600 mt-1">{role}</p>
-        </div>
-      </div>
-      
-      {/* Floating elements */}
-      <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-    </div>
-  )
-}
+  </div>
+)
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isContentLoading, setIsContentLoading] = useState(true)
   
   useEffect(() => {
     setIsLoaded(true)
     
-    // Mouse tracking for parallax effects
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100
-      })
+    // Simulate content loading for better UX
+    setTimeout(() => {
+      setIsContentLoading(false)
+    }, 500)
+    
+    // Preload critical resources
+    const linkElement = document.createElement('link')
+    linkElement.rel = 'preload'
+    linkElement.as = 'image'
+    linkElement.href = '/api/placeholder/600/400'
+    document.head.appendChild(linkElement)
+    
+    // Scroll reveal animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
     }
     
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible')
+        }
+      })
+    }, observerOptions)
+    
+    // Observe all scroll reveal elements
+    const scrollElements = document.querySelectorAll('.scroll-reveal')
+    scrollElements.forEach((el) => observer.observe(el))
+    
+    return () => {
+      scrollElements.forEach((el) => observer.unobserve(el))
+    }
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 overflow-x-hidden">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div 
-          className="absolute w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full filter blur-3xl"
-          style={{
-            transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
-            top: '10%',
-            left: '10%'
-          }}
-        />
-        <div 
-          className="absolute w-80 h-80 bg-gradient-to-r from-green-400/10 to-blue-400/10 rounded-full filter blur-3xl"
-          style={{
-            transform: `translate(${-mousePosition.x * 0.03}px, ${-mousePosition.y * 0.03}px)`,
-            bottom: '10%',
-            right: '10%'
-          }}
-        />
+    <div className="min-h-screen bg-hero-animated">
+      {/* Skip to main content link for screen readers */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 btn-gradient px-4 py-2 rounded z-50 focus-ring"
+      >
+        Skip to main content
+      </a>
+
+      {/* Accessibility Toolbar */}
+      <div className="bg-neutral-white py-2 px-4 border-b border-border-light shadow-soft" role="banner">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-4 text-sm">
+            <span className="text-accessibility font-medium">Accessibility Features Available</span>
+            <button 
+              className="text-primary-magenta hover:text-primary-magenta-dark underline focus-ring rounded px-2 py-1 font-medium transition-colors"
+              onClick={() => document.body.classList.toggle('dyslexia-friendly')}
+              aria-label="Toggle dyslexia-friendly font"
+            >
+              Dyslexia Font
+            </button>
+          </div>
+          <div className="flex items-center space-x-4 text-sm text-text-secondary">
+            <span className="font-medium">Crisis Hotline: <a href="tel:1860-2662-345" className="text-error font-bold hover:underline focus-ring rounded px-1">1860-2662-345</a></span>
+          </div>
+        </div>
       </div>
 
-      {/* Modern Header Section */}
-      <header className="relative bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-white/20">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Semantic Header */}
+      <header className="bg-neutral-white shadow-soft sticky top-0 z-40 border-b border-border-light" role="banner">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" role="navigation" aria-label="Main navigation">
           <div className="flex justify-between items-center h-16">
-            {/* Logo with animation */}
-            <div className="flex items-center space-x-3 group">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-                <span className="text-white font-bold text-xl">🧠</span>
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                MindCare
-              </span>
+            {/* Logo and Brand */}
+            <div className="flex items-center">
+              <a href="#" className="flex items-center space-x-3 group focus-ring rounded-lg p-1 hover-scale">
+                <div className="w-10 h-10 bg-gradient-hero rounded-lg flex items-center justify-center shadow-soft group-hover:shadow-medium transition-shadow breathe">
+                  <span className="font-bold text-lg text-white" role="img" aria-label="MindCare brain icon">🧠</span>
+                </div>
+                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-hero">
+                  MindCare
+                </span>
+              </a>
             </div>
             
-            {/* Navigation Links with hover effects */}
-            <div className="hidden md:flex items-center space-x-8">
-              {['Who We Serve', 'Services', 'How It Works', 'About'].map((item, index) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(' ', '-')}`}
-                  className="relative text-gray-600 hover:text-blue-600 transition-all duration-300 font-medium group"
-                >
-                  {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-green-600 group-hover:w-full transition-all duration-300"></span>
-                </a>
+            {/* Main Navigation */}
+            <ul className="hidden md:flex items-center space-x-8" role="menubar">
+              {[
+                { name: 'Who We Serve', href: '#who-we-serve' },
+                { name: 'Services', href: '#services' },
+                { name: 'How It Works', href: '#how-it-works' },
+                { name: 'About', href: '#about' }
+              ].map((item) => (
+                <li key={item.name} role="none">
+                  <a
+                    href={item.href}
+                    className="text-text-secondary hover:text-primary-magenta transition-colors font-medium focus-ring rounded px-2 py-1"
+                    role="menuitem"
+                  >
+                    {item.name}
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
 
-            {/* CTA Buttons with enhanced styling */}
+            {/* CTA Buttons */}
             <div className="flex items-center space-x-4">
-              <button className="hidden sm:block border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg">
+              <button className="hidden sm:block btn-outline-magenta px-4 py-2 rounded-full font-medium transition-colors focus-ring hover-scale button-press">
                 Sign In
               </button>
-              <button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <button className="btn-gradient px-6 py-2 rounded-full font-medium transition-colors focus-ring hover-lift button-press btn-ripple">
                 Get Started
               </button>
             </div>
@@ -284,483 +139,708 @@ export default function HomePage() {
         </nav>
       </header>
 
-      {/* Enhanced Hero Section */}
-      <section className={`relative pt-20 pb-24 px-4 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          {/* Floating elements */}
-          <div className="absolute -top-10 left-10 w-20 h-20 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full filter blur-xl animate-pulse"></div>
-          <div className="absolute -top-16 right-16 w-32 h-32 bg-gradient-to-r from-green-400/20 to-blue-400/20 rounded-full filter blur-xl animate-pulse delay-1000"></div>
-          
-          <h1 className="text-6xl md:text-7xl font-bold text-gray-800 mb-8 leading-tight">
-            Mental health care for{' '}
-            <span className="relative">
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent animate-pulse">
-                Indian youth
-              </span>
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-green-600/20 blur-lg -z-10 animate-pulse"></div>
-            </span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-5xl mx-auto leading-relaxed font-light">
-            Culturally sensitive mental health support designed specifically for young Indians. 
-            Connect with licensed therapists who understand your background, access AI-powered tools, 
-            and find 24/7 crisis support in a safe, confidential environment.
-          </p>
-
-          {/* Enhanced Hero CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-            <button className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-4 rounded-full font-semibold text-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl overflow-hidden">
-              <span className="relative z-10">Get Support Now</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-            </button>
-            <button className="group border-2 border-gray-300 hover:border-blue-600 text-gray-700 hover:text-blue-600 px-10 py-4 rounded-full font-semibold text-xl transition-all duration-300 hover:scale-105 relative overflow-hidden">
-              <span className="relative z-10">Take Our Assessment</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
+      {/* Main Content */}
+      <main id="main-content" role="main">
+        {/* Enhanced Hero Section */}
+        <section className="relative bg-hero-vibrant py-20 lg:py-32 overflow-hidden" role="banner" aria-labelledby="hero-heading">
+          {/* Vibrant Background Elements */}
+          <div className="absolute inset-0 opacity-40" aria-hidden="true">
+            <div className="absolute top-10 left-10 w-72 h-72 bg-blob-magenta rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob"></div>
+            <div className="absolute top-10 right-10 w-72 h-72 bg-blob-blue rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob animation-delay-2000"></div>
+            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-72 h-72 bg-blob-green rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob animation-delay-4000"></div>
           </div>
 
-          {/* Enhanced Trust Indicators */}
-          <div className="flex flex-wrap justify-center items-center gap-8 text-sm">
-            {[
-              { icon: '🚨', text: '24/7 Crisis Support', color: 'green' },
-              { icon: '👨‍⚕️', text: 'Licensed Therapists', color: 'blue' },
-              { icon: '🔒', text: 'Complete Privacy', color: 'purple' },
-              { icon: '🇮🇳', text: 'Cultural Understanding', color: 'orange' }
-            ].map((item, index) => (
-              <div 
-                key={item.text}
-                className={`flex items-center gap-3 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 animate-fade-in-up`}
-                style={{ animationDelay: `${index * 200}ms` }}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span className="font-medium text-gray-700">{item.text}</span>
+          {/* Floating Elements for Visual Interest */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blob-lavender rounded-full opacity-60 animate-float"></div>
+            <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-blob-sage rounded-full opacity-50 animate-float animation-delay-1000"></div>
+            <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-blob-blush rounded-full opacity-40 animate-float animation-delay-3000"></div>
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              {/* Enhanced Content Section */}
+              <div className={`transform transition-all duration-1200 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+                {/* Trust Badge */}
+                <div className="inline-flex items-center bg-neutral-white/90 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-border-light shadow-soft">
+                  <span className="w-2 h-2 bg-tertiary-green rounded-full mr-2 animate-pulse"></span>
+                  <span className="text-sm font-medium text-text-primary">Trusted by 10,000+ young people across India</span>
+                </div>
+
+                {/* Empathetic Headlines */}
+                <h1 id="hero-heading" className="text-4xl lg:text-6xl font-bold text-text-primary leading-tight mb-6">
+                  You're Not Alone.{' '}
+                  <span className="bg-clip-text text-transparent bg-gradient-hero">
+                    We Understand.
+                  </span>
+                </h1>
+                
+                {/* Supportive Subheading */}
+                <p className="text-xl lg:text-2xl text-text-secondary leading-relaxed mb-4 max-w-2xl">
+                  Mental health support that honors your culture, respects your family values, and understands the unique pressures you face as a young person in India.
+                </p>
+
+                {/* Emotional Connection Point */}
+                <div className="bg-neutral-white/90 backdrop-blur-sm rounded-lg p-4 mb-8 border-l-4 border-l-primary-magenta shadow-soft hover-lift">
+                  <p className="text-text-primary italic">
+                    "Finally, someone who gets what it's like to balance family expectations with my own dreams. The support feels like talking to an understanding older sibling."
+                  </p>
+                  <cite className="text-sm text-text-muted not-italic">- Priya, 19, Delhi University</cite>
+                </div>
+
+                {/* Enhanced CTA Section */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <button className="group btn-gradient px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-lift button-press focus-ring shadow-lg relative overflow-hidden btn-ripple">
+                    <span className="relative z-10">Start Your Healing Journey</span>
+                  </button>
+                  <button className="group btn-outline-magenta px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-scale button-press focus-ring">
+                    <span className="flex items-center">
+                      Learn How We Help
+                      <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform icon-float" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+
+                {/* Safety & Privacy Assurance */}
+                <div className="flex items-center space-x-6 text-sm text-text-secondary">
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-tertiary-green" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
+                    100% Confidential
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-secondary-blue" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Licensed Therapists
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-primary-magenta" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Available 24/7
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Who We Serve Section */}
-      <section id="who-we-serve" className="py-16 px-4 bg-white/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">WHO WE SERVE</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              For every young Indian—and every stage of life. Mental health support tailored to your unique cultural background and experiences.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <AgeGroupCard 
-              icon="🎓"
-              title="Students (16-22)"
-              ages="High School & College"
-              description="Navigate academic stress, career pressure, and social challenges with culturally aware support."
-              link="#students"
-              index={0}
-            />
-            <AgeGroupCard 
-              icon="💼"
-              title="Young Professionals (23-28)"
-              ages="Early Career"
-              description="Handle workplace stress, relationship challenges, and family expectations in your career journey."
-              link="#professionals"
-              index={1}
-            />
-            <AgeGroupCard 
-              icon="💑"
-              title="Young Adults (25-30)"
-              ages="Life Transitions"
-              description="Support through marriage decisions, family planning, and major life transitions."
-              link="#adults"
-              index={2}
-            />
-            <AgeGroupCard 
-              icon="👨‍👩‍👧‍👦"
-              title="Families & Parents"
-              ages="Supporting Loved Ones"
-              description="Resources for families supporting young adults with mental health challenges."
-              link="#families"
-              index={3}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* What We Treat Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">WHAT WE TREAT</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive mental health support addressing the unique challenges faced by Indian youth
-            </p>
-          </div>
-          
-          <div className="flex flex-wrap gap-4 justify-center">
-            {[
-              "Academic Stress", "Career Anxiety", "Family Pressure", "Relationship Issues", 
-              "Depression", "Anxiety Disorders", "Social Anxiety", "Cultural Identity Conflicts",
-              "Marriage Pressure", "Career Confusion", "Workplace Stress", "Financial Anxiety",
-              "Body Image Issues", "Eating Disorders", "Self-Harm", "Substance Use",
-              "LGBTQ+ Identity", "Gender Dysphoria", "Bullying", "Trauma & PTSD"
-            ].map((condition, index) => (
-              <TreatmentCard key={condition} condition={condition} index={index} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Enhanced Results Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full filter blur-xl animate-float"></div>
-          <div className="absolute bottom-10 right-10 w-24 h-24 bg-white rounded-full filter blur-xl animate-float" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white rounded-full filter blur-2xl animate-float" style={{ animationDelay: '2s' }}></div>
-        </div>
-        
-        <div className="max-w-6xl mx-auto text-center text-white relative z-10">
-          <h2 className="text-5xl font-bold mb-6">OUR RESULTS</h2>
-          <p className="text-2xl mb-16 opacity-90">Measurable results that young Indians feel</p>
-          
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Stat 1 */}
-            <div className="group">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/20 transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-                <div className="text-6xl font-bold mb-3 bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                  85%
+              {/* Enhanced Visual Section */}
+              <div className={`relative transform transition-all duration-1200 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+                {/* Main Image with Enhanced Styling */}
+                <div className="relative group">
+                  <div className="absolute -inset-4 bg-gradient-to-r from-primary-blue/20 to-secondary-green/20 rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60"></div>
+                  <div className="relative bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-white/50">
+                    <img 
+                      src="/api/placeholder/600/400" 
+                      alt="Young Indian person sitting peacefully in meditation pose, surrounded by soft natural lighting and calming elements, representing mental wellness and inner peace" 
+                      className="rounded-2xl w-full shadow-lg hover-scale smooth-transition"
+                      loading="lazy"
+                      width="600"
+                      height="400"
+                    />
+                    {/* Overlay with cultural elements */}
+                    <div className="absolute inset-6 rounded-2xl bg-gradient-to-t from-primary-blue/10 via-transparent to-transparent pointer-events-none" aria-hidden="true"></div>
+                  </div>
                 </div>
-                <div className="text-blue-100 text-lg font-medium">Show improvement in 8 sessions</div>
-                <div className="mt-4 w-full bg-white/20 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-yellow-300 to-orange-300 h-2 rounded-full" style={{ width: '85%' }}></div>
+
+                {/* Floating Stats Cards */}
+                <div 
+                  className="absolute -top-6 -left-6 bg-stats-lavender rounded-xl p-4 shadow-xl border animate-float hover-lift"
+                  role="region"
+                  aria-label="Success rate statistic"
+                >
+                  <div className="text-2xl font-bold text-stats-lavender" aria-label="95 percent">95%</div>
+                  <div className="text-sm text-accessibility">Feel Better</div>
                 </div>
+
+                <div 
+                  className="absolute -bottom-6 -right-6 bg-stats-sage rounded-xl p-4 shadow-xl border animate-float animation-delay-1000 hover-lift"
+                  role="region"
+                  aria-label="Support availability"
+                >
+                  <div className="text-2xl font-bold text-stats-sage">24/7</div>
+                  <div className="text-sm text-accessibility">Support</div>
+                </div>
+
+                {/* Cultural Touch - Lotus Elements */}
+                <div className="absolute top-1/2 -left-8 text-6xl opacity-20 animate-pulse" aria-hidden="true">🪷</div>
+                <div className="absolute bottom-1/4 -right-8 text-4xl opacity-30 animate-pulse animation-delay-2000" aria-hidden="true">🕉️</div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Who We Serve Section - Enhanced with Vibrant Background */}
+        <section id="who-we-serve" className="py-16 lg:py-24 bg-section-vibrant relative overflow-hidden" role="region" aria-labelledby="who-we-serve-heading">
+          {/* Attractive Background Elements */}
+          <div className="absolute inset-0" aria-hidden="true">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-blob-magenta rounded-full mix-blend-multiply filter blur-2xl opacity-10 animate-float"></div>
+            <div className="absolute bottom-0 right-0 w-80 h-80 bg-blob-blue rounded-full mix-blend-multiply filter blur-2xl opacity-10 animate-float animation-delay-2000"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-blob-green rounded-full mix-blend-multiply filter blur-2xl opacity-10 animate-float animation-delay-4000"></div>
+          </div>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              {/* Enhanced Header with Better Visibility */}
+              <div className="inline-flex items-center bg-neutral-white/90 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-border-light shadow-soft">
+                <span className="w-2 h-2 bg-primary-magenta rounded-full mr-3 animate-pulse"></span>
+                <span className="text-sm font-bold text-text-primary">Serving Youth Across India</span>
+              </div>
+              
+              <h2 id="who-we-serve-heading" className="text-4xl lg:text-6xl font-bold text-text-primary mb-6">
+                Who We{' '}
+                <span className="bg-clip-text text-transparent bg-gradient-hero">
+                  Serve
+                </span>
+              </h2>
+              <p className="text-xl lg:text-2xl text-text-secondary max-w-3xl mx-auto leading-relaxed font-medium">
+                Tailored mental health support for every stage of youth development, designed with Indian cultural values in mind.
+              </p>
+            </div>
             
-            {/* Stat 2 */}
-            <div className="group">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/20 transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-                <div className="text-6xl font-bold mb-3 bg-gradient-to-r from-green-300 to-blue-300 bg-clip-text text-transparent">
-                  10K+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                { 
+                  icon: "🧒", 
+                  title: "Children", 
+                  description: "Building emotional foundations and healthy coping skills through play therapy and family support.", 
+                  ages: "Ages 6-12",
+                  color: "magenta"
+                },
+                { 
+                  icon: "🧑‍🎓", 
+                  title: "Teens", 
+                  description: "Navigating academic pressure, social expectations, and identity formation during crucial years.", 
+                  ages: "Ages 13-17",
+                  color: "blue"
+                },
+                { 
+                  icon: "👨‍💼", 
+                  title: "Young Adults", 
+                  description: "Managing career stress, life transitions, and independence while honoring family relationships.", 
+                  ages: "Ages 18-25",
+                  color: "green"
+                }
+              ].map((group) => (
+                <article key={group.title} className="group relative bg-neutral-white/95 backdrop-blur-sm rounded-2xl shadow-medium border border-border-light hover:shadow-strong card-hover smooth-transition scroll-reveal overflow-hidden">
+                  {/* Card Gradient Overlay */}
+                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                    group.color === 'magenta' ? 'bg-gradient-to-br from-primary-magenta/5 to-primary-magenta/10' :
+                    group.color === 'blue' ? 'bg-gradient-to-br from-secondary-blue/5 to-secondary-blue/10' :
+                    'bg-gradient-to-br from-tertiary-green/5 to-tertiary-green/10'
+                  }`}></div>
+                  
+                  <div className="relative p-8">
+                    <div className="flex items-center mb-6">
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 ${
+                        group.color === 'magenta' ? 'bg-gradient-to-br from-primary-magenta/10 to-primary-magenta/20' :
+                        group.color === 'blue' ? 'bg-gradient-to-br from-secondary-blue/10 to-secondary-blue/20' :
+                        'bg-gradient-to-br from-tertiary-green/10 to-tertiary-green/20'
+                      }`}>
+                        <span className="text-4xl icon-float">{group.icon}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-text-primary mb-2 group-hover:text-primary-magenta transition-colors">{group.title}</h3>
+                        <span className={`text-sm font-bold px-3 py-1 rounded-full hover-scale ${
+                          group.color === 'magenta' ? 'text-primary-magenta bg-primary-magenta-50' :
+                          group.color === 'blue' ? 'text-secondary-blue bg-secondary-blue-50' :
+                          'text-tertiary-green bg-tertiary-green-50'
+                        }`}>{group.ages}</span>
+                      </div>
+                    </div>
+                    <p className="text-text-secondary leading-relaxed text-lg font-medium">{group.description}</p>
+                    
+                    {/* Learn More Button */}
+                    <button className={`mt-6 w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
+                      group.color === 'magenta' ? 'btn-magenta' :
+                      group.color === 'blue' ? 'btn-blue' :
+                      'btn-green'
+                    } opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0`}>
+                      Learn More
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Enhanced Services Section */}
+        <section id="services" className="py-20 lg:py-32 bg-neutral-50 relative overflow-hidden" role="region" aria-labelledby="services-heading">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5" aria-hidden="true">
+            <div className="absolute inset-0 bg-pattern-dots"></div>
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Enhanced Header */}
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center bg-trust-badge rounded-full px-6 py-3 mb-6 border shadow-soft">
+                <span className="w-2 h-2 bg-blob-sage rounded-full mr-3 animate-pulse"></span>
+                <span className="text-sm font-medium text-hero-primary">Evidence-based • Culturally Informed • Accessible</span>
+              </div>
+              
+              <h2 id="services-heading" className="text-4xl lg:text-6xl font-bold text-hero-primary mb-6">
+                Comprehensive Care,{' '}
+                <span className="text-hero-gradient">
+                  Your Way
+                </span>
+              </h2>
+              <p className="text-xl lg:text-2xl text-hero-secondary max-w-4xl mx-auto leading-relaxed">
+                From individual therapy to family support, we offer a full spectrum of mental health services designed specifically for the Indian youth experience.
+              </p>
+            </div>
+            
+            {/* Enhanced Service Cards - Horizontal Scrolling */}
+            <div className="horizontal-scroll-container mb-20">
+              <div className="horizontal-scroll-track">
+                {/* Create multiple copies for seamless infinite scroll */}
+                {[...Array(3)].map((_, arrayIndex) => 
+                  [
+                    { 
+                      icon: "💬", 
+                      title: "1-on-1 Therapy", 
+                      description: "Confidential sessions with licensed therapists who understand cultural nuances and family dynamics.",
+                      features: ["Video/Audio calls", "Hindi/English support", "Cultural sensitivity"],
+                      popular: true
+                    },
+                    { 
+                      icon: "👥", 
+                      title: "Group Sessions", 
+                      description: "Connect with peers facing similar challenges in a safe, supportive environment.",
+                      features: ["Peer support groups", "Skill-building workshops", "Age-specific groups"],
+                      popular: false
+                    },
+                    { 
+                      icon: "🏠", 
+                      title: "Family Therapy", 
+                      description: "Strengthen family bonds and improve communication with culturally informed counseling.",
+                      features: ["Multi-generational approach", "Cultural mediation", "Communication tools"],
+                      popular: false
+                    },
+                    { 
+                      icon: "🧘", 
+                      title: "Mindfulness & Yoga", 
+                      description: "Ancient practices meets modern psychology for stress reduction and emotional balance.",
+                      features: ["Guided meditation", "Yoga therapy", "Breathing techniques"],
+                      popular: true
+                    },
+                    { 
+                      icon: "📚", 
+                      title: "Academic Support", 
+                      description: "Managing study stress, exam anxiety, and academic pressure with healthy coping strategies.",
+                      features: ["Study strategies", "Exam preparation", "Career counseling"],
+                      popular: false
+                    },
+                    { 
+                      icon: "🚨", 
+                      title: "Crisis Support", 
+                      description: "24/7 crisis intervention and emergency mental health support when you need it most.",
+                      features: ["24/7 hotline", "Emergency response", "Safety planning"],
+                      popular: false
+                    }
+                  ].map((service, serviceIndex) => (
+                    <article key={`${arrayIndex}-${serviceIndex}-${service.title}`} className="service-card-horizontal group">
+                      {/* Popular Badge */}
+                      {service.popular && (
+                        <div className="absolute top-4 right-4 bg-gradient-to-r from-accent-blush to-secondary-sage text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                          Most Popular
+                        </div>
+                      )}
+                      
+                      <div className="service-card-content">
+                        {/* Icon with Animation */}
+                        <div className="w-16 h-16 bg-gradient-to-br from-primary-lavender/20 to-secondary-sage/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                          <span className="text-4xl">{service.icon}</span>
+                        </div>
+                        
+                        {/* Content */}
+                        <h3 className="text-2xl font-bold text-hero-primary mb-4 group-hover:text-primary-lavender transition-colors">
+                          {service.title}
+                        </h3>
+                        <p className="text-hero-secondary leading-relaxed mb-6">
+                          {service.description}
+                        </p>
+                        
+                        {/* Features List */}
+                        <ul className="space-y-2 mb-6">
+                          {service.features.map((feature, idx) => (
+                            <li key={`${arrayIndex}-${serviceIndex}-${idx}`} className="flex items-center text-sm text-accessibility">
+                              <svg className="w-4 h-4 mr-2 text-stats-sage flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                        
+                        {/* CTA Button */}
+                        <button className="w-full btn-lavender py-3 rounded-xl font-semibold transition-all duration-300 hover-lift focus-ring">
+                          Learn More
+                        </button>
+                      </div>
+                    </article>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Process Visualization Section */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 lg:p-12 mb-20">
+              <div className="text-center mb-12">
+                <h3 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4">
+                  Your Journey to Wellness
+                </h3>
+                <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+                  A simple, supportive process designed to make getting help as comfortable as possible
+                </p>
+              </div>
+              
+              {/* Process Steps */}
+              <div className="grid md:grid-cols-4 gap-8 relative">
+                {/* Connection Lines */}
+                <div className="hidden md:block absolute top-16 left-0 w-full h-0.5 bg-gradient-to-r from-primary-blue via-secondary-green to-warm-orange opacity-30" aria-hidden="true"></div>
+                
+                {[
+                  { 
+                    step: "01", 
+                    title: "Take Assessment", 
+                    description: "5-minute confidential questionnaire",
+                    icon: "📝",
+                    color: "primary-blue"
+                  },
+                  { 
+                    step: "02", 
+                    title: "Get Matched", 
+                    description: "Connected with your ideal therapist",
+                    icon: "🤝",
+                    color: "secondary-green"
+                  },
+                  { 
+                    step: "03", 
+                    title: "Start Sessions", 
+                    description: "Begin your personalized therapy",
+                    icon: "💬",
+                    color: "warm-orange"
+                  },
+                  { 
+                    step: "04", 
+                    title: "Track Progress", 
+                    description: "Monitor your growth journey",
+                    icon: "📈",
+                    color: "primary-blue"
+                  }
+                ].map((step) => (
+                  <div key={step.step} className="text-center relative group">
+                    {/* Step Circle */}
+                    <div className={`w-16 h-16 bg-${step.color} rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4 group-hover:scale-110 transition-all duration-300 shadow-lg relative z-10`}>
+                      {step.step}
+                    </div>
+                    
+                    {/* Icon */}
+                    <div className="text-4xl mb-4 group-hover:animate-bounce">{step.icon}</div>
+                    
+                    {/* Content */}
+                    <h4 className="text-xl font-bold text-text-primary mb-2">{step.title}</h4>
+                    <p className="text-text-secondary">{step.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Trust Indicators Section */}
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Stats Card */}
+              <div className="bg-gradient-to-br from-primary-blue/10 to-secondary-green/10 rounded-2xl p-8 text-center border border-primary-blue/20">
+                <div className="text-4xl lg:text-5xl font-bold text-primary-blue mb-2">10,000+</div>
+                <div className="text-lg text-text-primary font-semibold mb-2">Young People Helped</div>
+                <div className="text-text-secondary">Across India since 2020</div>
+              </div>
+
+              {/* Certification Card */}
+              <div className="bg-gradient-to-br from-secondary-green/10 to-warm-orange/10 rounded-2xl p-8 text-center border border-secondary-green/20">
+                <div className="text-4xl lg:text-5xl font-bold text-secondary-green mb-2">95%</div>
+                <div className="text-lg text-text-primary font-semibold mb-2">Success Rate</div>
+                <div className="text-text-secondary">Report improved mental health</div>
+              </div>
+
+              {/* Availability Card */}
+              <div className="bg-gradient-to-br from-warm-orange/10 to-primary-blue/10 rounded-2xl p-8 text-center border border-warm-orange/20">
+                <div className="text-4xl lg:text-5xl font-bold text-warm-orange mb-2">24/7</div>
+                <div className="text-lg text-text-primary font-semibold mb-2">Always Available</div>
+                <div className="text-text-secondary">Crisis support when needed</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Enhanced Testimonials Section */}
+        <section className="py-20 lg:py-32 bg-gradient-to-br from-primary-blue-50 via-white to-secondary-green-50 relative overflow-hidden" role="region" aria-labelledby="testimonials-heading">
+          {/* Background Elements */}
+          <div className="absolute inset-0 opacity-10" aria-hidden="true">
+            <div className="absolute top-20 left-10 w-40 h-40 bg-primary-blue rounded-full blur-3xl"></div>
+            <div className="absolute bottom-20 right-10 w-60 h-60 bg-secondary-green rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Header */}
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-primary-blue/20 shadow-soft">
+                <span className="text-yellow-500 mr-2">⭐⭐⭐⭐⭐</span>
+                <span className="text-sm font-medium text-text-primary">4.8/5 rating from 2,000+ reviews</span>
+              </div>
+              
+              <h2 id="testimonials-heading" className="text-4xl lg:text-6xl font-bold text-text-primary mb-6">
+                Real Stories,{' '}
+                <span className="bg-gradient-to-r from-primary-blue to-secondary-green bg-clip-text text-transparent">
+                  Real Healing
+                </span>
+              </h2>
+              <p className="text-xl lg:text-2xl text-text-secondary max-w-4xl mx-auto leading-relaxed">
+                Hear from young people across India who found their path to better mental health with our culturally sensitive support
+              </p>
+            </div>
+
+            {/* Testimonials Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+              {[
+                {
+                  quote: "I was drowning in academic pressure and family expectations. MindCare helped me understand that asking for help isn't weakness. My therapist really got my family situation and helped me communicate better with my parents.",
+                  name: "Priya",
+                  age: "17",
+                  location: "Mumbai",
+                  avatar: "👩‍🎓",
+                  category: "Academic Stress"
+                },
+                {
+                  quote: "The transition to college was overwhelming me. Through therapy here, I learned healthy coping strategies and my grades actually improved because I wasn't constantly anxious about everything.",
+                  name: "Arjun",
+                  age: "20", 
+                  location: "Bangalore",
+                  avatar: "👨‍💻",
+                  category: "Life Transitions"
+                },
+                {
+                  quote: "I was struggling with my identity and felt like I couldn't talk to anyone in my family. MindCare provided a safe space where I could be myself and work through my feelings without judgment.",
+                  name: "Anonymous",
+                  age: "19",
+                  location: "Delhi",
+                  avatar: "🎭",
+                  category: "Identity & Self-Acceptance"
+                },
+                {
+                  quote: "The family therapy sessions changed everything. My parents now understand my anxiety isn't just 'being weak' and we've learned to communicate so much better. Our whole family dynamic improved.",
+                  name: "Kavya",
+                  age: "16",
+                  location: "Chennai",
+                  avatar: "👨‍👩‍👧",
+                  category: "Family Relationships"
+                },
+                {
+                  quote: "Starting my career felt impossible with my social anxiety. The group sessions helped me realize I wasn't alone, and now I'm confident in interviews and workplace interactions.",
+                  name: "Rohit",
+                  age: "23",
+                  location: "Pune",
+                  avatar: "🤝",
+                  category: "Career & Social Anxiety"
+                },
+                {
+                  quote: "The crisis support team literally saved my life during my darkest moment. The 24/7 availability and immediate, compassionate response showed me that there's always hope and help available.",
+                  name: "Meera",
+                  age: "21",
+                  location: "Hyderabad", 
+                  avatar: "🌅",
+                  category: "Crisis Support"
+                }
+              ].map((testimonial, index) => (
+                <article key={index} className="group relative bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-8 hover:scale-105 transition-all duration-500 overflow-hidden">
+                  {/* Category Badge */}
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-primary-blue to-secondary-green text-white text-xs font-bold px-3 py-1 rounded-full">
+                    {testimonial.category}
+                  </div>
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 via-transparent to-secondary-green/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                  <div className="relative">
+                    {/* Quote */}
+                    <div className="mb-6">
+                      <svg className="w-8 h-8 text-primary-blue/30 mb-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
+                      </svg>
+                      <blockquote className="text-text-primary leading-relaxed text-lg italic">
+                        "{testimonial.quote}"
+                      </blockquote>
+                    </div>
+
+                    {/* Profile */}
+                    <footer className="border-t border-neutral-200 pt-6">
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary-blue/20 to-secondary-green/20 rounded-full flex items-center justify-center text-2xl mr-4">
+                          {testimonial.avatar}
+                        </div>
+                        <div>
+                          <cite className="not-italic">
+                            <div className="font-bold text-text-primary">
+                              {testimonial.name}, {testimonial.age}
+                            </div>
+                            <div className="text-sm text-text-muted">{testimonial.location}</div>
+                          </cite>
+                        </div>
+                      </div>
+                    </footer>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* Trust Badges */}
+            <div className="grid md:grid-cols-4 gap-8 mb-16">
+              {[
+                { icon: "🏆", title: "Award Winning", subtitle: "Top Mental Health Platform 2024" },
+                { icon: "🔒", title: "100% Confidential", subtitle: "HIPAA Compliant & Secure" },
+                { icon: "👨‍⚕️", title: "Licensed Professionals", subtitle: "Verified & Experienced Therapists" },
+                { icon: "🇮🇳", title: "Made for India", subtitle: "Cultural Context & Local Understanding" }
+              ].map((badge, index) => (
+                <div key={index} className="text-center group scroll-reveal">
+                  <div className="w-16 h-16 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg hover-scale smooth-transition border border-primary-blue/20">
+                    {badge.icon}
+                  </div>
+                  <h3 className="font-bold text-text-primary mb-1">{badge.title}</h3>
+                  <p className="text-sm text-text-muted">{badge.subtitle}</p>
                 </div>
-                <div className="text-blue-100 text-lg font-medium">Young Indians helped</div>
-                <div className="mt-4 flex justify-center">
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <div key={i} className="w-2 h-8 bg-gradient-to-t from-green-300 to-blue-300 rounded animate-bounce-gentle" style={{ animationDelay: `${i * 0.2}s` }}></div>
-                    ))}
+              ))}
+            </div>
+
+            {/* Cultural Sensitivity & Emergency Support */}
+            <div className="bg-gradient-to-br from-accent-teal-50 to-primary-blue-50 rounded-3xl p-8 lg:p-12 scroll-reveal">
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                {/* Cultural Understanding */}
+                <div>
+                  <h3 className="text-2xl lg:text-3xl font-bold text-text-primary mb-6">
+                    Understanding Your Cultural Context
+                  </h3>
+                  <div className="space-y-4 text-text-secondary">
+                    <div className="flex items-start">
+                      <span className="text-2xl mr-3 mt-1">🏠</span>
+                      <div>
+                        <h4 className="font-semibold text-text-primary">Family-Centered Approach</h4>
+                        <p>We understand the importance of family in Indian culture and work to build bridges, not walls.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <span className="text-2xl mr-3 mt-1">📚</span>
+                      <div>
+                        <h4 className="font-semibold text-text-primary">Academic Pressure Support</h4>
+                        <p>Navigate competitive education systems and career expectations with healthy coping strategies.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <span className="text-2xl mr-3 mt-1">🕉️</span>
+                      <div>
+                        <h4 className="font-semibold text-text-primary">Spiritual Integration</h4>
+                        <p>Blend traditional Indian wellness practices with modern psychological approaches.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Emergency Support */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/50">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-crisis-red/10 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4">
+                      🆘
+                    </div>
+                    <h3 className="text-xl font-bold text-text-primary mb-2">Need Immediate Support?</h3>
+                    <p className="text-text-muted">We're here for you 24/7, especially during crisis moments.</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <a 
+                      href="tel:1860-2662-345" 
+                      className="block w-full bg-crisis-red hover:bg-crisis-red-dark text-white text-center py-4 rounded-xl font-semibold transition-colors hover-lift button-press focus-ring"
+                      aria-label="Call crisis hotline at 1860-2662-345"
+                    >
+                      🚨 Crisis Hotline: 1860-2662-345
+                    </a>
+                    <button className="w-full bg-primary-blue hover:bg-primary-blue-dark text-white py-3 rounded-xl font-medium transition-colors hover-scale button-press focus-ring">
+                      Chat with Crisis Counselor
+                    </button>
+                    <p className="text-xs text-text-muted text-center">
+                      Available in Hindi, English, and regional languages
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-            
-            {/* Stat 3 */}
-            <div className="group">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/20 transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-                <div className="text-6xl font-bold mb-3 bg-gradient-to-r from-red-300 to-pink-300 bg-clip-text text-transparent">
-                  24/7
-                </div>
-                <div className="text-blue-100 text-lg font-medium">Crisis Support</div>
-                <div className="mt-4 flex justify-center">
-                  <div className="w-12 h-12 border-4 border-red-300 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Stat 4 */}
-            <div className="group">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/20 transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-                <div className="text-6xl font-bold mb-3 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                  92%
-                </div>
-                <div className="text-blue-100 text-lg font-medium">Feel culturally understood</div>
-                <div className="mt-4 w-full bg-white/20 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-purple-300 to-pink-300 h-2 rounded-full animate-pulse" style={{ width: '92%' }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-16">
-            <p className="text-xl opacity-90 mb-8">Join thousands of young Indians on their journey to better mental health</p>
-            <button className="group bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border-2 border-white/30 hover:border-white/50 px-10 py-4 rounded-full font-bold text-lg transition-all duration-500 hover:scale-105">
-              <span className="flex items-center gap-3">
-                <span>View Success Stories</span>
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-      </section>
 
-      {/* Enhanced How It Works Section */}
-      <section id="how-it-works" className="py-20 px-4 bg-gradient-to-br from-white via-blue-50/30 to-green-50/30 relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 via-transparent to-green-100/20"></div>
-        
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-gray-800 mb-6">HOW IT WORKS</h2>
-            <p className="text-xl text-gray-600">What to expect when you start your mental health journey with us</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-12 items-center">
-            {/* Step 1 */}
-            <div className="text-center group">
-              <div className="relative mb-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto shadow-2xl group-hover:shadow-blue-500/25 transition-all duration-500 group-hover:scale-110">
-                  1
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-blue-600/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                
-                {/* Connecting line */}
-                <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-blue-300 to-green-300"></div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-blue-600 transition-colors duration-300">
-                Tell us about yourself
+            {/* Call to Action */}
+            <div className="text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 lg:p-12">
+              <h3 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4">
+                Ready to Start Your Story?
               </h3>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                Complete our culturally-aware assessment to help us understand your background, challenges, and goals.
+              <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
+                Join thousands of young people who've found their path to better mental health with culturally sensitive, professional support.
               </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="text-center group">
-              <div className="relative mb-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto shadow-2xl group-hover:shadow-green-500/25 transition-all duration-500 group-hover:scale-110">
-                  2
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-green-600/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                
-                {/* Connecting line */}
-                <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-green-300 to-purple-300"></div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button className="group bg-gradient-to-r from-primary-blue to-primary-blue-dark text-white px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-blue focus:ring-opacity-50 shadow-xl relative overflow-hidden">
+                  <span className="relative z-10">Begin Your Healing Journey</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-secondary-green to-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </button>
+                <button className="group border-2 border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-blue focus:ring-opacity-30">
+                  <span className="flex items-center">
+                    Schedule Free Consultation
+                    <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </span>
+                </button>
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-green-600 transition-colors duration-300">
-                Get matched & start care
-              </h3>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                Connect with a licensed therapist who understands Indian culture. Begin your first session within 24 hours.
-              </p>
             </div>
+          </div>
+        </section>
+      </main>
 
-            {/* Step 3 */}
-            <div className="text-center group">
-              <div className="relative mb-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto shadow-2xl group-hover:shadow-purple-500/25 transition-all duration-500 group-hover:scale-110">
-                  3
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-purple-600/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-purple-600 transition-colors duration-300">
-                Track progress & grow
-              </h3>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                Use our AI-powered tools, track your progress, and access 24/7 support whenever you need it.
-              </p>
-            </div>
-          </div>
-          
-          <div className="text-center mt-12">
-            <button className="group relative bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 text-white px-12 py-4 rounded-full font-bold text-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl overflow-hidden">
-              <span className="relative z-10">Start Your Journey Today</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Services Section */}
-      <section id="services" className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">OUR SERVICES</h2>
-            <p className="text-xl text-gray-600">Comprehensive mental health support designed for Indian youth</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <ServiceCard 
-              icon="💬"
-              title="AI-Powered Chat Therapy"
-              description="24/7 conversational AI that understands Indian culture, provides personalized support, and escalates to human therapists when needed."
-              index={0}
-            />
-            <ServiceCard 
-              icon="👨‍⚕️"
-              title="Licensed Therapist Sessions"
-              description="Video and chat sessions with licensed mental health professionals trained in Indian cultural contexts and family dynamics."
-              index={1}
-            />
-            <ServiceCard 
-              icon="🚨"
-              title="Crisis Intervention"
-              description="Immediate support for mental health emergencies with AI-powered risk assessment and instant human intervention when needed."
-              index={2}
-            />
-            <ServiceCard 
-              icon="📱"
-              title="Digital Wellness Tools"
-              description="Mood tracking, meditation guides, breathing exercises, and personalized coping strategies available anytime on your phone."
-              index={3}
-            />
-            <ServiceCard 
-              icon="👥"
-              title="Peer Support Groups"
-              description="Safe, moderated online communities where young Indians can share experiences and support each other anonymously."
-              index={4}
-            />
-            <ServiceCard 
-              icon="📚"
-              title="Cultural Resources"
-              description="Mental health education tailored to Indian families, addressing stigma, and helping navigate cultural expectations."
-              index={5}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">TESTIMONIALS</h2>
-            <p className="text-xl text-gray-600">Trusted by 10,000+ young Indians</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <TestimonialCard 
-              quote="Finally found someone who understands the pressure from my family about marriage and career. The therapist gets our culture."
-              attribution="Priya S."
-              role="Software Engineer, Age 26"
-              index={0}
-            />
-            <TestimonialCard 
-              quote="The AI chat was there for me at 2 AM when anxiety hit. It helped me calm down and connected me with a real therapist the next day."
-              attribution="Arjun M."
-              role="College Student, Age 20"
-              index={1}
-            />
-            <TestimonialCard 
-              quote="I was struggling with coming out to my traditional family. The support here helped me navigate this journey with care and understanding."
-              attribution="Anonymous"
-              role="Young Professional, Age 24"
-              index={2}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">WHY MINDCARE</h2>
-            <p className="text-xl text-gray-600">What makes us different for Indian youth mental health</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">🇮🇳 Cultural Understanding</h3>
-              <p className="text-gray-600">Therapists trained in Indian family dynamics, cultural expectations, and generational differences.</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">🤖 AI-Powered Support</h3>
-              <p className="text-gray-600">Advanced AI that provides immediate support and intelligently escalates to human care when needed.</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">🔒 Complete Privacy</h3>
-              <p className="text-gray-600">End-to-end encryption and anonymous options to protect your privacy from family and social pressures.</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">⚡ Immediate Access</h3>
-              <p className="text-gray-600">No waiting lists. Get support when you need it, day or night, with instant AI and 24-hour human matching.</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">💰 Affordable Care</h3>
-              <p className="text-gray-600">Sliding scale pricing and insurance acceptance to make mental health care accessible to all young Indians.</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">📊 Progress Tracking</h3>
-              <p className="text-gray-600">Data-driven insights into your mental health journey with transparent progress reports and goal tracking.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Emergency Section */}
-      <section className="py-12 px-4 bg-red-50 border-t-4 border-red-400">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-red-800 mb-4">🚨 Need Immediate Help?</h2>
-          <p className="text-red-700 mb-6">If you're in crisis or having thoughts of self-harm, reach out immediately:</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-semibold transition-all duration-300">
-              Chat Now - Crisis Support
-            </button>
-            <div className="text-red-800">
-              <p className="font-semibold">Crisis Helpline: <span className="text-2xl">1860-2662-345</span></p>
-              <p className="text-sm">Available 24/7 for immediate support</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12 px-4">
-        <div className="max-w-7xl mx-auto">
+      {/* Semantic Footer */}
+      <footer className="bg-text-primary text-white py-16" role="contentinfo">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-primary-blue rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">🧠</span>
                 </div>
                 <span className="text-2xl font-bold">MindCare</span>
               </div>
-              <p className="text-gray-400 mb-4">
-                Mental health support designed specifically for Indian youth, with cultural understanding and 24/7 accessibility.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">📱</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">📧</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">🔗</a>
-              </div>
+              <p className="text-neutral-300">Mental health support for Indian youth.</p>
             </div>
-            
             <div>
-              <h3 className="font-semibold mb-4">For Youth</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Students (16-22)</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Young Professionals (23-28)</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Young Adults (25-30)</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">LGBTQ+ Support</a></li>
+              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                {['Services', 'About', 'Contact'].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-neutral-300 hover:text-white transition-colors">{link}</a>
+                  </li>
+                ))}
               </ul>
             </div>
-            
             <div>
-              <h3 className="font-semibold mb-4">Services</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">AI Chat Therapy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Licensed Therapists</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Crisis Support</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Peer Groups</a></li>
+              <h3 className="text-lg font-semibold mb-4">Resources</h3>
+              <ul className="space-y-2">
+                {['Blog', 'Self-Help', 'Crisis Help'].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-neutral-300 hover:text-white transition-colors">{link}</a>
+                  </li>
+                ))}
               </ul>
             </div>
-            
             <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Mental Health Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Cultural Resources</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Family Support</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy & Safety</a></li>
-              </ul>
+              <h3 className="text-lg font-semibold mb-4">Get Help</h3>
+              <p className="text-neutral-300">Crisis Hotline:</p>
+              <a href="tel:1860-2662-345" className="text-crisis-red font-semibold text-lg">1860-2662-345</a>
             </div>
-          </div>
-          
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 MindCare. All rights reserved. | Privacy Policy | Terms of Service | Crisis Resources</p>
-            <p className="mt-2 text-sm">Licensed mental health platform for Indian youth mental wellness</p>
           </div>
         </div>
       </footer>

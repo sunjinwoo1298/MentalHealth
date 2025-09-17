@@ -1,5 +1,151 @@
 /* Mental Health Platform Styles */
 
+/* ========================================
+   ANIMATION FOUNDATION & ACCESSIBILITY
+   ======================================== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Base animation classes */
+.animate-fade-in {
+  opacity: 0;
+  animation: fadeIn 800ms ease-out forwards;
+}
+
+.animate-fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 600ms ease-out forwards;
+}
+
+.animate-slide-up {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: slideUp 500ms ease-out forwards;
+}
+
+.animate-scale-in {
+  opacity: 0;
+  transform: scale(0.95);
+  animation: scaleIn 400ms ease-out forwards;
+}
+
+/* Stagger delays for coordinated animations */
+.stagger-1 { animation-delay: 150ms; }
+.stagger-2 { animation-delay: 300ms; }
+.stagger-3 { animation-delay: 450ms; }
+.stagger-4 { animation-delay: 600ms; }
+.stagger-5 { animation-delay: 750ms; }
+
+/* Core keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Gentle background gradient animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Floating elements animation */
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(4px) rotate(-0.5deg);
+  }
+}
+
+@keyframes floatGentleReverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(6px) rotate(-1deg);
+  }
+  66% {
+    transform: translateY(-4px) rotate(0.5deg);
+  }
+}
+
+/* Pulse animation for interactive elements */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Icon bounce animation */
+@keyframes iconBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Progress bar fill animation */
+@keyframes progressFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* Modern Mental Health Platform Styles */
 
 /* 3D Transform Utilities */
@@ -1132,7 +1278,7 @@ button:active,
   padding: 2rem;
   box-shadow: 0 4px 16px rgba(34, 44, 58, 0.08);
   border: 1px solid rgba(34, 44, 58, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   min-height: 280px;
@@ -1142,6 +1288,53 @@ button:active,
   flex-direction: column;
   align-items: center;
   text-align: center;
+  
+  /* Initial state for animation */
+  opacity: 0;
+  transform: translateY(40px);
+  animation: slideUpCard 600ms ease-out forwards;
+}
+
+/* Staggered animation delays for cards */
+.audience-card:nth-child(1) {
+  animation-delay: 200ms;
+}
+
+.audience-card:nth-child(2) {
+  animation-delay: 400ms;
+}
+
+.audience-card:nth-child(3) {
+  animation-delay: 600ms;
+}
+
+/* Enhanced hover effects */
+.audience-card:hover {
+  transform: translateY(-12px) scale(1.04);
+  box-shadow: 0 20px 40px rgba(34, 44, 58, 0.15);
+}
+
+.audience-card:hover .audience-card-icon {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, var(--secondary-blue), var(--tertiary-green));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.audience-card:hover::before {
+  opacity: 1;
+}
+
+/* Card slide-up animation */
+@keyframes slideUpCard {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .audience-card::before {
@@ -1173,7 +1366,7 @@ button:active,
   outline-offset: 2px;
 }
 
-/* Card icons */
+/* Card icons with enhanced animations */
 .audience-card-icon {
   font-size: 4rem;
   margin-bottom: 1.5rem;
@@ -1183,12 +1376,71 @@ button:active,
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  animation: gentle-pulse 3s ease-in-out infinite;
+  animation: iconGentlePulse 3s ease-in-out infinite;
+  transition: all 0.4s ease;
 }
 
-@keyframes gentle-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+@keyframes iconGentlePulse {
+  0%, 100% { 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(1.05); 
+  }
+}
+
+/* Enhanced decorative background elements for Who We Serve */
+.who-we-serve-section::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -100px;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.06), rgba(33, 150, 243, 0.06));
+  border-radius: 50%;
+  animation: floatGentleSlow 20s ease-in-out infinite;
+  z-index: 0;
+}
+
+.who-we-serve-decorative-blob {
+  position: absolute;
+  top: 20%;
+  left: -80px;
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(45deg, rgba(76, 175, 80, 0.04), rgba(33, 150, 243, 0.04));
+  border-radius: 50%;
+  animation: floatGentleSlow 25s ease-in-out infinite reverse;
+  z-index: 0;
+}
+
+/* Additional floating elements */
+.who-we-serve-decorative-blob-2 {
+  position: absolute;
+  bottom: 10%;
+  right: 5%;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(45deg, rgba(233, 30, 99, 0.03), rgba(76, 175, 80, 0.03));
+  border-radius: 50%;
+  animation: floatGentleSlow 30s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes floatGentleSlow {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-15px) translateX(10px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-8px) translateX(-5px) rotate(-1deg);
+  }
+  75% {
+    transform: translateY(5px) translateX(8px) rotate(1deg);
+  }
 }
 
 /* Card text */
@@ -1294,30 +1546,178 @@ button:active,
   }
 }
 
-/* Animation Delays for better UX */
-.animation-delay-500 {
-  animation-delay: 0.5s;
+/* ========================================
+   PAGE TRANSITIONS & GENERAL UI POLISH
+   ======================================== */
+
+/* Page transition overlay */
+.page-transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255,255,255,0.95), rgba(248,249,251,0.98));
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-.animation-delay-1000 {
-  animation-delay: 1s;
+.page-transition-overlay.active {
+  opacity: 1;
+  pointer-events: all;
 }
 
-.animation-delay-2000 {
-  animation-delay: 2s;
+/* Progress indicators with smooth fill animation */
+.progress-indicator {
+  position: relative;
+  background: rgba(233, 30, 99, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  height: 8px;
 }
 
-.animation-delay-4000 {
-  animation-delay: 4s;
+.progress-indicator-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-magenta), var(--secondary-blue));
+  border-radius: 0.5rem;
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: progressFill 2s ease-out forwards;
 }
 
-/* Gentle floating animation for decorative elements */
-@keyframes float-gentle {
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg); 
+/* Section reveal animations */
+.section-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.section-reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Enhanced button interactions */
+.btn-enhanced {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.btn-enhanced:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Testimonial quote animations */
+.testimonial-quote {
+  opacity: 0;
+  transform: scale(0.95);
+  animation: testimonialFadeIn 0.8s ease-out forwards;
+}
+
+@keyframes testimonialFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-  50% { 
-    transform: translateY(-10px) rotate(2deg); 
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Trust badge pulse animation */
+.trust-badge {
+  animation: trustPulse 4s ease-in-out infinite;
+}
+
+@keyframes trustPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.1);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(233, 30, 99, 0.15);
+  }
+}
+
+/* Scroll-triggered animations */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Enhanced focus states for accessibility */
+.focus-enhanced:focus {
+  outline: 3px solid var(--primary-magenta);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(233, 30, 99, 0.1);
+  animation: focusPulse 0.3s ease-out;
+}
+
+@keyframes focusPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 6px rgba(233, 30, 99, 0.1);
+  }
+}
+
+/* Micro-interactions for better UX */
+.micro-bounce {
+  transition: transform 0.1s ease;
+}
+
+.micro-bounce:active {
+  transform: scale(0.98);
+}
+
+.micro-lift {
+  transition: transform 0.2s ease;
+}
+
+.micro-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Accessibility: Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+  .section-reveal,
+  .scroll-reveal,
+  .testimonial-quote,
+  .trust-badge,
+  .progress-indicator-fill,
+  .btn-enhanced::before {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .focus-enhanced:focus {
+    animation: none !important;
   }
 }
 
@@ -2054,7 +2454,75 @@ html {
     rgba(76, 175, 80, 0.1), 
     rgba(233, 30, 99, 0.05));
   background-size: 400% 400%;
-  animation: gradient-flow 15s ease infinite;
+  animation: gradientShift 20s ease infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hero floating shapes */
+.hero-floating-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-floating-shape-1 {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, var(--primary-magenta), var(--secondary-blue));
+  top: 15%;
+  right: 10%;
+  animation: floatGentle 25s ease-in-out infinite;
+}
+
+.hero-floating-shape-2 {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--secondary-blue), var(--tertiary-green));
+  top: 60%;
+  left: 5%;
+  animation: floatGentleReverse 30s ease-in-out infinite;
+}
+
+.hero-floating-shape-3 {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--tertiary-green), var(--primary-magenta));
+  top: 30%;
+  left: 15%;
+  animation: floatGentle 35s ease-in-out infinite;
+}
+
+/* Hero content animations */
+.hero-content {
+  position: relative;
+  z-index: 10;
+}
+
+.hero-title {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 800ms ease-out 300ms forwards;
+}
+
+.hero-subtitle {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 800ms ease-out 500ms forwards;
+}
+
+.hero-cta {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 800ms ease-out 700ms forwards;
+}
+
+.hero-trust-badge {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 600ms ease-out 900ms forwards;
 }
 
 .bg-blob-magenta {
@@ -2230,20 +2698,95 @@ html {
   border-radius: 1.5rem;
   padding: 2rem;
   border: 1px solid var(--border-light);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
+  
+  /* Animation initial state */
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUpService 600ms ease-out forwards;
   
   /* Ensure content doesn't overflow */
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
+/* Staggered animation for service cards */
+.service-card-horizontal:nth-child(1) { animation-delay: 100ms; }
+.service-card-horizontal:nth-child(2) { animation-delay: 200ms; }
+.service-card-horizontal:nth-child(3) { animation-delay: 300ms; }
+.service-card-horizontal:nth-child(4) { animation-delay: 400ms; }
+.service-card-horizontal:nth-child(5) { animation-delay: 500ms; }
+
+@keyframes fadeInUpService {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .service-card-horizontal:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px -8px rgba(233, 30, 99, 0.15);
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 24px 48px -8px rgba(233, 30, 99, 0.18);
   border-color: var(--primary-magenta);
+}
+
+/* Enhanced icon animations for service cards */
+.service-card-icon {
+  display: inline-block;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  animation: iconBounceGentle 2s ease-in-out infinite;
+}
+
+.service-card-horizontal:hover .service-card-icon {
+  transform: scale(1.1) rotate(5deg);
+  animation-play-state: paused;
+}
+
+@keyframes iconBounceGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Gradient button transitions for service CTAs */
+.service-cta-button {
+  background: linear-gradient(135deg, var(--primary-magenta), var(--secondary-blue));
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.service-cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.service-cta-button:hover::before {
+  left: 100%;
+}
+
+.service-cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(233, 30, 99, 0.3);
+  animation: pulse 0.6s ease-in-out;
 }
 
 .service-card-horizontal::before {

@@ -142,7 +142,12 @@ export default function HomePage() {
       {/* Main Content */}
       <main id="main-content" role="main">
         {/* Enhanced Hero Section */}
-        <section className="relative bg-hero-vibrant py-20 lg:py-32 overflow-hidden" role="banner" aria-labelledby="hero-heading">
+        <section className="relative bg-hero-animated py-20 lg:py-32 overflow-hidden" role="banner" aria-labelledby="hero-heading">
+          {/* Floating Shapes for Visual Interest */}
+          <div className="hero-floating-shape hero-floating-shape-1" aria-hidden="true"></div>
+          <div className="hero-floating-shape hero-floating-shape-2" aria-hidden="true"></div>
+          <div className="hero-floating-shape hero-floating-shape-3" aria-hidden="true"></div>
+
           {/* Vibrant Background Elements */}
           <div className="absolute inset-0 opacity-40" aria-hidden="true">
             <div className="absolute top-10 left-10 w-72 h-72 bg-blob-magenta rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob"></div>
@@ -150,25 +155,18 @@ export default function HomePage() {
             <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-72 h-72 bg-blob-green rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob animation-delay-4000"></div>
           </div>
 
-          {/* Floating Elements for Visual Interest */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blob-lavender rounded-full opacity-60 animate-float"></div>
-            <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-blob-sage rounded-full opacity-50 animate-float animation-delay-1000"></div>
-            <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-blob-blush rounded-full opacity-40 animate-float animation-delay-3000"></div>
-          </div>
-
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="grid lg:grid-cols-2 gap-16 items-center hero-content">
               {/* Enhanced Content Section */}
-              <div className={`transform transition-all duration-1200 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              <div>
                 {/* Trust Badge */}
-                <div className="inline-flex items-center bg-neutral-white/90 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-border-light shadow-soft">
+                <div className="hero-trust-badge inline-flex items-center bg-neutral-white/90 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-border-light shadow-soft">
                   <span className="w-2 h-2 bg-tertiary-green rounded-full mr-2 animate-pulse"></span>
                   <span className="text-sm font-medium text-text-primary">Trusted by 10,000+ young people across India</span>
                 </div>
 
                 {/* Empathetic Headlines */}
-                <h1 id="hero-heading" className="text-4xl lg:text-6xl font-bold text-text-primary leading-tight mb-6">
+                <h1 id="hero-heading" className="hero-title text-4xl lg:text-6xl font-bold text-text-primary leading-tight mb-6">
                   You're Not Alone.{' '}
                   <span className="bg-clip-text text-transparent bg-gradient-hero">
                     We Understand.
@@ -176,12 +174,12 @@ export default function HomePage() {
                 </h1>
                 
                 {/* Supportive Subheading */}
-                <p className="text-xl lg:text-2xl text-text-secondary leading-relaxed mb-4 max-w-2xl">
+                <p className="hero-subtitle text-xl lg:text-2xl text-text-secondary leading-relaxed mb-4 max-w-2xl">
                   Mental health support that honors your culture, respects your family values, and understands the unique pressures you face as a young person in India.
                 </p>
 
                 {/* Emotional Connection Point */}
-                <div className="bg-neutral-white/90 backdrop-blur-sm rounded-lg p-4 mb-8 border-l-4 border-l-primary-magenta shadow-soft hover-lift">
+                <div className="hero-subtitle bg-neutral-white/90 backdrop-blur-sm rounded-lg p-4 mb-8 border-l-4 border-l-primary-magenta shadow-soft hover-lift">
                   <p className="text-text-primary italic">
                     "Finally, someone who gets what it's like to balance family expectations with my own dreams. The support feels like talking to an understanding older sibling."
                   </p>
@@ -189,7 +187,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Enhanced CTA Section */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="hero-cta flex flex-col sm:flex-row gap-4 mb-6">
                   <button className="group btn-gradient px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-lift button-press focus-ring shadow-lg relative overflow-hidden btn-ripple">
                     <span className="relative z-10">Start Your Healing Journey</span>
                   </button>
@@ -281,6 +279,7 @@ export default function HomePage() {
         aria-labelledby="who-we-serve-heading"
       >
         <div className="who-we-serve-decorative-blob" aria-hidden="true"></div>
+        <div className="who-we-serve-decorative-blob-2" aria-hidden="true"></div>
         <div className="container">
           <h2 id="who-we-serve-heading" className="who-we-serve-heading">
             Tailored Support for Every Stage

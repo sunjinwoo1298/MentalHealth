@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 ﻿import { useState, useEffect } from 'react'
+=======
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import Navigation from '../components/Navigation/Navigation'
+>>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
 
 // Loading component for better UX
 const LoadingCard = () => (
@@ -21,7 +28,13 @@ const LoadingCard = () => (
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false)
+<<<<<<< HEAD
   const [isContentLoading, setIsContentLoading] = useState(true)
+=======
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const navigate = useNavigate()
+  const { isAuthenticated, user, logout } = useAuth()
+>>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
   
   useEffect(() => {
     setIsLoaded(true)
@@ -61,6 +74,11 @@ export default function HomePage() {
     }
   }, [])
 
+  const handleLogout = async () => {
+    await logout()
+    // User will be redirected automatically when isAuthenticated changes
+  }
+
   return (
     <div className="min-h-screen bg-hero-animated">
       {/* Skip to main content link for screen readers */}
@@ -90,6 +108,7 @@ export default function HomePage() {
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Semantic Header */}
       <header className="bg-neutral-white shadow-soft sticky top-0 z-40 border-b border-border-light" role="banner">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" role="navigation" aria-label="Main navigation">
@@ -138,6 +157,16 @@ export default function HomePage() {
           </div>
         </nav>
       </header>
+=======
+      {/* Navigation */}
+      <Navigation 
+        isAuthenticated={isAuthenticated}
+        user={user || undefined}
+        onLogin={() => navigate('/login')}
+        onRegister={() => navigate('/register')}
+        onLogout={handleLogout}
+      />
+>>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
 
       {/* Main Content */}
       <main id="main-content" role="main">

@@ -245,25 +245,25 @@ export default function Dashboard() {
             </div>
 
             {/* Wellness Activities Card */}
-            <div className="glass-card-dark p-6 hover-lift fadeInUp" style={{ animationDelay: '0.6s' }}>
+            <div className="glass-card-dark p-6 hover-lift fadeInUp card-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Wellness Activities</h3>
-                <span className="text-2xl">🧘</span>
+                <span className="text-2xl animate-breathe">🧘</span>
               </div>
               <p className="text-gray-300 mb-4">Discover mindfulness exercises</p>
-              <button className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-3 rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium">
+              <button className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-3 rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium btn-interactive">
                 Explore Activities
               </button>
             </div>
 
             {/* Crisis Support Card */}
-            <div className="glass-card-dark p-6 hover-lift fadeInUp" style={{ animationDelay: '0.7s' }}>
+            <div className="glass-card-dark p-6 hover-lift fadeInUp card-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Need Help?</h3>
-                <span className="text-2xl">🆘</span>
+                <span className="text-2xl animate-glow-pulse">🆘</span>
               </div>
               <p className="text-gray-300 mb-4">Access immediate support and resources</p>
-              <button className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium animate-glow-pulse">
+              <button className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium animate-glow-pulse btn-interactive crisis-support">
                 Get Support
               </button>
             </div>

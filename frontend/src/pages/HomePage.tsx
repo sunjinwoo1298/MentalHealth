@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-﻿import { useState, useEffect } from 'react'
-=======
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
->>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
 
 // Loading component for better UX
 const LoadingCard = () => (
@@ -28,21 +24,17 @@ const LoadingCard = () => (
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false)
-<<<<<<< HEAD
-  const [isContentLoading, setIsContentLoading] = useState(true)
-=======
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuth()
->>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
   
   useEffect(() => {
     setIsLoaded(true)
     
     // Simulate content loading for better UX
-    setTimeout(() => {
-      setIsContentLoading(false)
-    }, 500)
+    // setTimeout(() => {
+    //   setIsContentLoading(false)
+    // }, 500)
     
     // Preload critical resources
     const linkElement = document.createElement('link')
@@ -108,56 +100,6 @@ export default function HomePage() {
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Semantic Header */}
-      <header className="bg-neutral-white shadow-soft sticky top-0 z-40 border-b border-border-light" role="banner">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" role="navigation" aria-label="Main navigation">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo and Brand */}
-            <div className="flex items-center">
-              <a href="#" className="flex items-center space-x-3 group focus-ring rounded-lg p-1 hover-scale">
-                <div className="w-10 h-10 bg-gradient-hero rounded-lg flex items-center justify-center shadow-soft group-hover:shadow-medium transition-shadow breathe">
-                  <span className="font-bold text-lg text-white" role="img" aria-label="MindCare brain icon">🧠</span>
-                </div>
-                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-hero">
-                  MindCare
-                </span>
-              </a>
-            </div>
-            
-            {/* Main Navigation */}
-            <ul className="hidden md:flex items-center space-x-8" role="menubar">
-              {[
-                { name: 'Who We Serve', href: '#who-we-serve' },
-                { name: 'Services', href: '#services' },
-                { name: 'How It Works', href: '#how-it-works' },
-                { name: 'About', href: '#about' }
-              ].map((item) => (
-                <li key={item.name} role="none">
-                  <a
-                    href={item.href}
-                    className="text-text-secondary hover:text-primary-magenta transition-colors font-medium focus-ring rounded px-2 py-1"
-                    role="menuitem"
-                  >
-                    {item.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-
-            {/* CTA Buttons */}
-            <div className="flex items-center space-x-4">
-              <button className="hidden sm:block btn-outline-magenta px-4 py-2 rounded-full font-medium transition-colors focus-ring hover-scale button-press">
-                Sign In
-              </button>
-              <button className="btn-gradient px-6 py-2 rounded-full font-medium transition-colors focus-ring hover-lift button-press btn-ripple">
-                Get Started
-              </button>
-            </div>
-          </div>
-        </nav>
-      </header>
-=======
       {/* Navigation */}
       <Navigation 
         isAuthenticated={isAuthenticated}
@@ -166,7 +108,6 @@ export default function HomePage() {
         onRegister={() => navigate('/register')}
         onLogout={handleLogout}
       />
->>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
 
       {/* Main Content */}
       <main id="main-content" role="main">

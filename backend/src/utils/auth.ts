@@ -11,9 +11,9 @@ export interface JWTPayload {
 
 export class AuthUtils {
   private static jwtSecret = process.env.JWT_SECRET!;
-  private static jwtRefreshSecret = process.env.REFRESH_TOKEN_SECRET!;
+  private static jwtRefreshSecret = process.env.JWT_REFRESH_SECRET!;
   private static jwtExpiresIn = process.env.JWT_EXPIRES_IN || '1h';
-  private static jwtRefreshExpiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+  private static jwtRefreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
   // Hash password
   static async hashPassword(password: string): Promise<string> {

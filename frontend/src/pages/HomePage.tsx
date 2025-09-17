@@ -272,94 +272,34 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Who We Serve Section - Enhanced with Vibrant Background */}
-        <section id="who-we-serve" className="py-16 lg:py-24 bg-section-vibrant relative overflow-hidden" role="region" aria-labelledby="who-we-serve-heading">
-          {/* Attractive Background Elements */}
-          <div className="absolute inset-0" aria-hidden="true">
-            <div className="absolute top-0 left-0 w-96 h-96 bg-blob-magenta rounded-full mix-blend-multiply filter blur-2xl opacity-10 animate-float"></div>
-            <div className="absolute bottom-0 right-0 w-80 h-80 bg-blob-blue rounded-full mix-blend-multiply filter blur-2xl opacity-10 animate-float animation-delay-2000"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-blob-green rounded-full mix-blend-multiply filter blur-2xl opacity-10 animate-float animation-delay-4000"></div>
-          </div>
-          
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Who We Serve Section */}
+        <section id="who-we-serve" className="py-16 lg:py-24 bg-white" role="region" aria-labelledby="who-we-serve-heading">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              {/* Enhanced Header with Better Visibility */}
-              <div className="inline-flex items-center bg-neutral-white/90 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-border-light shadow-soft">
-                <span className="w-2 h-2 bg-primary-magenta rounded-full mr-3 animate-pulse"></span>
-                <span className="text-sm font-bold text-text-primary">Serving Youth Across India</span>
-              </div>
-              
-              <h2 id="who-we-serve-heading" className="text-4xl lg:text-6xl font-bold text-text-primary mb-6">
-                Who We{' '}
-                <span className="bg-clip-text text-transparent bg-gradient-hero">
-                  Serve
-                </span>
+              <h2 id="who-we-serve-heading" className="text-3xl lg:text-5xl font-bold text-text-primary mb-6">
+                Who We Serve
               </h2>
-              <p className="text-xl lg:text-2xl text-text-secondary max-w-3xl mx-auto leading-relaxed font-medium">
-                Tailored mental health support for every stage of youth development, designed with Indian cultural values in mind.
+              <p className="text-xl text-text-secondary max-w-3xl mx-auto leading-relaxed">
+                Tailored mental health support for every stage of youth development.
               </p>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
-                { 
-                  icon: "🧒", 
-                  title: "Children", 
-                  description: "Building emotional foundations and healthy coping skills through play therapy and family support.", 
-                  ages: "Ages 6-12",
-                  color: "magenta"
-                },
-                { 
-                  icon: "🧑‍🎓", 
-                  title: "Teens", 
-                  description: "Navigating academic pressure, social expectations, and identity formation during crucial years.", 
-                  ages: "Ages 13-17",
-                  color: "blue"
-                },
-                { 
-                  icon: "👨‍💼", 
-                  title: "Young Adults", 
-                  description: "Managing career stress, life transitions, and independence while honoring family relationships.", 
-                  ages: "Ages 18-25",
-                  color: "green"
-                }
+                { icon: "🧒", title: "Children", description: "Building emotional foundations and coping skills.", ages: "Ages 6-12" },
+                { icon: "🧑‍🎓", title: "Teens", description: "Navigating academic pressure and social expectations.", ages: "Ages 13-17" },
+                { icon: "👨‍💼", title: "Young Adults", description: "Managing career stress and life transitions.", ages: "Ages 18-25" }
               ].map((group) => (
-                <article key={group.title} className="group relative bg-neutral-white/95 backdrop-blur-sm rounded-2xl shadow-medium border border-border-light hover:shadow-strong card-hover smooth-transition scroll-reveal overflow-hidden">
-                  {/* Card Gradient Overlay */}
-                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                    group.color === 'magenta' ? 'bg-gradient-to-br from-primary-magenta/5 to-primary-magenta/10' :
-                    group.color === 'blue' ? 'bg-gradient-to-br from-secondary-blue/5 to-secondary-blue/10' :
-                    'bg-gradient-to-br from-tertiary-green/5 to-tertiary-green/10'
-                  }`}></div>
-                  
-                  <div className="relative p-8">
-                    <div className="flex items-center mb-6">
-                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 ${
-                        group.color === 'magenta' ? 'bg-gradient-to-br from-primary-magenta/10 to-primary-magenta/20' :
-                        group.color === 'blue' ? 'bg-gradient-to-br from-secondary-blue/10 to-secondary-blue/20' :
-                        'bg-gradient-to-br from-tertiary-green/10 to-tertiary-green/20'
-                      }`}>
-                        <span className="text-4xl icon-float">{group.icon}</span>
-                      </div>
+                <article key={group.title} className="group relative bg-white rounded-lg shadow-soft border border-neutral-200 card-hover smooth-transition scroll-reveal">
+                  <div className="p-6">
+                    <div className="flex items-center mb-4">
+                      <span className="text-4xl mr-3 icon-float">{group.icon}</span>
                       <div>
-                        <h3 className="text-2xl font-bold text-text-primary mb-2 group-hover:text-primary-magenta transition-colors">{group.title}</h3>
-                        <span className={`text-sm font-bold px-3 py-1 rounded-full hover-scale ${
-                          group.color === 'magenta' ? 'text-primary-magenta bg-primary-magenta-50' :
-                          group.color === 'blue' ? 'text-secondary-blue bg-secondary-blue-50' :
-                          'text-tertiary-green bg-tertiary-green-50'
-                        }`}>{group.ages}</span>
+                        <h3 className="text-xl font-semibold text-text-primary mb-1">{group.title}</h3>
+                        <span className="text-sm text-primary-blue font-medium bg-primary-blue-50 px-2 py-1 rounded-full hover-scale">{group.ages}</span>
                       </div>
                     </div>
-                    <p className="text-text-secondary leading-relaxed text-lg font-medium">{group.description}</p>
-                    
-                    {/* Learn More Button */}
-                    <button className={`mt-6 w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
-                      group.color === 'magenta' ? 'btn-magenta' :
-                      group.color === 'blue' ? 'btn-blue' :
-                      'btn-green'
-                    } opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0`}>
-                      Learn More
-                    </button>
+                    <p className="text-text-secondary leading-relaxed">{group.description}</p>
                   </div>
                 </article>
               ))}
@@ -377,24 +317,36 @@ export default function HomePage() {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Enhanced Header */}
             <div className="text-center mb-20">
-              <div className="inline-flex items-center bg-trust-badge rounded-full px-6 py-3 mb-6 border shadow-soft">
-                <span className="w-2 h-2 bg-blob-sage rounded-full mr-3 animate-pulse"></span>
-                <span className="text-sm font-medium text-hero-primary">Evidence-based • Culturally Informed • Accessible</span>
+              <div className="inline-flex items-center bg-neutral-white/90 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-border-light shadow-soft">
+                <span className="w-2 h-2 bg-tertiary-green rounded-full mr-3 animate-pulse"></span>
+                <span className="text-sm font-medium text-text-primary">Evidence-based • Culturally Informed • Accessible</span>
               </div>
               
-              <h2 id="services-heading" className="text-4xl lg:text-6xl font-bold text-hero-primary mb-6">
+              <h2 id="services-heading" className="text-4xl lg:text-5xl font-bold text-text-primary mb-6">
                 Comprehensive Care,{' '}
-                <span className="text-hero-gradient">
+                <span className="bg-clip-text text-transparent bg-gradient-hero">
                   Your Way
                 </span>
               </h2>
-              <p className="text-xl lg:text-2xl text-hero-secondary max-w-4xl mx-auto leading-relaxed">
+              <p className="text-lg lg:text-xl text-text-body max-w-4xl mx-auto leading-relaxed">
                 From individual therapy to family support, we offer a full spectrum of mental health services designed specifically for the Indian youth experience.
               </p>
             </div>
             
-            {/* Enhanced Service Cards - Horizontal Scrolling */}
-            <div className="horizontal-scroll-container mb-20">
+            {/* Enhanced Service Cards - Horizontal Scrolling with Accessibility */}
+            <div 
+              className="horizontal-scroll-container mb-20"
+              role="region"
+              aria-labelledby="services-heading"
+              aria-describedby="services-description"
+            >
+              <div 
+                id="services-description" 
+                className="sr-only"
+              >
+                Horizontally scrollable service cards. Use arrow keys or swipe to navigate between services.
+              </div>
+              
               <div className="horizontal-scroll-track">
                 {/* Create multiple copies for seamless infinite scroll */}
                 {[...Array(3)].map((_, arrayIndex) => 
@@ -442,33 +394,71 @@ export default function HomePage() {
                       popular: false
                     }
                   ].map((service, serviceIndex) => (
-                    <article key={`${arrayIndex}-${serviceIndex}-${service.title}`} className="service-card-horizontal group">
+                    <article 
+                      key={`${arrayIndex}-${serviceIndex}-${service.title}`} 
+                      className="service-card-horizontal group"
+                      role="article"
+                      aria-labelledby={`service-title-${arrayIndex}-${serviceIndex}`}
+                      tabIndex={arrayIndex === 0 ? 0 : -1}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          // Focus the Learn More button
+                          const button = e.currentTarget.querySelector('button');
+                          button?.focus();
+                        }
+                      }}
+                    >
                       {/* Popular Badge */}
                       {service.popular && (
-                        <div className="absolute top-4 right-4 bg-gradient-to-r from-accent-blush to-secondary-sage text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                        <div 
+                          className="absolute top-4 right-4 bg-gradient-to-r from-accent-orange to-primary-magenta text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10"
+                          role="img"
+                          aria-label="Most popular service"
+                        >
                           Most Popular
                         </div>
                       )}
                       
                       <div className="service-card-content">
                         {/* Icon with Animation */}
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary-lavender/20 to-secondary-sage/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <div 
+                          className="w-16 h-16 bg-gradient-to-br from-primary-magenta/20 to-tertiary-green/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+                          role="img"
+                          aria-label={`${service.title} service icon`}
+                        >
                           <span className="text-4xl">{service.icon}</span>
                         </div>
                         
                         {/* Content */}
-                        <h3 className="text-2xl font-bold text-hero-primary mb-4 group-hover:text-primary-lavender transition-colors">
+                        <h3 
+                          id={`service-title-${arrayIndex}-${serviceIndex}`}
+                          className="service-card-content h3 text-text-primary mb-4 group-hover:text-primary-magenta transition-colors"
+                        >
                           {service.title}
                         </h3>
-                        <p className="text-hero-secondary leading-relaxed mb-6">
+                        <p className="service-card-content p text-text-body leading-relaxed mb-6">
                           {service.description}
                         </p>
                         
                         {/* Features List */}
-                        <ul className="space-y-2 mb-6">
+                        <ul 
+                          className="space-y-2 mb-6"
+                          role="list"
+                          aria-label={`${service.title} features`}
+                        >
                           {service.features.map((feature, idx) => (
-                            <li key={`${arrayIndex}-${serviceIndex}-${idx}`} className="flex items-center text-sm text-accessibility">
-                              <svg className="w-4 h-4 mr-2 text-stats-sage flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <li 
+                              key={`${arrayIndex}-${serviceIndex}-${idx}`} 
+                              className="flex items-center text-sm text-text-muted"
+                              role="listitem"
+                            >
+                              <svg 
+                                className="w-4 h-4 mr-2 text-tertiary-green flex-shrink-0" 
+                                fill="currentColor" 
+                                viewBox="0 0 20 20"
+                                aria-hidden="true"
+                              >
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                               {feature}
@@ -477,7 +467,10 @@ export default function HomePage() {
                         </ul>
                         
                         {/* CTA Button */}
-                        <button className="w-full btn-lavender py-3 rounded-xl font-semibold transition-all duration-300 hover-lift focus-ring">
+                        <button 
+                          className="w-full btn-gradient py-3 rounded-xl font-semibold transition-all duration-300 hover-lift focus-ring"
+                          aria-label={`Learn more about ${service.title}`}
+                        >
                           Learn More
                         </button>
                       </div>
@@ -488,20 +481,24 @@ export default function HomePage() {
             </div>
 
             {/* Process Visualization Section */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 lg:p-12 mb-20">
+            <div className="bg-neutral-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-border-light p-8 lg:p-12 mb-20">
               <div className="text-center mb-12">
                 <h3 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4">
                   Your Journey to Wellness
                 </h3>
-                <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+                <p className="text-lg text-text-body max-w-3xl mx-auto leading-relaxed">
                   A simple, supportive process designed to make getting help as comfortable as possible
                 </p>
               </div>
               
               {/* Process Steps */}
-              <div className="grid md:grid-cols-4 gap-8 relative">
+              <div 
+                className="grid md:grid-cols-4 gap-8 relative"
+                role="list"
+                aria-label="Four-step wellness journey process"
+              >
                 {/* Connection Lines */}
-                <div className="hidden md:block absolute top-16 left-0 w-full h-0.5 bg-gradient-to-r from-primary-blue via-secondary-green to-warm-orange opacity-30" aria-hidden="true"></div>
+                <div className="hidden md:block absolute top-16 left-0 w-full h-0.5 bg-gradient-hero opacity-30" aria-hidden="true"></div>
                 
                 {[
                   { 
@@ -509,54 +506,110 @@ export default function HomePage() {
                     title: "Take Assessment", 
                     description: "5-minute confidential questionnaire",
                     icon: "📝",
-                    color: "primary-blue"
+                    color: "secondary-blue"
                   },
                   { 
                     step: "02", 
                     title: "Get Matched", 
                     description: "Connected with your ideal therapist",
                     icon: "🤝",
-                    color: "secondary-green"
+                    color: "tertiary-green"
                   },
                   { 
                     step: "03", 
                     title: "Start Sessions", 
                     description: "Begin your personalized therapy",
                     icon: "💬",
-                    color: "warm-orange"
+                    color: "primary-magenta"
                   },
                   { 
                     step: "04", 
                     title: "Track Progress", 
                     description: "Monitor your growth journey",
                     icon: "📈",
-                    color: "primary-blue"
+                    color: "secondary-blue"
                   }
-                ].map((step) => (
-                  <div key={step.step} className="text-center relative group">
+                ].map((step, index) => (
+                  <div 
+                    key={step.step} 
+                    className="text-center relative group focus-within:scale-105 transition-transform duration-300"
+                    role="listitem"
+                    tabIndex={0}
+                    aria-labelledby={`step-title-${index}`}
+                    aria-describedby={`step-description-${index}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        // Add visual feedback or action here
+                        e.currentTarget.classList.add('scale-110');
+                        setTimeout(() => {
+                          e.currentTarget.classList.remove('scale-110');
+                        }, 200);
+                      }
+                    }}
+                  >
                     {/* Step Circle */}
-                    <div className={`w-16 h-16 bg-${step.color} rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4 group-hover:scale-110 transition-all duration-300 shadow-lg relative z-10`}>
+                    <div 
+                      className={`w-16 h-16 bg-${step.color} rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4 group-hover:scale-110 group-focus-within:scale-110 transition-all duration-300 shadow-lg relative z-10`}
+                      role="img"
+                      aria-label={`Step ${step.step}: ${step.title}`}
+                    >
                       {step.step}
                     </div>
                     
                     {/* Icon */}
-                    <div className="text-4xl mb-4 group-hover:animate-bounce">{step.icon}</div>
+                    <div 
+                      className="text-4xl mb-4 group-hover:animate-bounce"
+                      role="img"
+                      aria-label={`${step.title} icon`}
+                    >
+                      {step.icon}
+                    </div>
                     
                     {/* Content */}
-                    <h4 className="text-xl font-bold text-text-primary mb-2">{step.title}</h4>
-                    <p className="text-text-secondary">{step.description}</p>
+                    <h4 
+                      id={`step-title-${index}`}
+                      className="process-step-title text-text-primary mb-2"
+                    >
+                      {step.title}
+                    </h4>
+                    <p 
+                      id={`step-description-${index}`}
+                      className="process-step-description text-text-body"
+                    >
+                      {step.description}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Trust Indicators Section */}
-            <div className="grid md:grid-cols-3 gap-8">
+            <div 
+              className="grid md:grid-cols-3 gap-8"
+              role="region"
+              aria-label="Trust indicators and statistics"
+            >
               {/* Stats Card */}
-              <div className="bg-gradient-to-br from-primary-blue/10 to-secondary-green/10 rounded-2xl p-8 text-center border border-primary-blue/20">
-                <div className="text-4xl lg:text-5xl font-bold text-primary-blue mb-2">10,000+</div>
-                <div className="text-lg text-text-primary font-semibold mb-2">Young People Helped</div>
-                <div className="text-text-secondary">Across India since 2020</div>
+              <div 
+                className="bg-gradient-to-br from-secondary-blue/10 to-tertiary-green/10 rounded-2xl p-8 text-center border border-secondary-blue/20 focus-within:ring-2 focus-within:ring-secondary-blue transition-all duration-300"
+                tabIndex={0}
+                role="article"
+                aria-labelledby="stats-heading"
+              >
+                <div 
+                  className="text-4xl lg:text-5xl font-bold text-secondary-blue mb-2"
+                  aria-label="Ten thousand plus"
+                >
+                  10,000+
+                </div>
+                <div 
+                  id="stats-heading"
+                  className="text-lg text-text-primary font-semibold mb-2"
+                >
+                  Young People Helped
+                </div>
+                <div className="text-text-muted">Across India since 2020</div>
               </div>
 
               {/* Certification Card */}

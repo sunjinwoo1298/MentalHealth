@@ -314,6 +314,49 @@
   }
 }
 
+/* Meditation-specific animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+
+@keyframes meditation-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
+  }
+}
+
+@keyframes lotus-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
 /* Horizontal Scrolling Animations */
 @keyframes scroll-horizontal {
   0% {
@@ -2384,6 +2427,152 @@ html {
   color: var(--primary-magenta);
 }
 
+/* Enhanced navigation text visibility */
+.text-nav-primary {
+  color: #1f2937 !important; /* Dark gray for maximum contrast */
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.text-nav-primary:hover {
+  color: #2563eb !important; /* Blue-600 for hover */
+}
+
+/* Enhanced Navigation Bar Styling */
+.nav-enhanced {
+  background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 2px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.nav-logo {
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2563eb 0%, #059669 50%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.nav-item {
+  position: relative;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover {
+  background-color: #f1f5f9;
+  transform: translateY(-1px);
+}
+
+.nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #059669);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-item:hover::after {
+  width: 80%;
+}
+
+.nav-button-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #059669 100%);
+  color: white;
+  padding: 0.625rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
+  border: none;
+  cursor: pointer;
+}
+
+.nav-button-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4), 0 4px 6px -2px rgba(37, 99, 235, 0.2);
+}
+
+.nav-button-secondary {
+  color: #2563eb;
+  background: transparent;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.nav-button-secondary:hover {
+  background-color: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+/* Navigation Accessibility Enhancements */
+.nav-item:focus,
+.nav-button-primary:focus,
+.nav-button-secondary:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .text-nav-primary {
+    color: #000000 !important;
+    font-weight: 700;
+  }
+  
+  .nav-item:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+  
+  .nav-button-primary {
+    background: #000000 !important;
+    border: 2px solid #ffffff;
+  }
+  
+  .nav-button-secondary {
+    border: 2px solid #000000 !important;
+    color: #000000 !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .nav-item,
+  .nav-button-primary,
+  .nav-button-secondary {
+    transition: none;
+  }
+  
+  .nav-item:hover {
+    transform: none;
+  }
+  
+  .nav-button-primary:hover {
+    transform: none;
+  }
+}
+
 .btn-magenta {
   background: linear-gradient(135deg, var(--primary-magenta) 0%, var(--primary-magenta-light) 100%);
   color: var(--neutral-white);
@@ -3160,6 +3349,97 @@ html {
 .final-cta-section {
   background: rgba(255, 255, 255, 0.95) !important;
   border: 2px solid rgba(26, 32, 44, 0.1) !important;
+}
+
+/* ========================================
+   MEDITATION HERO SECTION STYLES
+   ======================================== */
+
+/* Meditation card with shimmer effect */
+.meditation-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.meditation-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.8s ease;
+  z-index: 1;
+}
+
+.meditation-card:hover::before {
+  left: 100%;
+}
+
+/* Float animations with delays */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* Cultural lotus pattern overlay */
+.lotus-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23E91E63' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Animation delays for staggered effects */
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-3000 {
+  animation-delay: 3s;
+}
+
+/* Enhanced glow effects for meditation theme */
+.meditation-glow {
+  animation: meditation-glow 4s ease-in-out infinite;
+}
+
+/* Responsive adjustments for meditation section */
+@media (max-width: 1024px) {
+  .meditation-card {
+    margin: 0 auto;
+    max-width: 500px;
+  }
+  
+  .absolute.-bottom-8.-left-8 {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    margin-top: 1rem;
+    transform: none !important;
+  }
+  
+  .absolute.top-6.left-6,
+  .absolute.bottom-6.right-6 {
+    position: absolute !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .absolute.-bottom-8.-left-8 {
+    max-width: 100% !important;
+    margin: 1rem 0 0 0 !important;
+  }
+  
+  .meditation-card .absolute {
+    transform: scale(0.9);
+  }
 }
 
 .final-cta-section h3 {

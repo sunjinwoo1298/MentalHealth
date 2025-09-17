@@ -1,54 +1,21 @@
-<<<<<<< HEAD
 ﻿import { useState, useEffect } from 'react'
-=======
-import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
->>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
-
-// Loading component for better UX
-const LoadingCard = () => (
-  <div className="bg-white rounded-lg p-6 shadow-soft border border-neutral-200">
-    <div className="animate-pulse">
-      <div className="flex items-center mb-4">
-        <div className="w-12 h-12 bg-neutral-200 rounded-full mr-3"></div>
-        <div>
-          <div className="h-4 bg-neutral-200 rounded w-24 mb-2"></div>
-          <div className="h-3 bg-neutral-200 rounded w-16"></div>
-        </div>
-      </div>
-      <div className="space-y-2">
-        <div className="h-3 bg-neutral-200 rounded"></div>
-        <div className="h-3 bg-neutral-200 rounded w-3/4"></div>
-      </div>
-    </div>
-  </div>
-)
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false)
-<<<<<<< HEAD
-  const [isContentLoading, setIsContentLoading] = useState(true)
-=======
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuth()
->>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
   
   useEffect(() => {
     setIsLoaded(true)
-    
-    // Simulate content loading for better UX
-    setTimeout(() => {
-      setIsContentLoading(false)
-    }, 500)
     
     // Preload critical resources
     const linkElement = document.createElement('link')
     linkElement.rel = 'preload'
     linkElement.as = 'image'
-    linkElement.href = '/api/placeholder/600/400'
+    linkElement.href = '/meditative-sunset-scene-by-lake.jpg'
     document.head.appendChild(linkElement)
     
     // Scroll reveal animation
@@ -108,56 +75,6 @@ export default function HomePage() {
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Semantic Header */}
-      <header className="bg-neutral-white shadow-soft sticky top-0 z-40 border-b border-border-light" role="banner">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" role="navigation" aria-label="Main navigation">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo and Brand */}
-            <div className="flex items-center">
-              <a href="#" className="flex items-center space-x-3 group focus-ring rounded-lg p-1 hover-scale">
-                <div className="w-10 h-10 bg-gradient-hero rounded-lg flex items-center justify-center shadow-soft group-hover:shadow-medium transition-shadow breathe">
-                  <span className="font-bold text-lg text-white" role="img" aria-label="MindCare brain icon">🧠</span>
-                </div>
-                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-hero">
-                  MindCare
-                </span>
-              </a>
-            </div>
-            
-            {/* Main Navigation */}
-            <ul className="hidden md:flex items-center space-x-8" role="menubar">
-              {[
-                { name: 'Who We Serve', href: '#who-we-serve' },
-                { name: 'Services', href: '#services' },
-                { name: 'How It Works', href: '#how-it-works' },
-                { name: 'About', href: '#about' }
-              ].map((item) => (
-                <li key={item.name} role="none">
-                  <a
-                    href={item.href}
-                    className="text-text-secondary hover:text-primary-magenta transition-colors font-medium focus-ring rounded px-2 py-1"
-                    role="menuitem"
-                  >
-                    {item.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-
-            {/* CTA Buttons */}
-            <div className="flex items-center space-x-4">
-              <button className="hidden sm:block btn-outline-magenta px-4 py-2 rounded-full font-medium transition-colors focus-ring hover-scale button-press">
-                Sign In
-              </button>
-              <button className="btn-gradient px-6 py-2 rounded-full font-medium transition-colors focus-ring hover-lift button-press btn-ripple">
-                Get Started
-              </button>
-            </div>
-          </div>
-        </nav>
-      </header>
-=======
       {/* Navigation */}
       <Navigation 
         isAuthenticated={isAuthenticated}
@@ -166,7 +83,6 @@ export default function HomePage() {
         onRegister={() => navigate('/register')}
         onLogout={handleLogout}
       />
->>>>>>> 5a4f0b7cf1e9438a7237d88303cb79c3a2fe1db4
 
       {/* Main Content */}
       <main id="main-content" role="main">
@@ -253,47 +169,91 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Enhanced Visual Section */}
+              {/* Enhanced Visual Section with Meditative Image */}
               <div className={`relative transform transition-all duration-1200 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-                {/* Main Image with Enhanced Styling */}
-                <div className="relative group">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-primary-blue/20 to-secondary-green/20 rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60"></div>
-                  <div className="relative bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-white/50">
+                {/* Main Meditative Image Container */}
+                <div className="relative meditation-card group">
+                  {/* Soft glow background */}
+                  <div className="absolute -inset-4 bg-gradient-to-br from-primary-magenta/20 via-primary-blue/20 to-primary-green/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70"></div>
+                  
+                  {/* Main image with enhanced styling */}
+                  <div className="relative rounded-3xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
                     <img 
-                      src="/api/placeholder/600/400" 
-                      alt="Young Indian person sitting peacefully in meditation pose, surrounded by soft natural lighting and calming elements, representing mental wellness and inner peace" 
-                      className="rounded-2xl w-full shadow-lg hover-scale smooth-transition"
-                      loading="lazy"
+                      src="/meditative-sunset-scene-by-lake.jpg" 
+                      alt="Young Indian person sitting peacefully in meditation pose by a serene lake during sunset, surrounded by soft natural lighting and calming elements, representing mental wellness, inner peace, and cultural connection to nature" 
+                      className="w-full h-96 lg:h-[500px] object-cover"
+                      loading="eager"
                       width="600"
-                      height="400"
+                      height="500"
+                      onError={(e) => {
+                        console.error('Failed to load meditation image');
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.className = 'w-full h-96 lg:h-[500px] bg-gradient-to-br from-purple-400 via-pink-300 to-orange-300 flex items-center justify-center text-white text-xl font-semibold';
+                        fallbackDiv.innerHTML = '🧘‍♀️ Meditation & Wellness 🌅';
+                        fallbackDiv.setAttribute('role', 'img');
+                        fallbackDiv.setAttribute('aria-label', 'Meditation and wellness illustration');
+                        e.currentTarget.parentNode?.replaceChild(fallbackDiv, e.currentTarget);
+                      }}
                     />
-                    {/* Overlay with cultural elements */}
-                    <div className="absolute inset-6 rounded-2xl bg-gradient-to-t from-primary-blue/10 via-transparent to-transparent pointer-events-none" aria-hidden="true"></div>
+                    
+                    {/* Gradient overlay for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                    
+                    {/* Cultural lotus pattern overlay */}
+                    <div className="absolute inset-0 lotus-pattern opacity-30"></div>
                   </div>
                 </div>
 
-                {/* Floating Stats Cards */}
+                {/* Success Stats Overlay */}
                 <div 
-                  className="absolute -top-6 -left-6 bg-stats-lavender rounded-xl p-4 shadow-xl border animate-float hover-lift"
+                  className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/50 animate-float hover-lift"
                   role="region"
                   aria-label="Success rate statistic"
                 >
-                  <div className="text-2xl font-bold text-stats-lavender" aria-label="95 percent">95%</div>
-                  <div className="text-sm text-accessibility">Feel Better</div>
+                  <div className="text-3xl font-bold text-primary-magenta mb-1">95%</div>
+                  <div className="text-sm text-gray-600 font-medium">Feel Better</div>
                 </div>
 
+                {/* 24/7 Support Badge */}
                 <div 
-                  className="absolute -bottom-6 -right-6 bg-stats-sage rounded-xl p-4 shadow-xl border animate-float animation-delay-1000 hover-lift"
+                  className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-sm rounded-full px-6 py-3 shadow-xl border border-white/50 animate-float animation-delay-1000"
                   role="region"
                   aria-label="Support availability"
                 >
-                  <div className="text-2xl font-bold text-stats-sage">24/7</div>
-                  <div className="text-sm text-accessibility">Support</div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary-blue">24/7</div>
+                    <div className="text-xs text-gray-600 font-medium">Support</div>
+                  </div>
                 </div>
 
-                {/* Cultural Touch - Lotus Elements */}
-                <div className="absolute top-1/2 -left-8 text-6xl opacity-20 animate-pulse" aria-hidden="true">🪷</div>
-                <div className="absolute bottom-1/4 -right-8 text-4xl opacity-30 animate-pulse animation-delay-2000" aria-hidden="true">🕉️</div>
+                {/* Floating Testimonial Card */}
+                <div 
+                  className="absolute -bottom-8 -left-8 bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl max-w-sm animate-float-delayed border border-white/50 hover-lift"
+                  role="article"
+                  aria-label="User testimonial"
+                >
+                  <div className="flex items-start space-x-3">
+                    <div 
+                      className="w-12 h-12 bg-gradient-to-br from-primary-green to-primary-blue rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
+                      aria-label="User avatar with initial प्र for Priya"
+                    >
+                      प्र
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-700 leading-relaxed mb-2">
+                        "Finally, someone who gets what it's like to balance family expectations with my own dreams."
+                      </p>
+                      <div className="text-xs text-gray-500 font-medium">
+                        - Priya, 19, Delhi University
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cultural Elements - Enhanced */}
+                <div className="absolute top-1/2 -left-12 text-6xl opacity-20 animate-pulse" aria-hidden="true">🪷</div>
+                <div className="absolute bottom-1/4 -right-12 text-5xl opacity-25 animate-pulse animation-delay-2000" aria-hidden="true">🕉️</div>
+                <div className="absolute top-1/4 -right-8 text-4xl opacity-15 animate-pulse animation-delay-3000" aria-hidden="true">☮️</div>
               </div>
             </div>
           </div>

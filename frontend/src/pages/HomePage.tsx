@@ -8,6 +8,17 @@ export default function HomePage() {
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuth()
   
+  // Inspirational quotes state
+  const inspirationalQuotes = [
+    "Breathe in peace. Breathe out stress.",
+    "You are worthy of support and understanding.",
+    "Every sunrise is a new beginning.",
+    "Your mental health matters. You matter.",
+    "Healing is not linear, and that's okay.",
+    "Be gentle with yourself. You're doing the best you can."
+  ]
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0)
+  
   useEffect(() => {
     setIsLoaded(true)
     
@@ -40,6 +51,17 @@ export default function HomePage() {
       scrollElements.forEach((el) => observer.unobserve(el))
     }
   }, [])
+
+  // Quote rotation effect
+  useEffect(() => {
+    const quoteInterval = setInterval(() => {
+      setCurrentQuoteIndex((prevIndex) => 
+        (prevIndex + 1) % inspirationalQuotes.length
+      )
+    }, 5000) // Change quote every 5 seconds
+
+    return () => clearInterval(quoteInterval)
+  }, [inspirationalQuotes.length])
 
   const handleLogout = async () => {
     await logout()
@@ -204,48 +226,30 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Success Stats Overlay */}
+                {/* Inspirational Quote/Mantra */}
                 <div 
-                  className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/50 animate-float hover-lift"
+                  className="absolute bottom-8 left-8 right-8 bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 inspiration-quote"
                   role="region"
-                  aria-label="Success rate statistic"
-                >
-                  <div className="text-3xl font-bold text-primary-magenta mb-1">95%</div>
-                  <div className="text-sm text-gray-600 font-medium">Feel Better</div>
-                </div>
-
-                {/* 24/7 Support Badge */}
-                <div 
-                  className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-sm rounded-full px-6 py-3 shadow-xl border border-white/50 animate-float animation-delay-1000"
-                  role="region"
-                  aria-label="Support availability"
+                  aria-label="Daily inspiration"
+                  aria-live="polite"
                 >
                   <div className="text-center">
-                    <div className="text-xl font-bold text-primary-blue">24/7</div>
-                    <div className="text-xs text-gray-600 font-medium">Support</div>
-                  </div>
-                </div>
-
-                {/* Floating Testimonial Card */}
-                <div 
-                  className="absolute -bottom-8 -left-8 bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl max-w-sm animate-float-delayed border border-white/50 hover-lift"
-                  role="article"
-                  aria-label="User testimonial"
-                >
-                  <div className="flex items-start space-x-3">
-                    <div 
-                      className="w-12 h-12 bg-gradient-to-br from-primary-green to-primary-blue rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
-                      aria-label="User avatar with initial प्र for Priya"
-                    >
-                      प्र
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-700 leading-relaxed mb-2">
-                        "Finally, someone who gets what it's like to balance family expectations with my own dreams."
-                      </p>
-                      <div className="text-xs text-gray-500 font-medium">
-                        - Priya, 19, Delhi University
-                      </div>
+                    <p className="text-lg font-semibold text-gray-700 leading-relaxed mb-2 inspiration-text transition-opacity duration-500">
+                      "{inspirationalQuotes[currentQuoteIndex]}"
+                    </p>
+                    <div className="w-16 h-1 bg-gradient-to-r from-primary-magenta to-primary-blue rounded-full mx-auto"></div>
+                    <div className="flex justify-center mt-3 space-x-1">
+                      {inspirationalQuotes.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            index === currentQuoteIndex 
+                              ? 'bg-primary-magenta' 
+                              : 'bg-gray-300'
+                          }`}
+                          aria-hidden="true"
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>

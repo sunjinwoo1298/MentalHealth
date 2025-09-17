@@ -859,7 +859,7 @@ export default function HomePage() {
             </div>
 
             {/* Call to Action */}
-            <div className="text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 lg:p-12">
+            <div className="final-cta-section text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 lg:p-12">
               <h3 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4">
                 Ready to Start Your Story?
               </h3>

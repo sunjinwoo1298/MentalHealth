@@ -3155,3 +3155,50 @@ html {
   font-weight: 600 !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
 }
+
+/* Final CTA Section - Maximum Visibility */
+.final-cta-section {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid rgba(26, 32, 44, 0.1) !important;
+}
+
+.final-cta-section h3 {
+  color: #1A202C !important;
+  font-weight: 800 !important;
+  font-size: 2.5rem !important;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9) !important;
+  letter-spacing: -0.02em !important;
+}
+
+.final-cta-section p {
+  color: #2D3748 !important;
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8) !important;
+  line-height: 1.6 !important;
+}
+
+/* Enhanced CTA Button Styling */
+.final-cta-section .cta-buttons button {
+  font-weight: 800 !important;
+  font-size: 1.125rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  border-width: 3px !important;
+}
+
+.final-cta-section .cta-buttons button:first-child {
+  background: linear-gradient(135deg, #1E40AF, #1D4ED8) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4) !important;
+}
+
+.final-cta-section .cta-buttons button:last-child {
+  border-color: #1E40AF !important;
+  color: #1E40AF !important;
+  font-weight: 700 !important;
+}
+
+.final-cta-section .cta-buttons button:last-child:hover {
+  background: #1E40AF !important;
+  color: #FFFFFF !important;
+}

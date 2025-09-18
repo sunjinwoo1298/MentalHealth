@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import Dashboard from './pages/Dashboard'
+import ChatPage from './pages/ChatPage'
 import OnboardingFlow from './pages/OnboardingFlow'
 import ProfilePage from './pages/ProfilePage'
 import PrivacyPage from './pages/PrivacyPage'
@@ -22,6 +23,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/settings" element={<SettingsPage />} />

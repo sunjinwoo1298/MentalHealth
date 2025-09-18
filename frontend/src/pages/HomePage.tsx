@@ -5,6 +5,7 @@ import Navigation from '../components/Navigation/Navigation'
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false)
+  const [audienceCardsVisible, setAudienceCardsVisible] = useState(false)
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuth()
   
@@ -43,14 +44,33 @@ export default function HomePage() {
       })
     }, observerOptions)
     
+    // Audience cards intersection observer
+    const audienceObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !audienceCardsVisible) {
+          setAudienceCardsVisible(true)
+        }
+      })
+    }, {
+      threshold: 0.2,
+      rootMargin: '0px 0px -100px 0px'
+    })
+    
     // Observe all scroll reveal elements
     const scrollElements = document.querySelectorAll('.scroll-reveal')
     scrollElements.forEach((el) => observer.observe(el))
     
-    return () => {
-      scrollElements.forEach((el) => observer.unobserve(el))
+    // Observe audience section
+    const audienceSection = document.querySelector('.who-we-serve-section')
+    if (audienceSection) {
+      audienceObserver.observe(audienceSection)
     }
-  }, [])
+    
+    return () => {
+      observer.disconnect()
+      audienceObserver.disconnect()
+    }
+  }, [audienceCardsVisible])
 
   // Quote rotation effect
   useEffect(() => {
@@ -273,6 +293,10 @@ export default function HomePage() {
       >
         <div className="who-we-serve-decorative-blob" aria-hidden="true"></div>
         <div className="who-we-serve-decorative-blob-2" aria-hidden="true"></div>
+        <div className="who-we-serve-floating-circle-1" aria-hidden="true"></div>
+        <div className="who-we-serve-floating-circle-2" aria-hidden="true"></div>
+        <div className="who-we-serve-floating-blob-1" aria-hidden="true"></div>
+        <div className="who-we-serve-floating-blob-2" aria-hidden="true"></div>
         <div className="container">
           <h2 id="who-we-serve-heading" className="who-we-serve-heading">
             Tailored Support for Every Stage
@@ -284,7 +308,8 @@ export default function HomePage() {
           
           <div className="audience-cards-grid relative z-10">
             <div 
-              className="audience-card fade-in-up"
+              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
+              style={{animationDelay: audienceCardsVisible ? '0ms' : ''}}
               role="article"
               aria-labelledby="children-title"
               tabIndex={0}
@@ -299,7 +324,8 @@ export default function HomePage() {
             </div>
             
             <div 
-              className="audience-card fade-in-up animation-delay-500"
+              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
+              style={{animationDelay: audienceCardsVisible ? '150ms' : ''}}
               role="article"
               aria-labelledby="teens-title"
               tabIndex={0}
@@ -314,7 +340,8 @@ export default function HomePage() {
             </div>
             
             <div 
-              className="audience-card fade-in-up animation-delay-1000"
+              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
+              style={{animationDelay: audienceCardsVisible ? '300ms' : ''}}
               role="article"
               aria-labelledby="young-adults-title"
               tabIndex={0}
@@ -327,6 +354,21 @@ export default function HomePage() {
                 and mental health resources for life's major decisions.
               </p>
             </div>
+          </div>
+          
+          {/* Main CTA Button */}
+          <div className="text-center mt-12 relative z-10">
+            <button
+              className="who-we-serve-cta-button"
+              onClick={() => navigate('/resources')}
+              aria-label="Explore mental health resources tailored to your needs"
+            >
+              <span className="cta-button-text">Explore Resources</span>
+              <span className="cta-button-icon" aria-hidden="true">→</span>
+            </button>
+            <p className="cta-button-subtitle">
+              Discover personalized support for your mental wellness journey
+            </p>
           </div>
         </div>
       </section>        {/* Enhanced Services Section */}

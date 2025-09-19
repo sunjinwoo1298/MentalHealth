@@ -10,6 +10,7 @@ import OnboardingFlow from './pages/OnboardingFlow'
 import ProfilePage from './pages/ProfilePage'
 import PrivacyPage from './pages/PrivacyPage'
 import SettingsPage from './pages/SettingsPage'
+import VrmAvatarPage from './pages/VrmAvatarPage'
 import './App.css'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/vrm-avatar" element={<VrmAvatarPage />} />
         </Routes>
       </Router>
     </AuthProvider>

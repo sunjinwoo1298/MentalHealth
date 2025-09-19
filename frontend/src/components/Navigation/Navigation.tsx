@@ -36,7 +36,7 @@ export default function Navigation({
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="ml-10 flex items-center space-x-2">
               {!isAuthenticated ? (
                 <>
                   <a href="#features" className="text-gray-300 hover:text-pink-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
@@ -72,7 +72,7 @@ export default function Navigation({
                   <Link to="/progress" className="text-gray-300 hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                     Progress
                   </Link>
-                  <div className="relative">
+                  <div className="relative ml-2">
                     <button
                       onClick={() => setIsMenuOpen(!isMenuOpen)}
                       className="flex items-center text-gray-300 hover:text-pink-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -173,6 +173,7 @@ export default function Navigation({
                   <Link to="/settings" className="text-gray-300 hover:text-teal-400 block px-3 py-2 rounded-md text-base font-medium">
                     Settings
                   </Link>
+                  <hr className="my-2 border-gray-300" />
                   <button
                     onClick={onLogout}
                     className="text-red-400 hover:text-red-300 block px-3 py-2 rounded-md text-base font-medium w-full text-left"

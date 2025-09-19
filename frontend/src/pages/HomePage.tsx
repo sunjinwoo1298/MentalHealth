@@ -1,46 +1,33 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
 
-// Loading component for better UX
-const LoadingCard = () => (
-  <div className="bg-white rounded-lg p-6 shadow-soft border border-neutral-200">
-    <div className="animate-pulse">
-      <div className="flex items-center mb-4">
-        <div className="w-12 h-12 bg-neutral-200 rounded-full mr-3"></div>
-        <div>
-          <div className="h-4 bg-neutral-200 rounded w-24 mb-2"></div>
-          <div className="h-3 bg-neutral-200 rounded w-16"></div>
-        </div>
-      </div>
-      <div className="space-y-2">
-        <div className="h-3 bg-neutral-200 rounded"></div>
-        <div className="h-3 bg-neutral-200 rounded w-3/4"></div>
-      </div>
-    </div>
-  </div>
-)
-
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [audienceCardsVisible, setAudienceCardsVisible] = useState(false)
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuth()
   
+  // Inspirational quotes state
+  const inspirationalQuotes = [
+    "Breathe in peace. Breathe out stress.",
+    "You are worthy of support and understanding.",
+    "Every sunrise is a new beginning.",
+    "Your mental health matters. You matter.",
+    "Healing is not linear, and that's okay.",
+    "Be gentle with yourself. You're doing the best you can."
+  ]
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0)
+  
   useEffect(() => {
     setIsLoaded(true)
-    
-    // Simulate content loading for better UX
-    // setTimeout(() => {
-    //   setIsContentLoading(false)
-    // }, 500)
     
     // Preload critical resources
     const linkElement = document.createElement('link')
     linkElement.rel = 'preload'
     linkElement.as = 'image'
-    linkElement.href = '/api/placeholder/600/400'
+    linkElement.href = '/meditative-sunset-scene-by-lake.jpg'
     document.head.appendChild(linkElement)
     
     // Scroll reveal animation
@@ -57,14 +44,44 @@ export default function HomePage() {
       })
     }, observerOptions)
     
+    // Audience cards intersection observer
+    const audienceObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !audienceCardsVisible) {
+          setAudienceCardsVisible(true)
+        }
+      })
+    }, {
+      threshold: 0.2,
+      rootMargin: '0px 0px -100px 0px'
+    })
+    
     // Observe all scroll reveal elements
     const scrollElements = document.querySelectorAll('.scroll-reveal')
     scrollElements.forEach((el) => observer.observe(el))
     
-    return () => {
-      scrollElements.forEach((el) => observer.unobserve(el))
+    // Observe audience section
+    const audienceSection = document.querySelector('.who-we-serve-section')
+    if (audienceSection) {
+      audienceObserver.observe(audienceSection)
     }
-  }, [])
+    
+    return () => {
+      observer.disconnect()
+      audienceObserver.disconnect()
+    }
+  }, [audienceCardsVisible])
+
+  // Quote rotation effect
+  useEffect(() => {
+    const quoteInterval = setInterval(() => {
+      setCurrentQuoteIndex((prevIndex) => 
+        (prevIndex + 1) % inspirationalQuotes.length
+      )
+    }, 5000) // Change quote every 5 seconds
+
+    return () => clearInterval(quoteInterval)
+  }, [inspirationalQuotes.length])
 
   const handleLogout = async () => {
     await logout()
@@ -194,47 +211,73 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Enhanced Visual Section */}
+              {/* Enhanced Visual Section with Meditative Image */}
               <div className={`relative transform transition-all duration-1200 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-                {/* Main Image with Enhanced Styling */}
-                <div className="relative group">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-primary-blue/20 to-secondary-green/20 rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60"></div>
-                  <div className="relative bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-white/50">
+                {/* Main Meditative Image Container */}
+                <div className="relative meditation-card group">
+                  {/* Soft glow background */}
+                  <div className="absolute -inset-4 bg-gradient-to-br from-primary-magenta/20 via-primary-blue/20 to-primary-green/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70"></div>
+                  
+                  {/* Main image with enhanced styling */}
+                  <div className="relative rounded-3xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
                     <img 
-                      src="/api/placeholder/600/400" 
-                      alt="Young Indian person sitting peacefully in meditation pose, surrounded by soft natural lighting and calming elements, representing mental wellness and inner peace" 
-                      className="rounded-2xl w-full shadow-lg hover-scale smooth-transition"
-                      loading="lazy"
+                      src="/meditative-sunset-scene-by-lake.jpg" 
+                      alt="Young Indian person sitting peacefully in meditation pose by a serene lake during sunset, surrounded by soft natural lighting and calming elements, representing mental wellness, inner peace, and cultural connection to nature" 
+                      className="w-full h-96 lg:h-[500px] object-cover"
+                      loading="eager"
                       width="600"
-                      height="400"
+                      height="500"
+                      onError={(e) => {
+                        console.error('Failed to load meditation image');
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.className = 'w-full h-96 lg:h-[500px] bg-gradient-to-br from-purple-400 via-pink-300 to-orange-300 flex items-center justify-center text-white text-xl font-semibold';
+                        fallbackDiv.innerHTML = '🧘‍♀️ Meditation & Wellness 🌅';
+                        fallbackDiv.setAttribute('role', 'img');
+                        fallbackDiv.setAttribute('aria-label', 'Meditation and wellness illustration');
+                        e.currentTarget.parentNode?.replaceChild(fallbackDiv, e.currentTarget);
+                      }}
                     />
-                    {/* Overlay with cultural elements */}
-                    <div className="absolute inset-6 rounded-2xl bg-gradient-to-t from-primary-blue/10 via-transparent to-transparent pointer-events-none" aria-hidden="true"></div>
+                    
+                    {/* Gradient overlay for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                    
+                    {/* Cultural lotus pattern overlay */}
+                    <div className="absolute inset-0 lotus-pattern opacity-30"></div>
                   </div>
                 </div>
 
-                {/* Floating Stats Cards */}
+                {/* Inspirational Quote/Mantra */}
                 <div 
-                  className="absolute -top-6 -left-6 bg-stats-lavender rounded-xl p-4 shadow-xl border animate-float hover-lift"
+                  className="absolute bottom-8 left-8 right-8 bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 inspiration-quote"
                   role="region"
-                  aria-label="Success rate statistic"
+                  aria-label="Daily inspiration"
+                  aria-live="polite"
                 >
-                  <div className="text-2xl font-bold text-stats-lavender" aria-label="95 percent">95%</div>
-                  <div className="text-sm text-accessibility">Feel Better</div>
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-gray-700 leading-relaxed mb-2 inspiration-text transition-opacity duration-500">
+                      "{inspirationalQuotes[currentQuoteIndex]}"
+                    </p>
+                    <div className="w-16 h-1 bg-gradient-to-r from-primary-magenta to-primary-blue rounded-full mx-auto"></div>
+                    <div className="flex justify-center mt-3 space-x-1">
+                      {inspirationalQuotes.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            index === currentQuoteIndex 
+                              ? 'bg-primary-magenta' 
+                              : 'bg-gray-300'
+                          }`}
+                          aria-hidden="true"
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                <div 
-                  className="absolute -bottom-6 -right-6 bg-stats-sage rounded-xl p-4 shadow-xl border animate-float animation-delay-1000 hover-lift"
-                  role="region"
-                  aria-label="Support availability"
-                >
-                  <div className="text-2xl font-bold text-stats-sage">24/7</div>
-                  <div className="text-sm text-accessibility">Support</div>
-                </div>
-
-                {/* Cultural Touch - Lotus Elements */}
-                <div className="absolute top-1/2 -left-8 text-6xl opacity-20 animate-pulse" aria-hidden="true">🪷</div>
-                <div className="absolute bottom-1/4 -right-8 text-4xl opacity-30 animate-pulse animation-delay-2000" aria-hidden="true">🕉️</div>
+                {/* Cultural Elements - Enhanced */}
+                <div className="absolute top-1/2 -left-12 text-6xl opacity-20 animate-pulse" aria-hidden="true">🪷</div>
+                <div className="absolute bottom-1/4 -right-12 text-5xl opacity-25 animate-pulse animation-delay-2000" aria-hidden="true">🕉️</div>
+                <div className="absolute top-1/4 -right-8 text-4xl opacity-15 animate-pulse animation-delay-3000" aria-hidden="true">☮️</div>
               </div>
             </div>
           </div>
@@ -250,6 +293,10 @@ export default function HomePage() {
       >
         <div className="who-we-serve-decorative-blob" aria-hidden="true"></div>
         <div className="who-we-serve-decorative-blob-2" aria-hidden="true"></div>
+        <div className="who-we-serve-floating-circle-1" aria-hidden="true"></div>
+        <div className="who-we-serve-floating-circle-2" aria-hidden="true"></div>
+        <div className="who-we-serve-floating-blob-1" aria-hidden="true"></div>
+        <div className="who-we-serve-floating-blob-2" aria-hidden="true"></div>
         <div className="container">
           <h2 id="who-we-serve-heading" className="who-we-serve-heading">
             Tailored Support for Every Stage
@@ -261,7 +308,8 @@ export default function HomePage() {
           
           <div className="audience-cards-grid relative z-10">
             <div 
-              className="audience-card fade-in-up"
+              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
+              style={{animationDelay: audienceCardsVisible ? '0ms' : ''}}
               role="article"
               aria-labelledby="children-title"
               tabIndex={0}
@@ -276,7 +324,8 @@ export default function HomePage() {
             </div>
             
             <div 
-              className="audience-card fade-in-up animation-delay-500"
+              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
+              style={{animationDelay: audienceCardsVisible ? '150ms' : ''}}
               role="article"
               aria-labelledby="teens-title"
               tabIndex={0}
@@ -291,7 +340,8 @@ export default function HomePage() {
             </div>
             
             <div 
-              className="audience-card fade-in-up animation-delay-1000"
+              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
+              style={{animationDelay: audienceCardsVisible ? '300ms' : ''}}
               role="article"
               aria-labelledby="young-adults-title"
               tabIndex={0}
@@ -304,6 +354,21 @@ export default function HomePage() {
                 and mental health resources for life's major decisions.
               </p>
             </div>
+          </div>
+          
+          {/* Main CTA Button */}
+          <div className="text-center mt-12 relative z-10">
+            <button
+              className="who-we-serve-cta-button"
+              onClick={() => navigate('/resources')}
+              aria-label="Explore mental health resources tailored to your needs"
+            >
+              <span className="cta-button-text">Explore Resources</span>
+              <span className="cta-button-icon" aria-hidden="true">→</span>
+            </button>
+            <p className="cta-button-subtitle">
+              Discover personalized support for your mental wellness journey
+            </p>
           </div>
         </div>
       </section>        {/* Enhanced Services Section */}

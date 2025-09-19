@@ -55,7 +55,7 @@ const VrmAvatarPage = () => {
 
     // Load VRM model
     vrmLoader.load(
-      '/models/sample.vrm',
+      '/vrm_models/sample.vrm',
       (gltf) => {
         const vrm = gltf.userData.vrm as VRM
         if (vrm) {

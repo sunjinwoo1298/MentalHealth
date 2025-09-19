@@ -18,6 +18,7 @@ import chatRoutes from './routes/chat';
 import wellnessRoutes from './routes/wellness';
 import therapistRoutes from './routes/therapists';
 import interventionRoutes from './routes/interventions';
+import gamificationRoutes from './routes/gamification';
 
 // Import middleware
 import { authMiddleware } from './middleware/auth';
@@ -118,6 +119,7 @@ app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/wellness', authMiddleware, wellnessRoutes);
 app.use('/api/therapists', authMiddleware, therapistRoutes);
 app.use('/api/interventions', authMiddleware, interventionRoutes);
+app.use('/api/gamification', gamificationRoutes);
 
 // Socket.IO connection handling
 const socketService = new SocketService(io);

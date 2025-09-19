@@ -151,6 +151,68 @@ export const authAPI = {
     const response = await api.put('/auth/privacy-settings', settings)
     return response.data
   },
+
+}
+
+// Gamification API methods
+export const gamificationAPI = {
+  // Get user points and level
+  getPoints: async () => {
+    const response = await api.get('/gamification/points')
+    return response.data
+  },
+
+  // Get user badges
+  getBadges: async () => {
+    const response = await api.get('/gamification/badges')
+    return response.data
+  },
+
+  // Get complete gamification profile
+  getProfile: async () => {
+    const response = await api.get('/gamification/profile')
+    return response.data
+  },
+
+  // Get available activities
+  getActivities: async () => {
+    const response = await api.get('/gamification/activities')
+    return response.data
+  },
+
+  // Get available badges
+  getAvailableBadges: async () => {
+    const response = await api.get('/gamification/available-badges')
+    return response.data
+  },
+
+  // Award points (internal use)
+  awardPoints: async (activityType: string, metadata: any = {}) => {
+    const response = await api.post('/gamification/award-points', {
+      activity_type: activityType,
+      metadata
+    })
+    return response.data
+  },
+
+  // Get user streaks
+  getStreaks: async () => {
+    const response = await api.get('/gamification/streaks')
+    return response.data
+  },
+
+  // Get streak achievements
+  getStreakAchievements: async () => {
+    const response = await api.get('/gamification/streak-achievements')
+    return response.data
+  },
+
+  // Get available streak milestones
+  getStreakMilestones: async (activityType?: string) => {
+    const params = activityType ? `?activity_type=${activityType}` : '';
+    const response = await api.get(`/gamification/streak-milestones${params}`)
+    return response.data
+  }
 }
 
 export default api

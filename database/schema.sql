@@ -413,7 +413,77 @@ $$ language 'plpgsql';
                                                     UPDATE ON consultations FOR EACH ROW
                                                     EXECUTE FUNCTION update_updated_at_column
                                                     ();
-                                                    CREATE TRIGGER update_user_progress_updated_at BEFORE
-                                                    UPDATE ON user_progress FOR EACH ROW
-                                                    EXECUTE FUNCTION update_updated_at_column
-                                                    ();
+CREATE TRIGGER update_user_progress_updated_at BEFORE
+UPDATE ON user_progress FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column
+();
+
+-- Gamification: User Points and Rewards System
+CREATE TABLE user_points
+(
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    total_points INTEGER DEFAULT 0,
+    available_points INTEGER DEFAULT 0, -- Points that can be spent
+    lifetime_points INTEGER DEFAULT 0, -- Total points ever earned
+    current_level INTEGER DEFAULT 1,
+    points_to_next_level INTEGER DEFAULT 100,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Point earning activities
+CREATE TABLE point_activities
+(
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    activity_type VARCHAR(50) NOT NULL, -- mood_checkin, chat_session, journal_entry, etc.
+    activity_name VARCHAR(100) NOT NULL,
+    points_value INTEGER NOT NULL,
+    description TEXT,
+    cultural_theme VARCHAR(50), -- karma, dharma, moksha, etc.
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Point transaction history
+CREATE TABLE point_transactions
+(
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    activity_id UUID REFERENCES point_activities(id),
+    transaction_type VARCHAR(20) NOT NULL, -- earned, spent, bonus
+    points_amount INTEGER NOT NULL,
+    description TEXT,
+    metadata JSONB DEFAULT '{}', -- Additional context
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Cultural karma badges
+CREATE TABLE karma_badges
+(
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    badge_name VARCHAR(100) NOT NULL,
+    badge_description TEXT,
+    badge_icon VARCHAR(100), -- Icon identifier
+    cultural_meaning TEXT, -- Explanation of cultural significance
+    unlock_criteria JSONB NOT NULL, -- Conditions to unlock
+    points_required INTEGER DEFAULT 0,
+    badge_category VARCHAR(50) DEFAULT 'general', -- mindfulness, resilience, compassion, etc.
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- User earned badges
+CREATE TABLE user_badges
+(
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    badge_id UUID REFERENCES karma_badges(id) ON DELETE CASCADE,
+    earned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    is_displayed BOOLEAN DEFAULT TRUE -- User choice to display or hide
+);
+
+-- Add triggers for points table
+CREATE TRIGGER update_user_points_updated_at BEFORE
+UPDATE ON user_points FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column
+();

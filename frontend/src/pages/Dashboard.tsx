@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
+import PointsWidget from '../components/Gamification/PointsWidget'
+import BadgesWidget from '../components/Gamification/BadgesWidget'
+import StreaksWidget from '../components/Gamification/StreaksWidget'
+import TestPoints from '../components/Gamification/TestPoints'
 import '../styles/dashboard-animations.css'
 
 // Types for dashboard data
@@ -283,6 +287,32 @@ export default function Dashboard() {
               </button>
             </div>
 
+          </div>
+
+          {/* Gamification Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            {/* Points Widget */}
+            <div className="fadeInUp" style={{ animationDelay: '0.9s' }}>
+              <PointsWidget />
+            </div>
+            
+            {/* Streaks Widget */}
+            <div className="fadeInUp" style={{ animationDelay: '1.0s' }}>
+              <StreaksWidget />
+            </div>
+          </div>
+
+          {/* Second Row of Gamification */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            {/* Badges Widget */}
+            <div className="fadeInUp" style={{ animationDelay: '1.1s' }}>
+              <BadgesWidget />
+            </div>
+
+            {/* Test Points Component */}
+            <div className="fadeInUp" style={{ animationDelay: '1.2s' }}>
+              <TestPoints />
+            </div>
           </div>
 
           {/* Enhanced Progress Section */}

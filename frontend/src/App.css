@@ -1,3 +1,6 @@
+/* Font Loading - Must be first for CSS compliance */
+@import url('https://fonts.googleapis.com/css2?family=Calibri:wght@300;400;500;600;700&display=swap');
+
 /* Mental Health Platform Styles */
 
 /* ========================================
@@ -869,9 +872,6 @@
 }
 
 /* Typography System - Accessibility-First & Mental Health Focused */
-
-/* Font Loading - Optimized for Performance */
-@import url('https://fonts.googleapis.com/css2?family=Calibri:wght@300;400;500;600;700&display=swap');
 
 /* OpenDyslexic Font for Accessibility (loaded conditionally) */
 @font-face {

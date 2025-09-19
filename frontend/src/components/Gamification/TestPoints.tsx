@@ -23,8 +23,9 @@ const TestPoints: React.FC<TestPointsProps> = ({ className = '' }) => {
         const result = response.data;
         let msg = `🎉 Earned ${result.points_earned} points!`;
         
-        if (result.level_up) {
-          msg += ` 🆙 Level up to ${result.new_level}!`;
+        if (result.level_up || result.leveled_up) {
+          const newLevel = result.new_level || result.level_info?.level_number;
+          msg += ` 🆙 Level up to ${newLevel}!`;
         }
         
         if (result.streak_info) {

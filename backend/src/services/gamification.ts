@@ -130,44 +130,70 @@ export class GameService {
     }
   }
 
-  // Check if user leveled up
+  // Check if user leveled up (using wellness levels system)
   static async checkLevelUp(userId: string, totalPoints: number): Promise<{
     leveled_up: boolean;
     new_level?: number;
     old_level?: number;
   }> {
     try {
-      // Simple level calculation: Level = floor(totalPoints / 100) + 1
-      const newLevel = Math.floor(totalPoints / 100) + 1;
-      
-      const currentRecord = await db.query(
-        'SELECT current_level FROM user_points WHERE user_id = $1',
-        [userId]
-      );
+      // Get current user level
+      const userPoints = await this.getUserPoints(userId);
+      const currentLevel = userPoints.current_level;
 
-      if (currentRecord.rows.length === 0) return { leveled_up: false };
+      // Find the highest level the user should be at with their current points
+      const levelResult = await db.query(`
+        SELECT * FROM wellness_levels 
+        WHERE points_required <= $1 
+        ORDER BY level_number DESC 
+        LIMIT 1
+      `, [totalPoints]);
 
-      const currentLevel = currentRecord.rows[0].current_level;
-      
-      if (newLevel > currentLevel) {
-        // Update level
-        const pointsToNext = ((newLevel) * 100) - totalPoints;
-        await db.query(
-          'UPDATE user_points SET current_level = $1, points_to_next_level = $2 WHERE user_id = $3',
-          [newLevel, pointsToNext, userId]
-        );
+      if (levelResult.rows.length === 0) {
+        return { leveled_up: false };
+      }
 
-        logger.info(`User ${userId} leveled up from ${currentLevel} to ${newLevel}`);
+      const targetLevel = levelResult.rows[0];
+
+      if (targetLevel.level_number > currentLevel) {
+        // User has leveled up!
         
+        // Get next level points for calculation
+        const nextLevelResult = await db.query(`
+          SELECT points_required FROM wellness_levels 
+          WHERE level_number = $1
+        `, [targetLevel.level_number + 1]);
+
+        const nextLevelPoints = nextLevelResult.rows.length > 0 
+          ? nextLevelResult.rows[0].points_required 
+          : totalPoints;
+
+        const pointsToNext = Math.max(0, nextLevelPoints - totalPoints);
+
+        // Update user's current level
+        await db.query(`
+          UPDATE user_points 
+          SET current_level = $1, points_to_next_level = $2
+          WHERE user_id = $3
+        `, [targetLevel.level_number, pointsToNext, userId]);
+
+        // Record the level achievement
+        await db.query(`
+          INSERT INTO user_level_achievements (user_id, level_number, points_at_achievement)
+          VALUES ($1, $2, $3)
+          ON CONFLICT DO NOTHING
+        `, [userId, targetLevel.level_number, totalPoints]);
+
+        logger.info(`User ${userId} leveled up from ${currentLevel} to ${targetLevel.level_number}`);
+
         return {
           leveled_up: true,
-          new_level: newLevel,
+          new_level: targetLevel.level_number,
           old_level: currentLevel
         };
       }
 
       return { leveled_up: false };
-
     } catch (error) {
       logger.error('Error checking level up:', error);
       return { leveled_up: false };
@@ -594,4 +620,87 @@ export class GameService {
       throw error;
     }
   }
+
+  // Get user's current level and progression data
+  static async getUserLevel(userId: string) {
+    try {
+      // Get user's current points
+      const userPoints = await this.getUserPoints(userId);
+      
+      // Get current level info
+      const currentLevelResult = await db.query(`
+        SELECT * FROM wellness_levels 
+        WHERE level_number = $1
+      `, [userPoints.current_level]);
+
+      if (currentLevelResult.rows.length === 0) {
+        throw new Error('Current level not found');
+      }
+
+      const currentLevel = currentLevelResult.rows[0];
+
+      // Get next level info
+      const nextLevelResult = await db.query(`
+        SELECT * FROM wellness_levels 
+        WHERE level_number = $1
+      `, [userPoints.current_level + 1]);
+
+      const nextLevel = nextLevelResult.rows.length > 0 ? nextLevelResult.rows[0] : null;
+
+      // Calculate progress
+      const nextLevelPoints = nextLevel ? nextLevel.points_required : userPoints.total_points;
+      const currentLevelPoints = currentLevel.points_required;
+      const pointsToNextLevel = Math.max(0, nextLevelPoints - userPoints.total_points);
+      const progressPoints = userPoints.total_points - currentLevelPoints;
+      const totalProgressNeeded = nextLevelPoints - currentLevelPoints;
+      const progressPercentage = totalProgressNeeded > 0 
+        ? Math.min(100, (progressPoints / totalProgressNeeded) * 100) 
+        : 100;
+
+      return {
+        current_level: userPoints.current_level,
+        current_points: userPoints.total_points,
+        points_to_next_level: pointsToNextLevel,
+        next_level_points: nextLevelPoints,
+        level_progress_percentage: Math.round(progressPercentage),
+        level_info: currentLevel,
+        next_level_info: nextLevel
+      };
+    } catch (error) {
+      logger.error('Error getting user level:', error);
+      throw error;
+    }
+  }
+
+  // Get user's level achievements
+  static async getLevelAchievements(userId: string) {
+    try {
+      const result = await db.query(`
+        SELECT * FROM user_level_achievements 
+        WHERE user_id = $1 
+        ORDER BY achieved_at DESC
+      `, [userId]);
+
+      return result.rows;
+    } catch (error) {
+      logger.error('Error getting level achievements:', error);
+      throw error;
+    }
+  }
+
+  // Get all available wellness levels
+  static async getWellnessLevels() {
+    try {
+      const result = await db.query(`
+        SELECT * FROM wellness_levels 
+        ORDER BY level_number ASC
+      `);
+
+      return result.rows;
+    } catch (error) {
+      logger.error('Error getting wellness levels:', error);
+      throw error;
+    }
+  }
+
 }

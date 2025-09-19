@@ -212,6 +212,77 @@ export const gamificationAPI = {
     const params = activityType ? `?activity_type=${activityType}` : '';
     const response = await api.get(`/gamification/streak-milestones${params}`)
     return response.data
+  },
+
+  // Get user's current level and progression
+  getUserLevel: async () => {
+    const response = await api.get('/gamification/level')
+    return response.data
+  },
+
+  // Get user's level achievements
+  getLevelAchievements: async () => {
+    const response = await api.get('/gamification/level-achievements')
+    return response.data
+  },
+
+  // Get all available wellness levels
+  getWellnessLevels: async () => {
+    const response = await api.get('/gamification/levels')
+    return response.data
+  },
+
+  // ========== CHALLENGE SYSTEM METHODS ==========
+
+  // Get user's daily challenges
+  getDailyChallenges: async () => {
+    const response = await api.get('/gamification/challenges/daily')
+    return response.data
+  },
+
+  // Get user's weekly challenges
+  getWeeklyChallenges: async () => {
+    const response = await api.get('/gamification/challenges/weekly')
+    return response.data
+  },
+
+  // Complete a challenge
+  completeChallenge: async (challengeId: string, completionData: {
+    quality?: 'excellent' | 'good' | 'satisfactory';
+    notes?: string;
+    progress_data?: any;
+  }) => {
+    const response = await api.post(`/gamification/challenges/${challengeId}/complete`, completionData)
+    return response.data
+  },
+
+  // Get challenge statistics
+  getChallengeStats: async () => {
+    const response = await api.get('/gamification/challenges/stats')
+    return response.data
+  },
+
+  // Get available challenge templates
+  getChallengeTemplates: async (filters?: {
+    type?: 'daily' | 'weekly';
+    category?: string;
+    difficulty?: number;
+    dosha?: string;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters?.type) params.append('type', filters.type);
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.difficulty) params.append('difficulty', filters.difficulty.toString());
+    if (filters?.dosha) params.append('dosha', filters.dosha);
+    
+    const response = await api.get(`/gamification/challenges/templates?${params.toString()}`)
+    return response.data
+  },
+
+  // Assign new daily challenges
+  assignDailyChallenges: async () => {
+    const response = await api.post('/gamification/challenges/assign-daily')
+    return response.data
   }
 }
 

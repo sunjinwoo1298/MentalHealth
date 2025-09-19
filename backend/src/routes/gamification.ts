@@ -2,6 +2,7 @@ import express from 'express';
 import { Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { GameService } from '../services/gamification';
+import { ChallengeService } from '../services/challenges';
 import { logger } from '../utils/logger';
 
 const router = express.Router();
@@ -225,6 +226,204 @@ router.get('/streak-milestones', authMiddleware, async (req: Request, res: Respo
     });
   } catch (error) {
     logger.error('Error fetching streak milestones:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's current level and progression
+router.get('/level', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const levelData = await GameService.getUserLevel(userId);
+
+    res.json({
+      success: true,
+      data: levelData
+    });
+  } catch (error) {
+    logger.error('Error fetching user level:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's level achievements
+router.get('/level-achievements', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const achievements = await GameService.getLevelAchievements(userId);
+
+    res.json({
+      success: true,
+      data: achievements
+    });
+  } catch (error) {
+    logger.error('Error fetching level achievements:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all available wellness levels
+router.get('/levels', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const levels = await GameService.getWellnessLevels();
+
+    res.json({
+      success: true,
+      data: levels
+    });
+  } catch (error) {
+    logger.error('Error fetching wellness levels:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ========== CHALLENGE SYSTEM ROUTES ==========
+
+// Get user's active daily challenges
+router.get('/challenges/daily', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Auto-assign daily challenges if none exist
+    let challenges = await ChallengeService.getDailyChallenges(userId);
+    if (challenges.length === 0) {
+      challenges = await ChallengeService.assignDailyChallenges(userId);
+    }
+
+    res.json({
+      success: true,
+      data: challenges
+    });
+  } catch (error) {
+    logger.error('Error fetching daily challenges:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's active weekly challenges
+router.get('/challenges/weekly', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const challenges = await ChallengeService.getWeeklyChallenges(userId);
+
+    res.json({
+      success: true,
+      data: challenges
+    });
+  } catch (error) {
+    logger.error('Error fetching weekly challenges:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Complete a challenge
+router.post('/challenges/:challengeId/complete', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    const { challengeId } = req.params;
+    const { quality, notes, progress_data } = req.body;
+
+    if (!userId || !challengeId) {
+      res.status(401).json({ error: 'Unauthorized or missing challenge ID' });
+      return;
+    }
+
+    const result = await ChallengeService.completeChallenge(userId, challengeId, {
+      quality,
+      notes,
+      progress_data
+    });
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    logger.error('Error completing challenge:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get challenge statistics
+router.get('/challenges/stats', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const stats = await ChallengeService.getChallengeStats(userId);
+
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    logger.error('Error fetching challenge stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get available challenge templates
+router.get('/challenges/templates', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { type, category, difficulty, dosha } = req.query;
+    
+    const filters: any = {};
+    if (type) filters.type = type as 'daily' | 'weekly';
+    if (category) filters.category = category as string;
+    if (difficulty) filters.difficulty = parseInt(difficulty as string);
+    if (dosha) filters.dosha = dosha as string;
+    
+    const templates = await ChallengeService.getChallengeTemplates(filters);
+
+    res.json({
+      success: true,
+      data: templates
+    });
+  } catch (error) {
+    logger.error('Error fetching challenge templates:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Assign new daily challenges manually
+router.post('/challenges/assign-daily', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const challenges = await ChallengeService.assignDailyChallenges(userId);
+
+    res.json({
+      success: true,
+      data: challenges
+    });
+  } catch (error) {
+    logger.error('Error assigning daily challenges:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

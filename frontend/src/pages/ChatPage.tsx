@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
 import ChatWindow from '../components/Chat/ChatWindow'
+import VRMAvatar from '../components/VRMAvatar/VRMAvatar_Simple'
 import '../styles/dashboard-animations.css'
 
 // Sound effect URLs (you can replace these with actual audio files)
@@ -281,47 +282,16 @@ export default function ChatPage() {
 
           {/* Avatar Display Area */}
           <div className="flex-1 flex items-center justify-center min-h-[200px] lg:min-h-0">
-            <div className="relative">
-              {/* Outer Breathing Ring */}
-              <div className="absolute inset-0 w-52 lg:w-84 h-52 lg:h-84 rounded-full border-2 border-pink-400/20 animate-breathe animation-delay-1000"></div>
-              <div className="absolute inset-0 w-56 lg:w-88 h-56 lg:h-88 rounded-full border border-teal-400/15 animate-breathe animation-delay-2000"></div>
+            <div className="relative w-full h-full flex items-center justify-center">
+              {/* Outer Breathing Ring - Larger for better visibility */}
+              <div className="absolute inset-0 w-64 lg:w-96 h-64 lg:h-96 rounded-full border-2 border-pink-400/20 animate-breathe animation-delay-1000 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+              <div className="absolute inset-0 w-72 lg:w-104 h-72 lg:h-104 rounded-full border border-teal-400/15 animate-breathe animation-delay-2000 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
               
-              {/* Main Avatar Circle */}
-              <div className={`w-48 lg:w-80 h-48 lg:h-80 rounded-full bg-gradient-to-br from-pink-400/20 to-teal-400/20 backdrop-blur-sm border-4 border-gradient-to-r border-pink-400/40 flex items-center justify-center animate-breathe relative ${avatarState === 'speaking' ? 'animate-glow-pulse' : ''}`}>
-                
-                {/* Aurora Effect Behind Avatar */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-teal-500/10 animate-aurora"></div>
-                
-                {/* Avatar Face */}
-                <div className="relative z-10">
-                  {/* Base Avatar */}
-                  <div className="w-28 lg:w-48 h-28 lg:h-48 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-2xl relative overflow-hidden">
-                    {/* Subtle shimmer effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
-                    
-                    <div className="text-4xl lg:text-8xl relative z-10">
-                      {avatarState === 'thinking' ? '🤔' : 
-                       avatarState === 'listening' ? '👂' :
-                       avatarState === 'speaking' ? '😊' : '😌'}
-                    </div>
-                  </div>
-                  
-                  {/* Animated Rings */}
-                  <div className={`absolute inset-0 rounded-full border-2 border-pink-400/50 animate-ping ${avatarState === 'listening' ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}></div>
-                  <div className={`absolute inset-0 rounded-full border-2 border-teal-400/50 animate-pulse ${avatarState === 'thinking' ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}></div>
-                  
-                  {/* Speaking Indicator with Enhanced Animation */}
-                  <div className={`absolute -bottom-2 lg:-bottom-4 left-1/2 transform -translate-x-1/2 ${avatarState === 'speaking' ? 'opacity-100' : 'opacity-0'} transition-all duration-300`}>
-                    <div className="flex space-x-1">
-                      <div className="w-1.5 lg:w-2 h-4 lg:h-6 bg-gradient-to-t from-pink-500 to-pink-300 rounded-full animate-pulse"></div>
-                      <div className="w-1.5 lg:w-2 h-5 lg:h-8 bg-gradient-to-t from-teal-500 to-teal-300 rounded-full animate-pulse animation-delay-200"></div>
-                      <div className="w-1.5 lg:w-2 h-3 lg:h-4 bg-gradient-to-t from-purple-500 to-purple-300 rounded-full animate-pulse animation-delay-400"></div>
-                      <div className="w-1.5 lg:w-2 h-6 lg:h-7 bg-gradient-to-t from-indigo-500 to-indigo-300 rounded-full animate-pulse animation-delay-600"></div>
-                      <div className="w-1.5 lg:w-2 h-4 lg:h-5 bg-gradient-to-t from-pink-500 to-pink-300 rounded-full animate-pulse animation-delay-800"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* VRM Avatar Component - Larger container */}
+              <VRMAvatar 
+                avatarState={avatarState}
+                className="w-64 lg:w-96 h-64 lg:h-96"
+              />
 
               {/* Enhanced Floating Particles */}
               <div className="absolute inset-0 pointer-events-none">

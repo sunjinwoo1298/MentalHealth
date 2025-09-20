@@ -128,57 +128,61 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main id="main-content" role="main">
-        {/* Enhanced Hero Section */}
-        <section className="relative bg-hero-animated py-20 lg:py-32 overflow-hidden" role="banner" aria-labelledby="hero-heading">
+        {/* Enhanced Hero Section with Nature Background */}
+        <section 
+          className="relative py-20 lg:py-32 overflow-hidden bg-cover bg-center bg-no-repeat" 
+          role="banner" 
+          aria-labelledby="hero-heading"
+          style={{
+            backgroundImage: 'url(/assests/nature_scene.jpg)',
+            minHeight: '100vh'
+          }}
+        >
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/40" aria-hidden="true"></div>
+          
           {/* Floating Shapes for Visual Interest */}
-          <div className="hero-floating-shape hero-floating-shape-1" aria-hidden="true"></div>
-          <div className="hero-floating-shape hero-floating-shape-2" aria-hidden="true"></div>
-          <div className="hero-floating-shape hero-floating-shape-3" aria-hidden="true"></div>
+          <div className="hero-floating-shape hero-floating-shape-1 opacity-20" aria-hidden="true"></div>
+          <div className="hero-floating-shape hero-floating-shape-2 opacity-20" aria-hidden="true"></div>
+          <div className="hero-floating-shape hero-floating-shape-3 opacity-20" aria-hidden="true"></div>
 
-          {/* Vibrant Background Elements */}
-          <div className="absolute inset-0 opacity-40" aria-hidden="true">
-            <div className="absolute top-10 left-10 w-72 h-72 bg-blob-magenta rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob"></div>
-            <div className="absolute top-10 right-10 w-72 h-72 bg-blob-blue rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob animation-delay-2000"></div>
-            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-72 h-72 bg-blob-green rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob animation-delay-4000"></div>
-          </div>
-
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
             <div className="grid lg:grid-cols-2 gap-16 items-center hero-content">
               {/* Enhanced Content Section */}
               <div>
                 {/* Trust Badge */}
-                <div className="hero-trust-badge inline-flex items-center bg-neutral-white/90 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-border-light shadow-soft">
-                  <span className="w-2 h-2 bg-tertiary-green rounded-full mr-2 animate-pulse"></span>
-                  <span className="text-sm font-medium text-text-primary">Trusted by 10,000+ young people across India</span>
+                <div className="hero-trust-badge inline-flex items-center bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-gray-300 shadow-lg">
+                  <span className="w-2 h-2 bg-green-600 rounded-full mr-2 animate-pulse"></span>
+                  <span className="text-sm font-bold text-black">Trusted by 10,000+ young people across India</span>
                 </div>
 
                 {/* Empathetic Headlines */}
-                <h1 id="hero-heading" className="hero-title text-4xl lg:text-6xl font-bold text-text-primary leading-tight mb-6">
+                <h1 id="hero-heading" className="hero-title text-4xl lg:text-6xl font-bold text-black leading-tight mb-6 drop-shadow-sm">
                   You're Not Alone.{' '}
-                  <span className="bg-clip-text text-transparent bg-gradient-hero">
+                  <span className="text-black font-black">
                     We Understand.
                   </span>
                 </h1>
                 
                 {/* Supportive Subheading */}
-                <p className="hero-subtitle text-xl lg:text-2xl text-text-secondary leading-relaxed mb-4 max-w-2xl">
+                <p className="hero-subtitle text-xl lg:text-2xl text-black font-semibold leading-relaxed mb-4 max-w-2xl drop-shadow-sm">
                   Mental health support that honors your culture, respects your family values, and understands the unique pressures you face as a young person in India.
                 </p>
 
                 {/* Emotional Connection Point */}
-                <div className="hero-subtitle bg-neutral-white/90 backdrop-blur-sm rounded-lg p-4 mb-8 border-l-4 border-l-primary-magenta shadow-soft hover-lift">
-                  <p className="text-text-primary italic">
+                <div className="hero-subtitle bg-white/95 backdrop-blur-sm rounded-lg p-4 mb-8 border-l-4 border-l-purple-600 shadow-lg hover-lift">
+                  <p className="text-black font-medium italic">
                     "Finally, someone who gets what it's like to balance family expectations with my own dreams. The support feels like talking to an understanding older sibling."
                   </p>
-                  <cite className="text-sm text-text-muted not-italic">- Priya, 19, Delhi University</cite>
+                  <cite className="text-sm text-gray-800 font-medium not-italic">- Priya, 19, Delhi University</cite>
                 </div>
 
                 {/* Enhanced CTA Section */}
                 <div className="hero-cta flex flex-col sm:flex-row gap-4 mb-6">
-                  <button className="group btn-gradient px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-lift button-press focus-ring shadow-lg relative overflow-hidden btn-ripple">
+                  <button className="group bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-lift button-press focus-ring shadow-lg relative overflow-hidden btn-ripple">
                     <span className="relative z-10">Start Your Healing Journey</span>
                   </button>
-                  <button className="group btn-outline-magenta px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-scale button-press focus-ring">
+                  <button className="group bg-white text-black border-2 border-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-scale button-press focus-ring shadow-lg hover:bg-gray-100">
                     <span className="flex items-center">
                       Learn How We Help
                       <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform icon-float" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,78 +198,45 @@ export default function HomePage() {
                     <svg className="w-4 h-4 mr-2 text-tertiary-green" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                     </svg>
-                    100% Confidential
+                    <span className="text-black font-semibold">100% Confidential</span>
                   </div>
                   <div className="flex items-center">
                     <svg className="w-4 h-4 mr-2 text-secondary-blue" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    Licensed Therapists
+                    <span className="text-black font-semibold">Licensed Therapists</span>
                   </div>
                   <div className="flex items-center">
                     <svg className="w-4 h-4 mr-2 text-primary-magenta" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Available 24/7
+                    <span className="text-black font-semibold">Available 24/7</span>
                   </div>
                 </div>
               </div>
 
-              {/* Enhanced Visual Section with Meditative Image */}
-              <div className={`relative transform transition-all duration-1200 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-                {/* Main Meditative Image Container */}
-                <div className="relative meditation-card group">
-                  {/* Soft glow background */}
-                  <div className="absolute -inset-4 bg-gradient-to-br from-primary-magenta/20 via-primary-blue/20 to-primary-green/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70"></div>
-                  
-                  {/* Main image with enhanced styling */}
-                  <div className="relative rounded-3xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
-                    <img 
-                      src="/meditative-sunset-scene-by-lake.jpg" 
-                      alt="Young Indian person sitting peacefully in meditation pose by a serene lake during sunset, surrounded by soft natural lighting and calming elements, representing mental wellness, inner peace, and cultural connection to nature" 
-                      className="w-full h-96 lg:h-[500px] object-cover"
-                      loading="eager"
-                      width="600"
-                      height="500"
-                      onError={(e) => {
-                        console.error('Failed to load meditation image');
-                        const fallbackDiv = document.createElement('div');
-                        fallbackDiv.className = 'w-full h-96 lg:h-[500px] bg-gradient-to-br from-purple-400 via-pink-300 to-orange-300 flex items-center justify-center text-white text-xl font-semibold';
-                        fallbackDiv.innerHTML = '🧘‍♀️ Meditation & Wellness 🌅';
-                        fallbackDiv.setAttribute('role', 'img');
-                        fallbackDiv.setAttribute('aria-label', 'Meditation and wellness illustration');
-                        e.currentTarget.parentNode?.replaceChild(fallbackDiv, e.currentTarget);
-                      }}
-                    />
-                    
-                    {/* Gradient overlay for better text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-                    
-                    {/* Cultural lotus pattern overlay */}
-                    <div className="absolute inset-0 lotus-pattern opacity-30"></div>
-                  </div>
-                </div>
-
-                {/* Inspirational Quote/Mantra */}
+              {/* Inspirational Quote Section - Now on right side with nature background */}
+              <div className={`relative transform transition-all duration-1200 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'} flex items-center justify-center min-h-96`}>
+                {/* Inspirational Quote/Mantra - Enhanced for better visibility */}
                 <div 
-                  className="absolute bottom-8 left-8 right-8 bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 inspiration-quote"
+                  className="bg-black/80 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20 inspiration-quote max-w-md"
                   role="region"
                   aria-label="Daily inspiration"
                   aria-live="polite"
                 >
                   <div className="text-center">
-                    <p className="text-lg font-semibold text-gray-700 leading-relaxed mb-2 inspiration-text transition-opacity duration-500">
+                    <p className="text-xl font-bold text-white leading-relaxed mb-4 inspiration-text transition-opacity duration-500">
                       "{inspirationalQuotes[currentQuoteIndex]}"
                     </p>
-                    <div className="w-16 h-1 bg-gradient-to-r from-primary-magenta to-primary-blue rounded-full mx-auto"></div>
-                    <div className="flex justify-center mt-3 space-x-1">
+                    <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full mx-auto"></div>
+                    <div className="flex justify-center mt-4 space-x-2">
                       {inspirationalQuotes.map((_, index) => (
                         <div
                           key={index}
                           className={`w-2 h-2 rounded-full transition-all duration-300 ${
                             index === currentQuoteIndex 
-                              ? 'bg-primary-magenta' 
-                              : 'bg-gray-300'
+                              ? 'bg-white' 
+                              : 'bg-gray-500'
                           }`}
                           aria-hidden="true"
                         />
@@ -274,10 +245,10 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Cultural Elements - Enhanced */}
-                <div className="absolute top-1/2 -left-12 text-6xl opacity-20 animate-pulse" aria-hidden="true">🪷</div>
-                <div className="absolute bottom-1/4 -right-12 text-5xl opacity-25 animate-pulse animation-delay-2000" aria-hidden="true">🕉️</div>
-                <div className="absolute top-1/4 -right-8 text-4xl opacity-15 animate-pulse animation-delay-3000" aria-hidden="true">☮️</div>
+                {/* Cultural Elements - Enhanced for nature background */}
+                <div className="absolute top-1/2 -left-12 text-6xl opacity-30 animate-pulse drop-shadow-lg" aria-hidden="true">🪷</div>
+                <div className="absolute bottom-1/4 -right-12 text-5xl opacity-35 animate-pulse animation-delay-2000 drop-shadow-lg" aria-hidden="true">🕉️</div>
+                <div className="absolute top-1/4 -right-8 text-4xl opacity-25 animate-pulse animation-delay-3000 drop-shadow-lg" aria-hidden="true">☮️</div>
               </div>
             </div>
           </div>

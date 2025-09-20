@@ -16,6 +16,7 @@
     "db:seed": "ts-node src/database/seeds/index.ts"
   },
   "dependencies": {
+    "@google-cloud/text-to-speech": "^6.3.0",
     "@prisma/client": "^5.6.0",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",

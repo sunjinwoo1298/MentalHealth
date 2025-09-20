@@ -17,7 +17,7 @@ const VrmAvatarPage = () => {
     const scene = new THREE.Scene()
     
     // Camera setup
-    const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 20)
+    const camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 20)
     camera.position.set(0, 1.6, 3)
     camera.lookAt(new THREE.Vector3(0, 1.6, 0))
 
@@ -61,6 +61,9 @@ const VrmAvatarPage = () => {
         if (vrm) {
           console.log('VRM loaded successfully')
           vrmRef.current = vrm
+          
+          vrm.scene.position.y = 0.3
+          
           scene.add(vrm.scene)
 
           // Load VRMA pose after VRM is loaded

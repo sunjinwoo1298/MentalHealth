@@ -283,6 +283,66 @@ export const gamificationAPI = {
   assignDailyChallenges: async () => {
     const response = await api.post('/gamification/challenges/assign-daily')
     return response.data
+  },
+
+  // ========== ACHIEVEMENT SYSTEM METHODS ==========
+
+  // Get achievement categories
+  getAchievementCategories: async () => {
+    const response = await api.get('/gamification/achievements/categories')
+    return response.data
+  },
+
+  // Get achievement tiers
+  getAchievementTiers: async () => {
+    const response = await api.get('/gamification/achievements/tiers')
+    return response.data
+  },
+
+  // Get all available achievements
+  getAvailableAchievements: async (includeSecret: boolean = false) => {
+    const params = includeSecret ? '?include_secret=true' : ''
+    const response = await api.get(`/gamification/achievements/available${params}`)
+    return response.data
+  },
+
+  // Get user's achievement progress
+  getAchievementProgress: async () => {
+    const response = await api.get('/gamification/achievements/progress')
+    return response.data
+  },
+
+  // Get user's earned achievements
+  getEarnedAchievements: async () => {
+    const response = await api.get('/gamification/achievements/earned')
+    return response.data
+  },
+
+  // Get user's achievement statistics
+  getAchievementStats: async () => {
+    const response = await api.get('/gamification/achievements/stats')
+    return response.data
+  },
+
+  // Get achievement collections
+  getAchievementCollections: async () => {
+    const response = await api.get('/gamification/achievements/collections')
+    return response.data
+  },
+
+  // Get user's collection progress
+  getCollectionProgress: async () => {
+    const response = await api.get('/gamification/achievements/collections/progress')
+    return response.data
+  },
+
+  // Trigger achievement check
+  triggerAchievementCheck: async (actionType: string, actionData: any = {}) => {
+    const response = await api.post('/gamification/achievements/check', {
+      actionType,
+      actionData
+    })
+    return response.data
   }
 }
 

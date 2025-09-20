@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { GameService } from '../services/gamification';
 import { ChallengeService } from '../services/challenges';
+import { AchievementService } from '../services/achievements';
 import { logger } from '../utils/logger';
 
 const router = express.Router();
@@ -424,6 +425,178 @@ router.post('/challenges/assign-daily', authMiddleware, async (req: Request, res
     });
   } catch (error) {
     logger.error('Error assigning daily challenges:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ========== ACHIEVEMENT SYSTEM ROUTES ==========
+
+// Get all achievement categories
+router.get('/achievements/categories', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const categories = await AchievementService.getCategories();
+
+    res.json({
+      success: true,
+      data: categories
+    });
+  } catch (error) {
+    logger.error('Error fetching achievement categories:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all achievement tiers
+router.get('/achievements/tiers', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const tiers = await AchievementService.getTiers();
+
+    res.json({
+      success: true,
+      data: tiers
+    });
+  } catch (error) {
+    logger.error('Error fetching achievement tiers:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all available achievements
+router.get('/achievements/available', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const includeSecret = req.query.include_secret === 'true';
+    const achievements = await AchievementService.getAllAchievements(includeSecret);
+
+    res.json({
+      success: true,
+      data: achievements
+    });
+  } catch (error) {
+    logger.error('Error fetching available achievements:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's achievement progress
+router.get('/achievements/progress', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const progress = await AchievementService.getUserProgress(userId);
+
+    res.json({
+      success: true,
+      data: progress
+    });
+  } catch (error) {
+    logger.error('Error fetching user achievement progress:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's earned achievements
+router.get('/achievements/earned', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const achievements = await AchievementService.getUserAchievements(userId);
+
+    res.json({
+      success: true,
+      data: achievements
+    });
+  } catch (error) {
+    logger.error('Error fetching user achievements:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's achievement statistics
+router.get('/achievements/stats', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const stats = await AchievementService.getUserStats(userId);
+
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    logger.error('Error fetching user achievement stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get achievement collections
+router.get('/achievements/collections', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const collections = await AchievementService.getCollections();
+
+    res.json({
+      success: true,
+      data: collections
+    });
+  } catch (error) {
+    logger.error('Error fetching achievement collections:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's collection progress
+router.get('/achievements/collections/progress', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const progress = await AchievementService.getUserCollectionProgress(userId);
+
+    res.json({
+      success: true,
+      data: progress
+    });
+  } catch (error) {
+    logger.error('Error fetching user collection progress:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Trigger achievement check (for testing or manual triggers)
+router.post('/achievements/check', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { actionType, actionData } = req.body;
+    const unlockedAchievements = await AchievementService.checkAchievementProgress(userId, actionType, actionData);
+
+    res.json({
+      success: true,
+      data: {
+        unlocked_achievements: unlockedAchievements,
+        count: unlockedAchievements.length
+      }
+    });
+  } catch (error) {
+    logger.error('Error checking achievements:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

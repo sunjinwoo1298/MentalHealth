@@ -4,11 +4,44 @@ import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
 import '../styles/dashboard-animations.css'
 
-// Types for dashboard data
+// Enhanced types for modern dashboard
 interface MoodData {
   current: number
   trend: 'up' | 'down' | 'stable'
   week: number[]
+  today: string
+  confidence: number
+  dailyNote?: string
+}
+
+interface WellnessMetrics {
+  meditation: { completed: number; goal: number; streak: number; todayMinutes: number }
+  journal: { entries: number; goal: number; lastEntry: string; weeklyGoal: number }
+  sleep: { average: number; goal: number; quality: 'excellent' | 'good' | 'fair' | 'poor'; lastNight: number }
+  activities: { completed: number; total: number; categories: string[] }
+  mindfulness: { sessions: number; totalMinutes: number; level: number }
+}
+
+interface Achievement {
+  id: string
+  title: string
+  description: string
+  icon: string
+  unlocked: boolean
+  progress?: number
+  maxProgress?: number
+  category: 'meditation' | 'mood' | 'consistency' | 'social'
+  rarity: 'common' | 'rare' | 'epic' | 'legendary'
+}
+
+interface QuickAction {
+  id: string
+  title: string
+  description: string
+  icon: string
+  color: string
+  action: () => void
+  isRecommended?: boolean
 }
 
 export default function Dashboard() {
@@ -16,11 +49,102 @@ export default function Dashboard() {
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const [currentTime, setCurrentTime] = useState(new Date())
   const [backgroundPhase, setBackgroundPhase] = useState(0)
+  const [selectedMoodToday, setSelectedMoodToday] = useState<number | null>(null)
+  const [showMoodInput, setShowMoodInput] = useState(false)
+  
   const [moodData] = useState<MoodData>({
     current: 7,
     trend: 'up',
-    week: [6, 7, 5, 8, 7, 7, 7]
+    week: [6, 7, 5, 8, 7, 7, 7],
+    today: 'feeling optimistic',
+    confidence: 8.5,
+    dailyNote: "Had a productive day with good energy levels"
   })
+
+  const [wellnessMetrics] = useState<WellnessMetrics>({
+    meditation: { completed: 6, goal: 8, streak: 4, todayMinutes: 15 },
+    journal: { entries: 3, goal: 5, lastEntry: '2 days ago', weeklyGoal: 7 },
+    sleep: { average: 7.5, goal: 8, quality: 'good', lastNight: 7.2 },
+    activities: { completed: 12, total: 15, categories: ['mindfulness', 'exercise', 'reading'] },
+    mindfulness: { sessions: 24, totalMinutes: 420, level: 3 }
+  })
+
+  const [achievements] = useState<Achievement[]>([
+    { 
+      id: '1', 
+      title: '7-Day Streak', 
+      description: 'Meditation consistency', 
+      icon: '🏆', 
+      unlocked: true, 
+      category: 'meditation', 
+      rarity: 'epic' 
+    },
+    { 
+      id: '2', 
+      title: 'Mindful Moments', 
+      description: '50 completed sessions', 
+      icon: '💎', 
+      unlocked: true, 
+      category: 'meditation', 
+      rarity: 'rare' 
+    },
+    { 
+      id: '3', 
+      title: 'Wellness Warrior', 
+      description: 'Daily check-ins', 
+      icon: '🌟', 
+      unlocked: true, 
+      category: 'consistency', 
+      rarity: 'common' 
+    },
+    { 
+      id: '4', 
+      title: 'Sleep Champion', 
+      description: 'Perfect sleep week', 
+      icon: '😴', 
+      unlocked: false, 
+      progress: 5, 
+      maxProgress: 7, 
+      category: 'consistency', 
+      rarity: 'legendary' 
+    }
+  ])
+
+  const quickActions: QuickAction[] = [
+    {
+      id: 'meditation',
+      title: 'Quick Meditation',
+      description: '5-minute mindfulness',
+      icon: '🧘‍♀️',
+      color: 'from-purple-500 to-indigo-600',
+      action: () => navigate('/meditation'),
+      isRecommended: true
+    },
+    {
+      id: 'journal',
+      title: 'Daily Journal',
+      description: 'Reflect on your day',
+      icon: '📝',
+      color: 'from-pink-500 to-rose-600',
+      action: () => navigate('/journal')
+    },
+    {
+      id: 'chat',
+      title: 'Talk to AI',
+      description: 'Share your thoughts',
+      icon: '💬',
+      color: 'from-teal-500 to-cyan-600',
+      action: () => navigate('/chat')
+    },
+    {
+      id: 'breathing',
+      title: 'Breathing Exercise',
+      description: '4-7-8 technique',
+      icon: '🫁',
+      color: 'from-emerald-500 to-green-600',
+      action: () => {}
+    }
+  ]
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -112,23 +236,22 @@ export default function Dashboard() {
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${getBackgroundGradient()} transition-all duration-8000 ease-in-out relative overflow-hidden`}>
-      {/* Animated Background Pattern - Meditation Elements */}
-      <div className="absolute inset-0 opacity-10">
-        {/* Floating meditation circles */}
-        <div className="absolute top-20 left-10 w-96 h-96 bg-pink-400 rounded-full mix-blend-soft-light filter blur-3xl animate-blob"></div>
-        <div className="absolute top-40 right-10 w-80 h-80 bg-teal-400 rounded-full mix-blend-soft-light filter blur-3xl animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-soft-light filter blur-3xl animate-blob animation-delay-4000"></div>
-        <div className="absolute bottom-32 right-32 w-64 h-64 bg-indigo-400 rounded-full mix-blend-soft-light filter blur-2xl animate-blob animation-delay-6000"></div>
+      {/* Enhanced Animated Background */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mix-blend-soft-light filter blur-3xl animate-blob"></div>
+        <div className="absolute top-40 right-10 w-80 h-80 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full mix-blend-soft-light filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-20 w-72 h-72 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full mix-blend-soft-light filter blur-3xl animate-blob animation-delay-4000"></div>
+        <div className="absolute bottom-32 right-32 w-64 h-64 bg-gradient-to-r from-indigo-400 to-teal-500 rounded-full mix-blend-soft-light filter blur-2xl animate-blob animation-delay-6000"></div>
       </div>
 
-      {/* Floating Meditation Icons */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 text-6xl text-pink-300/20 animate-float">🧘‍♀️</div>
-        <div className="absolute top-1/3 right-1/4 text-5xl text-teal-300/20 animate-float animation-delay-2000">🌸</div>
-        <div className="absolute bottom-1/3 left-1/3 text-4xl text-purple-300/20 animate-float animation-delay-4000">✨</div>
-        <div className="absolute bottom-1/4 right-1/3 text-5xl text-indigo-300/20 animate-float animation-delay-6000">🌙</div>
-        <div className="absolute top-1/2 left-1/6 text-3xl text-pink-300/15 animate-float animation-delay-8000">💫</div>
-        <div className="absolute top-2/3 right-1/6 text-4xl text-teal-300/15 animate-float animation-delay-10000">🕉️</div>
+      {/* Floating Wellness Elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 text-4xl text-pink-300/15 animate-float">🧘‍♀️</div>
+        <div className="absolute top-1/3 right-1/4 text-3xl text-teal-300/15 animate-float animation-delay-2000">🌸</div>
+        <div className="absolute bottom-1/3 left-1/3 text-2xl text-purple-300/15 animate-float animation-delay-4000">✨</div>
+        <div className="absolute bottom-1/4 right-1/3 text-3xl text-indigo-300/15 animate-float animation-delay-6000">🌙</div>
+        <div className="absolute top-1/2 left-1/6 text-2xl text-pink-300/10 animate-float animation-delay-8000">💫</div>
+        <div className="absolute top-2/3 right-1/6 text-2xl text-teal-300/10 animate-float animation-delay-10000">🕉️</div>
       </div>
       
       <Navigation 
@@ -139,241 +262,299 @@ export default function Dashboard() {
       
       <main className="relative z-10 pt-20 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Enhanced Header Section */}
-          <div className="text-center mb-12 fadeInUp" style={{ animationDelay: '0.1s' }}>
-            <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-pink-500/20 to-teal-500/20 backdrop-blur-md rounded-full px-8 py-4 mb-6 shadow-xl border border-pink-400/30 hover:border-teal-400/50 transition-all duration-300">
-              <span className="text-3xl animate-bounce">✨</span>
-              <span className="text-xl font-semibold bg-gradient-to-r from-pink-300 to-teal-300 bg-clip-text text-transparent">
-                {getGreeting()}, {user?.username || 'Friend'}!
-              </span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-pink-100 to-teal-100 bg-clip-text text-transparent mb-4 hover-lift">
-              Your Wellness Dashboard
-            </h1>
-            <p className="text-xl text-gray-100 max-w-2xl mx-auto font-medium">
-              Ready for another step in your wellness journey?
-            </p>
-            <div className="mt-4 text-base text-pink-200/80 font-medium bg-white/5 rounded-full px-6 py-2 inline-block border border-white/10">
-              {currentTime.toLocaleDateString('en-IN', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </div>
-          </div>
-
-          {/* Quick Actions Bar - Enhanced for Dark Theme */}
-          <div className="mb-12">
-            <div className="glass-card-dark rounded-3xl shadow-xl p-6 quick-actions fadeInUp" style={{ animationDelay: '0.2s' }}>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <button className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-teal-500 text-white px-6 py-3 rounded-xl hover:from-pink-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl btn-interactive quick-action-btn animate-glow-pulse">
-                  <span className="text-xl">💬</span>
-                  <span className="font-medium">Quick Chat</span>
-                </button>
-                <button className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl btn-interactive quick-action-btn">
-                  <span className="text-xl">🧘</span>
-                  <span className="font-medium">5-Min Breathing</span>
-                </button>
-                <button className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-6 py-3 rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl btn-interactive quick-action-btn">
-                  <span className="text-xl">📝</span>
-                  <span className="font-medium">Journal Entry</span>
-                </button>
-                <button className="flex items-center space-x-2 bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl btn-interactive quick-action-btn crisis-support">
-                  <span className="text-xl">🆘</span>
-                  <span className="font-medium">Need Help</span>
-                </button>
+          
+          {/* Hero Section - Completely Redesigned */}
+          <div className="text-center mb-16 fadeInUp" style={{ animationDelay: '0.1s' }}>
+            <div className="relative inline-block mb-8">
+              <div className="absolute -inset-4 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-teal-500/20 rounded-full blur-xl"></div>
+              <div className="relative bg-gradient-to-r from-pink-500/10 to-teal-500/10 backdrop-blur-md rounded-full px-12 py-6 border border-pink-400/30 shadow-2xl">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-teal-400 rounded-full flex items-center justify-center text-2xl animate-pulse">
+                    ✨
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm text-gray-300 mb-1">{getGreeting()}</p>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-teal-200 bg-clip-text text-transparent">
+                      {user?.username || 'Welcome back'}!
+                    </h2>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Main Dashboard Cards Grid - Enhanced with Remote Features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             
-            {/* Mood Tracking Card */}
-            <div className="glass-card-dark p-6 hover-lift fadeInUp animate-breathe" style={{ animationDelay: '0.3s' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Today's Mood</h3>
-                <span className="text-3xl animate-pulse">{getMoodEmoji(moodData.current)}</span>
+            <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-pink-100 to-teal-100 bg-clip-text text-transparent leading-tight">
+              Your Wellness
+              <br />
+              <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-teal-400 bg-clip-text text-transparent">
+                Journey
+              </span>
+            </h1>
+            
+            <p className="text-xl text-gray-200 max-w-3xl mx-auto mb-8 leading-relaxed">
+              Track your progress, connect with your AI companion, and discover tools for mental wellness.
+              <br />
+              <span className="text-pink-300">Today is a new opportunity to grow.</span>
+            </p>
+            
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              <div className="bg-white/10 backdrop-blur-md rounded-full px-6 py-3 border border-white/20">
+                <span className="text-teal-300 font-medium">
+                  {currentTime.toLocaleDateString('en-IN', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </span>
               </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-sm text-gray-300 mb-2">
-                  <span>Feeling Scale</span>
-                  <span className="font-bold text-lg text-white">{moodData.current}/10</span>
-                </div>
-                <div className="mood-progress-bar bg-gray-700/50 rounded-full h-3 shadow-inner">
-                  <div 
-                    className="mood-bar bg-gradient-to-r from-pink-400 via-purple-500 to-teal-400 h-3 rounded-full transition-all duration-1000 shadow-sm"
-                    style={{ width: `${(moodData.current / 10) * 100}%` }}
-                  ></div>
-                </div>
-                <div className="flex items-center justify-center text-sm text-gray-300">
-                  <span className="text-xl mr-2">{getTrendIcon(moodData.trend)}</span>
-                  <span className="capitalize font-medium">{moodData.trend} trend</span>
-                </div>
+              <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-md rounded-full px-6 py-3 border border-pink-400/30">
+                <span className="text-pink-300 font-medium">
+                  Mood: {getMoodEmoji(moodData.current)} {moodData.today}
+                </span>
               </div>
-              <button className="w-full mt-4 bg-gradient-to-r from-pink-500 to-teal-500 text-white py-3 rounded-xl hover:from-pink-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium animate-glow-pulse">
-                Track Mood
-              </button>
             </div>
+          </div>
 
-            {/* AI Companion Card */}
-            <div className="glass-card-dark p-6 hover-lift fadeInUp" style={{ animationDelay: '0.4s' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">AI Companion</h3>
-                <span className="text-2xl">💬</span>
-              </div>
-              <p className="text-gray-300 mb-4">Continue your conversation with our AI therapist</p>
+          {/* Quick Action Cards - Redesigned */}
+          <div className="mb-16">
+            <h3 className="text-2xl font-bold text-white mb-8 text-center">
+              Quick Actions
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              
               <button 
                 onClick={() => navigate('/chat')}
-                className="w-full bg-gradient-to-r from-purple-500 to-teal-500 text-white py-3 rounded-xl hover:from-purple-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium"
+                className="group relative overflow-hidden bg-gradient-to-br from-pink-500/20 to-purple-600/20 backdrop-blur-md rounded-3xl p-8 border border-pink-400/30 hover:border-pink-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/25"
               >
-                Start Chat
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-purple-600/0 group-hover:from-pink-500/10 group-hover:to-purple-600/10 transition-all duration-500"></div>
+                <div className="relative z-10 text-center">
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">💬</div>
+                  <h4 className="text-xl font-bold text-white mb-2">AI Chat</h4>
+                  <p className="text-pink-200 text-sm">Connect with your companion</p>
+                </div>
+              </button>
+
+              <button className="group relative overflow-hidden bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-md rounded-3xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/0 to-emerald-600/0 group-hover:from-green-500/10 group-hover:to-emerald-600/10 transition-all duration-500"></div>
+                <div className="relative z-10 text-center">
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300 animate-breathe">🧘</div>
+                  <h4 className="text-xl font-bold text-white mb-2">Meditate</h4>
+                  <p className="text-green-200 text-sm">5-minute breathing</p>
+                </div>
+              </button>
+
+              <button className="group relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-indigo-600/20 backdrop-blur-md rounded-3xl p-8 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-indigo-600/0 group-hover:from-purple-500/10 group-hover:to-indigo-600/10 transition-all duration-500"></div>
+                <div className="relative z-10 text-center">
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">📝</div>
+                  <h4 className="text-xl font-bold text-white mb-2">Journal</h4>
+                  <p className="text-purple-200 text-sm">Express your thoughts</p>
+                </div>
+              </button>
+
+              <button className="group relative overflow-hidden bg-gradient-to-br from-red-500/20 to-pink-600/20 backdrop-blur-md rounded-3xl p-8 border border-red-400/30 hover:border-red-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/25 animate-glow-pulse">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-pink-600/0 group-hover:from-red-500/10 group-hover:to-pink-600/10 transition-all duration-500"></div>
+                <div className="relative z-10 text-center">
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🆘</div>
+                  <h4 className="text-xl font-bold text-white mb-2">Support</h4>
+                  <p className="text-red-200 text-sm">Get immediate help</p>
+                </div>
               </button>
             </div>
-
-            {/* Progress Card */}
-            <div className="glass-card-dark p-6 hover-lift fadeInUp" style={{ animationDelay: '0.5s' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Your Progress</h3>
-                <span className="text-2xl">📈</span>
-              </div>
-              <p className="text-gray-300 mb-4">Track your wellness journey</p>
-              <button className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium">
-                View Progress
-              </button>
-            </div>
-
-            {/* Wellness Activities Card */}
-            <div className="glass-card-dark p-6 hover-lift fadeInUp card-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Wellness Activities</h3>
-                <span className="text-2xl animate-breathe">🧘</span>
-              </div>
-              <p className="text-gray-300 mb-4">Discover mindfulness exercises</p>
-              <button className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-3 rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium btn-interactive">
-                Explore Activities
-              </button>
-            </div>
-
-            {/* Crisis Support Card */}
-            <div className="glass-card-dark p-6 hover-lift fadeInUp card-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Need Help?</h3>
-                <span className="text-2xl animate-glow-pulse">🆘</span>
-              </div>
-              <p className="text-gray-300 mb-4">Access immediate support and resources</p>
-              <button className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium animate-glow-pulse btn-interactive crisis-support">
-                Get Support
-              </button>
-            </div>
-
-            {/* Profile Settings Card */}
-            <div className="glass-card-dark p-6 hover-lift fadeInUp" style={{ animationDelay: '0.8s' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Profile Settings</h3>
-                <span className="text-2xl">⚙️</span>
-              </div>
-              <p className="text-gray-300 mb-4">Manage your profile and preferences</p>
-              <button 
-                onClick={() => navigate('/profile')}
-                className="w-full bg-gradient-to-r from-gray-600 to-slate-600 text-white py-3 rounded-xl hover:from-gray-700 hover:to-slate-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium"
-              >
-                Edit Profile
-              </button>
-            </div>
-
           </div>
 
-          {/* Enhanced Progress Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Main Metrics Grid - Completely Redesigned */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
             
-            {/* Weekly Progress */}
-            <div className="glass-card-dark p-8 hover-lift fadeInUp" style={{ animationDelay: '0.9s' }}>
-              <h3 className="text-xl font-semibold text-white mb-6">Weekly Progress</h3>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">🧘</span>
-                    <span className="text-sm font-medium text-gray-200">Meditation</span>
+            {/* Mood Tracking - Enhanced */}
+            <div className="lg:col-span-2">
+              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-md rounded-3xl p-8 border border-slate-600/30 hover:border-pink-400/50 transition-all duration-500 shadow-2xl hover:shadow-pink-500/20">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white mb-2">Mood Insights</h3>
+                    <p className="text-gray-300">How you're feeling today</p>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-32 bg-gray-700/50 rounded-full h-3 shadow-inner">
-                      <div className="bg-gradient-to-r from-green-400 to-green-500 h-3 rounded-full transition-all duration-1000" style={{ width: '75%' }}></div>
+                  <div className="text-6xl animate-pulse">{getMoodEmoji(moodData.current)}</div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-gray-300">Current Mood</span>
+                      <span className="text-3xl font-bold text-white">{moodData.current}/10</span>
                     </div>
-                    <span className="text-sm font-bold text-white">6/8</span>
+                    <div className="bg-slate-700/50 rounded-full h-4 mb-6 overflow-hidden">
+                      <div 
+                        className="h-4 bg-gradient-to-r from-pink-400 via-purple-500 to-teal-400 rounded-full transition-all duration-1000 relative"
+                        style={{ width: `${(moodData.current / 10) * 100}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 text-gray-300">
+                      <span className="text-2xl">{getTrendIcon(moodData.trend)}</span>
+                      <span className="capitalize font-medium">{moodData.trend} trend this week</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-white font-semibold mb-4">Week Overview</h4>
+                    <div className="flex items-end space-x-2 h-20">
+                      {moodData.week.map((mood, index) => (
+                        <div key={index} className="flex-1 flex flex-col items-center">
+                          <div 
+                            className="w-full bg-gradient-to-t from-teal-400 to-pink-400 rounded-t-lg transition-all duration-500 hover:scale-110"
+                            style={{ height: `${(mood / 10) * 100}%` }}
+                          ></div>
+                          <span className="text-xs text-gray-400 mt-2">
+                            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">📝</span>
-                    <span className="text-sm font-medium text-gray-200">Journal</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-32 bg-gray-700/50 rounded-full h-3 shadow-inner">
-                      <div className="bg-gradient-to-r from-teal-400 to-teal-500 h-3 rounded-full transition-all duration-1000" style={{ width: '60%' }}></div>
-                    </div>
-                    <span className="text-sm font-bold text-white">3/5</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">😴</span>
-                    <span className="text-sm font-medium text-gray-200">Sleep</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-32 bg-gray-700/50 rounded-full h-3 shadow-inner">
-                      <div className="bg-gradient-to-r from-purple-400 to-purple-500 h-3 rounded-full transition-all duration-1000" style={{ width: '85%' }}></div>
-                    </div>
-                    <span className="text-sm font-bold text-white">8.5h</span>
-                  </div>
-                </div>
+                
+                <button className="w-full mt-8 bg-gradient-to-r from-pink-500 to-teal-500 text-white py-4 rounded-2xl hover:from-pink-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold text-lg">
+                  Update Mood
+                </button>
               </div>
             </div>
 
-            {/* Achievements */}
-            <div className="glass-card-dark p-8 hover-lift fadeInUp" style={{ animationDelay: '1.0s' }}>
-              <h3 className="text-xl font-semibold text-white mb-6">Achievements</h3>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl border border-yellow-400/30 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm">
-                  <span className="text-2xl animate-bounce">🏆</span>
-                  <div>
-                    <div className="text-sm font-semibold text-white">7-Day Streak</div>
-                    <div className="text-xs text-gray-300">Meditation consistency</div>
+            {/* Wellness Summary */}
+            <div className="space-y-6">
+              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-md rounded-3xl p-6 border border-slate-600/30 hover:border-teal-400/50 transition-all duration-500 shadow-2xl hover:shadow-teal-500/20">
+                <h3 className="text-xl font-bold text-white mb-6">Today's Goals</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">🧘</span>
+                      <span className="text-white font-medium">Meditation</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-16 bg-slate-700/50 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-green-400 to-green-500 h-2 rounded-full transition-all duration-1000"
+                          style={{ width: `${(wellnessMetrics.meditation.completed / wellnessMetrics.meditation.goal) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm text-white font-bold">
+                        {wellnessMetrics.meditation.completed}/{wellnessMetrics.meditation.goal}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-xl border border-teal-400/30 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm">
-                  <span className="text-2xl animate-pulse">💎</span>
-                  <div>
-                    <div className="text-sm font-semibold text-white">Mindful Moments</div>
-                    <div className="text-xs text-gray-300">50 completed sessions</div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">📝</span>
+                      <span className="text-white font-medium">Journal</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-16 bg-slate-700/50 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-purple-400 to-purple-500 h-2 rounded-full transition-all duration-1000"
+                          style={{ width: `${(wellnessMetrics.journal.entries / wellnessMetrics.journal.goal) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm text-white font-bold">
+                        {wellnessMetrics.journal.entries}/{wellnessMetrics.journal.goal}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-xl border border-pink-400/30 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm">
-                  <span className="text-2xl animate-spin">🌟</span>
-                  <div>
-                    <div className="text-sm font-semibold text-white">Wellness Warrior</div>
-                    <div className="text-xs text-gray-300">Daily check-ins</div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">😴</span>
+                      <span className="text-white font-medium">Sleep</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-white font-bold">
+                        {wellnessMetrics.sleep.average}h avg
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
+              {/* Streak Counter */}
+              <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 backdrop-blur-md rounded-3xl p-6 border border-yellow-400/30 hover:border-yellow-400/60 transition-all duration-500 shadow-2xl hover:shadow-yellow-500/20">
+                <div className="text-center">
+                  <div className="text-4xl mb-2 animate-bounce">🔥</div>
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {wellnessMetrics.meditation.streak}
+                  </div>
+                  <div className="text-yellow-200 font-medium">Day Streak</div>
+                  <p className="text-yellow-200/80 text-sm mt-2">Keep it going!</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Emergency Support Banner */}
-          <div className="glass-card-dark p-6 bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-400/30 fadeInUp shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm" style={{ animationDelay: '1.1s' }}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl animate-pulse">🆘</span>
-                <div>
-                  <div className="text-lg font-semibold text-white">Need immediate support?</div>
-                  <div className="text-sm text-gray-200">24/7 crisis helpline available • You're not alone</div>
+          {/* Recent Achievements */}
+          <div className="mb-16">
+            <h3 className="text-2xl font-bold text-white mb-8 text-center">Recent Achievements</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {achievements.map((achievement, index) => (
+                <div 
+                  key={achievement.id}
+                  className={`
+                    group relative overflow-hidden backdrop-blur-md rounded-2xl p-6 border transition-all duration-500 hover:scale-105 shadow-lg hover:shadow-xl
+                    ${achievement.unlocked 
+                      ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-400/30 hover:border-yellow-400/60 hover:shadow-yellow-500/20' 
+                      : 'bg-gradient-to-br from-slate-500/20 to-slate-600/20 border-slate-400/30 hover:border-slate-400/60'
+                    }
+                  `}
+                  style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+                >
+                  <div className="text-center">
+                    <div className={`text-4xl mb-3 ${achievement.unlocked ? 'animate-bounce' : 'grayscale'}`}>
+                      {achievement.icon}
+                    </div>
+                    <h4 className={`font-bold mb-1 ${achievement.unlocked ? 'text-white' : 'text-gray-400'}`}>
+                      {achievement.title}
+                    </h4>
+                    <p className={`text-sm ${achievement.unlocked ? 'text-yellow-200' : 'text-gray-500'}`}>
+                      {achievement.description}
+                    </p>
+                    {!achievement.unlocked && achievement.progress && achievement.maxProgress && (
+                      <div className="mt-3">
+                        <div className="bg-slate-700/50 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-slate-400 to-slate-500 h-2 rounded-full transition-all duration-1000"
+                            style={{ width: `${(achievement.progress / achievement.maxProgress) * 100}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {achievement.progress}/{achievement.maxProgress}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {achievement.unlocked && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/0 via-yellow-400/20 to-yellow-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  )}
                 </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Emergency Support - Redesigned */}
+          <div className="bg-gradient-to-r from-red-500/20 via-pink-500/20 to-red-500/20 backdrop-blur-md rounded-3xl p-8 border border-red-400/30 shadow-2xl hover:shadow-red-500/20 transition-all duration-500 animate-glow-pulse">
+            <div className="text-center">
+              <div className="text-6xl mb-4 animate-pulse">🆘</div>
+              <h3 className="text-2xl font-bold text-white mb-4">Need immediate support?</h3>
+              <p className="text-red-200 mb-6 max-w-2xl mx-auto">
+                If you're experiencing a mental health crisis or having thoughts of self-harm, 
+                please reach out immediately. You're not alone, and help is available 24/7.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <button className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-8 py-4 rounded-2xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-bold text-lg">
+                  Crisis Helpline
+                </button>
+                <button className="bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-2xl hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border border-white/20 font-semibold">
+                  Find Therapist
+                </button>
               </div>
-              <button className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold animate-glow-pulse">
-                Get Help Now
-              </button>
             </div>
           </div>
         </div>

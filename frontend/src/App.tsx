@@ -10,6 +10,7 @@ import OnboardingFlow from './pages/OnboardingFlow'
 import ProfilePage from './pages/ProfilePage'
 import PrivacyPage from './pages/PrivacyPage'
 import SettingsPage from './pages/SettingsPage'
+import VrmAvatarPage from './pages/VrmAvatarPage'
 import GamificationPage from './pages/GamificationPage'
 import './App.css'
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/vrm-avatar" element={<VrmAvatarPage />} />
           <Route path="/gamification" element={<GamificationPage />} />
         </Routes>
       </Router>

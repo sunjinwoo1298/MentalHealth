@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import { useVrmAvatar } from '../../hooks/useVrmAvatar';
 import { EmotionControls } from '../VrmControls';
+import { useGamification } from '../../contexts/GamificationContext';
 
 export type ChatMessage = {
   id: string;
@@ -34,7 +35,12 @@ export default function ChatWindow() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [chatStartTime, setChatStartTime] = useState<Date | null>(null);
+  const [messageCount, setMessageCount] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Gamification integration
+  const { addPendingReward } = useGamification();
 
   // VRM Avatar integration
   const {
@@ -79,6 +85,10 @@ export default function ChatWindow() {
       console.log('Connected to server:', socket.id);
       setIsConnected(true);
       
+      // Start tracking chat session
+      setChatStartTime(new Date());
+      setMessageCount(0);
+      
       // Join user room (using socket.id as temporary user ID)
       socket.emit('join_room', socket.id);
     });
@@ -86,12 +96,33 @@ export default function ChatWindow() {
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
       setIsConnected(false);
+      
+      // Award points for chat completion when disconnecting after meaningful conversation
+      if (chatStartTime && messageCount >= 3) {
+        const sessionDuration = Date.now() - chatStartTime.getTime();
+        const durationMinutes = Math.floor(sessionDuration / (1000 * 60));
+        
+        console.log(`Chat session completed: ${messageCount} messages, ${durationMinutes} minutes`);
+        
+        // Add pending reward for chat completion
+        addPendingReward('chat_completion', {
+          messageCount,
+          durationMinutes,
+          sessionId: socket.id,
+          completedAt: new Date().toISOString()
+        });
+      }
     });
 
     socket.on('chat:message', (msg: ChatMessage) => {
       console.log('Received message:', msg);
       setMessages((prev) => [...prev, msg]);
       setIsTyping(false);
+      
+      // Track message count for gamification
+      if (msg.type === 'user') {
+        setMessageCount(prev => prev + 1);
+      }
       
       // Update avatar emotion based on message
       updateAvatarEmotion(msg.text, msg.type as 'user' | 'ai');
@@ -135,6 +166,28 @@ export default function ChatWindow() {
       socket.disconnect();
     };
   }, []);
+
+  // Separate effect to handle chat completion on unmount with current state values
+  useEffect(() => {
+    return () => {
+      // Award points for chat completion when component unmounts after meaningful conversation
+      if (chatStartTime && messageCount >= 3) {
+        const sessionDuration = Date.now() - chatStartTime.getTime();
+        const durationMinutes = Math.floor(sessionDuration / (1000 * 60));
+        
+        console.log(`Chat component unmounting: ${messageCount} messages, ${durationMinutes} minutes`);
+        
+        // Add pending reward for chat completion
+        addPendingReward('chat_completion', {
+          messageCount,
+          durationMinutes,
+          sessionId: socket.id,
+          completedAt: new Date().toISOString(),
+          completionType: 'component_unmount'
+        });
+      }
+    };
+  }, [chatStartTime, messageCount, addPendingReward]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -48,6 +48,8 @@ const ChallengesWidget: React.FC<ChallengesWidgetProps> = ({ className = '' }) =
   const [error, setError] = useState<string | null>(null);
   const [completingChallenge, setCompletingChallenge] = useState<string | null>(null);
   const [showCompleteModal, setShowCompleteModal] = useState<UserChallenge | null>(null);
+  
+  const isDarkTheme = className?.includes('bg-transparent');
 
   useEffect(() => {
     fetchChallenges();
@@ -200,10 +202,10 @@ const ChallengesWidget: React.FC<ChallengesWidgetProps> = ({ className = '' }) =
 
   return (
     <>
-      <div className={`bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg shadow-md p-6 border border-orange-100 ${className}`}>
+      <div className={isDarkTheme ? className : `bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg shadow-md p-6 border border-orange-100 ${className}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+          <h3 className={`text-lg font-semibold flex items-center ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
             <span className="mr-2">🎯</span>
             Daily Challenges
           </h3>

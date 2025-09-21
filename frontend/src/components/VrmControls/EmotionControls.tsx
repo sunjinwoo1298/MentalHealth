@@ -18,6 +18,7 @@ export const EmotionControls: React.FC<EmotionControlsProps> = ({
   onEmotionChange
 }) => {
   const handleEmotionClick = async (emotion: EmotionType) => {
+    console.log(`EmotionControls: handleEmotionClick: ${emotion}`)
     if (isLoading || isTransitioning) return
     await onEmotionChange(emotion)
   }

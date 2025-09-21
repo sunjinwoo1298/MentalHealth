@@ -71,7 +71,7 @@ export default function Navigation({
                   <button
                     onClick={() => setIsWellnessDropdownOpen(!isWellnessDropdownOpen)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 ${
-                      ['/meditation', '/journal', '/mood', '/checkin'].includes(location.pathname)
+                      ['/meditation', '/journal', '/checkin'].includes(location.pathname)
                         ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
                         : 'text-gray-300 hover:text-purple-300 hover:bg-purple-500/10'
                     }`}
@@ -102,21 +102,14 @@ export default function Navigation({
                           <span>📝</span>
                           <span>Journal</span>
                         </Link>
-                        <Link 
-                          to="/mood" 
-                          className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:bg-purple-500/10 hover:text-purple-300 rounded-lg transition-all duration-200"
-                          onClick={() => setIsWellnessDropdownOpen(false)}
-                        >
-                          <span>📊</span>
-                          <span>Mood Tracker</span>
-                        </Link>
+
                         <Link 
                           to="/checkin" 
                           className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:bg-purple-500/10 hover:text-purple-300 rounded-lg transition-all duration-200"
                           onClick={() => setIsWellnessDropdownOpen(false)}
                         >
                           <span>✅</span>
-                          <span>Daily Check-in</span>
+                          <span>Wellness Check-in</span>
                         </Link>
                       </div>
                     </div>
@@ -287,18 +280,7 @@ export default function Navigation({
                     <span>📝</span>
                     <span>Journal</span>
                   </Link>
-                  <Link 
-                    to="/mood" 
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                      isActiveRoute('/mood') 
-                        ? 'bg-purple-500/20 text-purple-300' 
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <span>📊</span>
-                    <span>Mood Tracker</span>
-                  </Link>
+
                   <Link 
                     to="/checkin" 
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
@@ -309,7 +291,7 @@ export default function Navigation({
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>✅</span>
-                    <span>Daily Check-in</span>
+                    <span>Wellness Check-in</span>
                   </Link>
                   <Link 
                     to="/gamification" 

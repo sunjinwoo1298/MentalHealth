@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
+import QuickMoodTracker from '../components/Dashboard/QuickMoodTracker'
 
 // Cultural-aware dashboard interfaces
 interface MoodEntry {
@@ -261,19 +262,24 @@ export default function Dashboard() {
           
           {/* Clean Header */}
           <div className="text-left mb-8">
-            <div className="bg-gradient-to-r from-pink-500/10 to-teal-500/10 backdrop-blur-md rounded-2xl px-8 py-6 border border-pink-400/30 mb-4 shadow-lg max-w-fit">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-teal-400 rounded-full flex items-center justify-center text-xl shadow-md">
-                  ✨
+            <div className="flex items-start justify-between gap-6 mb-4">
+              <div className="bg-gradient-to-r from-pink-500/10 to-teal-500/10 backdrop-blur-md rounded-2xl px-8 py-6 border border-pink-400/30 shadow-lg">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-teal-400 rounded-full flex items-center justify-center text-xl shadow-md">
+                    ✨
+                  </div>
+                  <div className="text-left">
+                    <p className="text-2xl font-bold text-teal-300 mb-1">
+                      {getGreeting()}
+                    </p>
+                    <h2 className="text-xl font-bold text-white">
+                      {user?.username || 'Welcome back'}!
+                    </h2>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-2xl font-bold text-teal-300 mb-1">
-                    {getGreeting()}
-                  </p>
-                  <h2 className="text-xl font-bold text-white">
-                    {user?.username || 'Welcome back'}!
-                  </h2>
-                </div>
+              </div>
+              <div className="flex-shrink-0 w-80 mt-2">
+                <QuickMoodTracker />
               </div>
             </div>
             

@@ -1,0 +1,39 @@
+/* Custom slider styles for QuickMoodTracker */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(55, 65, 81, 0.8);
+  outline: none;
+  border-radius: 8px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #8b5cf6, #ec4899);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #8b5cf6, #ec4899);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slider:hover::-webkit-slider-thumb {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.slider:hover::-moz-range-thumb {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}

@@ -11,14 +11,30 @@ import Navigation from '../components/Navigation/Navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { useGamification } from '../contexts/GamificationContext';
 
+interface QuickMoodData {
+  emotions: { [key: string]: number };
+  triggers: string[];
+  notes: string;
+  timestamp: string;
+}
+
 const GamificationPage: React.FC = () => {
   const { user, logout } = useAuth();
   const { pendingRewards, processPendingRewards, isProcessing } = useGamification();
   const [rewardNotification, setRewardNotification] = useState<string | null>(null);
+  const [quickMoodLogs, setQuickMoodLogs] = useState<QuickMoodData[]>([]);
 
   const handleLogout = async () => {
     await logout();
   };
+
+  // Load mood logs
+  useEffect(() => {
+    const quickLogs = localStorage.getItem('quickMoodLogs');
+    if (quickLogs) {
+      setQuickMoodLogs(JSON.parse(quickLogs));
+    }
+  }, []);
 
   // Process pending rewards when page opens
   useEffect(() => {
@@ -259,10 +275,94 @@ const GamificationPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Mood Logs Section */}
+          <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-2xl p-6 border border-purple-400/30 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-1">⚡ Quick Mood Check-ins</h3>
+                <p className="text-purple-200 text-sm">Your recent emotional wellness tracking</p>
+              </div>
+              <Link 
+                to="/mood" 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
+              >
+                View All
+              </Link>
+            </div>
+            
+            {quickMoodLogs.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-3">🎯</div>
+                <h4 className="text-white font-bold mb-2">Start Tracking Your Mood</h4>
+                <p className="text-purple-200 mb-4">Use the Quick Mood Tracker on your dashboard to earn points and insights!</p>
+                <Link 
+                  to="/dashboard" 
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 inline-block"
+                >
+                  Go to Dashboard
+                </Link>
+              </div>
+            ) : (
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {quickMoodLogs.slice(0, 3).map((log, index) => (
+                    <div key={index} className="bg-purple-500/10 rounded-lg p-4 border border-purple-400/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-white font-medium text-sm">Quick Check</div>
+                        <div className="text-xs text-gray-400">
+                          {new Date(log.timestamp).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        {Object.entries(log.emotions).slice(0, 3).map(([emotion, value]) => value > 0 && (
+                          <div key={emotion} className="flex items-center justify-between">
+                            <span className="text-xs text-purple-300">{emotion}</span>
+                            <div className="flex space-x-1">
+                              {[...Array(5)].map((_, i) => (
+                                <div 
+                                  key={i} 
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    i < value ? 'bg-purple-400' : 'bg-gray-600'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {log.triggers.length > 0 && (
+                        <div className="mt-2">
+                          <div className="flex flex-wrap gap-1">
+                            {log.triggers.slice(0, 2).map((trigger, idx) => (
+                              <span key={idx} className="text-xs bg-pink-500/20 text-pink-300 px-2 py-1 rounded">
+                                {trigger}
+                              </span>
+                            ))}
+                            {log.triggers.length > 2 && (
+                              <span className="text-xs text-gray-400">+{log.triggers.length - 2}</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="text-center">
+                  <p className="text-purple-200 text-sm">
+                    Total check-ins: {quickMoodLogs.length} • Keep tracking for better insights!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Quick Actions */}
           <div className="text-center">
             <h3 className="text-xl font-bold text-white mb-6">🚀 Start Your Practice</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link to="/meditation" className="bg-gradient-to-r from-pink-500/20 to-rose-500/20 backdrop-blur-md rounded-xl p-4 border border-pink-400/30 hover:border-pink-400/60 text-white font-medium transition-all duration-300 hover:scale-105 group block">
                 <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🧘‍♀️</div>
                 <div className="text-pink-200">Meditation</div>
@@ -275,15 +375,11 @@ const GamificationPage: React.FC = () => {
                 <div className="text-teal-300/70 text-xs mt-1">स्वाध्याय</div>
               </Link>
               
-              <Link to="/mood" className="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-md rounded-xl p-4 border border-orange-400/30 hover:border-orange-400/60 text-white font-medium transition-all duration-300 hover:scale-105 group block">
-                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">📊</div>
-                <div className="text-orange-200">Mood Tracker</div>
-                <div className="text-orange-300/70 text-xs mt-1">अंतर्दर्शन</div>
-              </Link>
+
               
               <Link to="/checkin" className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-md rounded-xl p-4 border border-purple-400/30 hover:border-purple-400/60 text-white font-medium transition-all duration-300 hover:scale-105 group block">
                 <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">✅</div>
-                <div className="text-purple-200">Daily Check-in</div>
+                <div className="text-purple-200">Wellness Check-in</div>
                 <div className="text-purple-300/70 text-xs mt-1">दिनचर्या</div>
               </Link>
             </div>

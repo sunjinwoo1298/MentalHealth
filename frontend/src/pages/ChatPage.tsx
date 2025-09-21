@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
 import ChatWindow from '../components/Chat/ChatWindow'
@@ -24,6 +24,7 @@ const SOUNDS = {
 
 export default function ChatPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const [avatarState, setAvatarState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle')
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -33,9 +34,11 @@ export default function ChatPage() {
   const [volume, setVolume] = useState(0.3)
   const [showSoundControls, setShowSoundControls] = useState(false)
   
+  // Extract context from URL parameters
+  const chatContext = searchParams.get('context')
+  
   // Audio refs
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null)
-  const interactionAudioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -347,7 +350,7 @@ export default function ChatPage() {
 
             {/* Chat Messages Area */}
             <div className="flex-1 overflow-hidden">
-              <ChatWindow />
+              <ChatWindow context={chatContext || undefined} />
             </div>
           </div>
         </div>

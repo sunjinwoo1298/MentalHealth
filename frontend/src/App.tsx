@@ -1,4 +1,5 @@
 ﻿import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { createContext,useState } from 'react'
 import { AuthProvider } from './contexts/AuthContext'
 import { GamificationProvider } from './contexts/GamificationContext'
 import HomePage from './pages/HomePage'
@@ -20,9 +21,20 @@ import CheckInPage from './pages/CheckInPage'
 import TestGamificationPage from './pages/TestGamificationPage'
 import './App.css'
 
+type MentalHealthContextType = {
+  currentContext: string;
+  setCurrentContext: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export const mentalHealthContext = createContext<MentalHealthContextType | undefined>(undefined);
+
 function App() {
+  const [currentContext, setCurrentContext] = useState("general");
+
+
   return (
     <AuthProvider>
+      <mentalHealthContext.Provider value={{currentContext,setCurrentContext}}>
       <GamificationProvider>
         <Router>
           <Routes>
@@ -46,6 +58,7 @@ function App() {
           </Routes>
         </Router>
       </GamificationProvider>
+      </mentalHealthContext.Provider>
     </AuthProvider>
   )
 }

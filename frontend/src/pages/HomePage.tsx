@@ -554,8 +554,19 @@ export default function HomePage() {
                         <button 
                           className="w-full btn-gradient py-3 rounded-xl font-semibold transition-all duration-300 hover-lift focus-ring"
                           aria-label={`Learn more about ${service.title}`}
+                          onClick={() => {
+                            // Context-specific navigation for Academic Support and Family Therapy
+                            if (service.title === 'Academic Support') {
+                              navigate('/chat?context=academic')
+                            } else if (service.title === 'Family Therapy') {
+                              navigate('/chat?context=family')
+                            } else {
+                              // For other services, just navigate to chat without context
+                              navigate('/chat')
+                            }
+                          }}
                         >
-                          Learn More
+                          {service.title === 'Academic Support' || service.title === 'Family Therapy' ? 'Start Chat' : 'Learn More'}
                         </button>
                       </div>
                     </article>

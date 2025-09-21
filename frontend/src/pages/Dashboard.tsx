@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState ,useContext} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
+import { mentalHealthContext } from '../App'
 
 // Cultural-aware dashboard interfaces
 interface MoodEntry {
@@ -41,6 +42,7 @@ interface TherapistProfile {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const context=useContext(mentalHealthContext);
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   
   // Cultural mood reasons (Method 3)
@@ -390,7 +392,12 @@ export default function Dashboard() {
                       ))}
                     </div>
                     <button 
-                      onClick={() => navigate('/vrm-avatar')}
+                      onClick={() =>{ 
+                        navigate('/vrm-avatar')
+                        if(insight.title==="📚 Academic Pressure Support")context?.setCurrentContext("academic");
+                        if(insight.title==="🏠 Family Relationship Support")context?.setCurrentContext("family");
+                      }
+                      }
                       className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 text-sm font-medium"
                     >
                       {insight.actionPrompt}

@@ -14,7 +14,7 @@
     "install:backend": "cd backend && npm install",
     "install:ai": "cd ai-services && pip install -r requirements.txt",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:ai\" \"npm run dev:frontend\"",
-    "dev:frontend": "cd frontend && npm start",
+    "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run dev",
     "dev:ai": "cd ai-services && python main.py",
     "build": "npm run build:frontend && npm run build:backend",

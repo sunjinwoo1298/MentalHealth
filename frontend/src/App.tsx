@@ -6,7 +6,6 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import Dashboard from './pages/Dashboard'
-import ChatPage from './pages/ChatPage'
 import OnboardingFlow from './pages/OnboardingFlow'
 import ProfilePage from './pages/ProfilePage'
 import PrivacyPage from './pages/PrivacyPage'
@@ -18,6 +17,7 @@ import JournalPage from './pages/JournalPage'
 import MoodPage from './pages/MoodPage'
 import CheckInPage from './pages/CheckInPage'
 import TestGamificationPage from './pages/TestGamificationPage'
+import AudioTTSTestPage from './pages/AudioTTSTestPage'
 import './App.css'
 
 
@@ -44,6 +44,7 @@ function App() {
             <Route path="/mood" element={<MoodPage />} />
             <Route path="/checkin" element={<CheckInPage />} />
             <Route path="/test-gamification" element={<TestGamificationPage />} />
+            <Route path="/audio-chat" element={<AudioTTSTestPage />} />
           </Routes>
         </Router>
       </GamificationProvider>

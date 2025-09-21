@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
-import ChatWindow from '../components/Chat/ChatWindow'
+import ChatWindowWithTTS from '../components/Chat/ChatWindowWithTTS'
 import VRMAvatar from '../components/VRMAvatar/VRMAvatar_Simple'
 import '../styles/dashboard-animations.css'
 
@@ -35,7 +35,6 @@ export default function ChatPage() {
   
   // Audio refs
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null)
-  const interactionAudioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -206,6 +205,7 @@ export default function ChatPage() {
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
               className={`w-12 h-6 rounded-full transition-colors ${soundEnabled ? 'bg-gradient-to-r from-pink-500 to-teal-500' : 'bg-gray-600'}`}
+              aria-label={`${soundEnabled ? 'Disable' : 'Enable'} sounds`}
             >
               <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${soundEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
             </button>
@@ -222,6 +222,8 @@ export default function ChatPage() {
               value={volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
               className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+              title="Volume control"
+              aria-label="Volume control"
             />
           </div>
 
@@ -347,7 +349,7 @@ export default function ChatPage() {
 
             {/* Chat Messages Area */}
             <div className="flex-1 overflow-hidden">
-              <ChatWindow />
+              <ChatWindowWithTTS />
             </div>
           </div>
         </div>

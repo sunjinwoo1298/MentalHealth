@@ -128,7 +128,7 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main id="main-content" role="main">
-        {/* Enhanced Hero Section with Nature Background */}
+        {/* Enhanced Hero Section with Nature Background and Stunning Effects */}
         <section 
           className="relative py-20 lg:py-32 overflow-hidden bg-cover bg-center bg-no-repeat" 
           role="banner" 
@@ -138,55 +138,80 @@ export default function HomePage() {
             minHeight: '100vh'
           }}
         >
-          {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black/40" aria-hidden="true"></div>
+          {/* Very light overlay for maximum background brightness */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/15 via-black/10 to-black/15" aria-hidden="true"></div>
           
-          {/* Floating Shapes for Visual Interest */}
-          <div className="hero-floating-shape hero-floating-shape-1 opacity-20" aria-hidden="true"></div>
-          <div className="hero-floating-shape hero-floating-shape-2 opacity-20" aria-hidden="true"></div>
-          <div className="hero-floating-shape hero-floating-shape-3 opacity-20" aria-hidden="true"></div>
+          {/* Animated particles effect */}
+          <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white rounded-full animate-ping animation-delay-1000 opacity-60"></div>
+            <div className="absolute top-3/4 left-3/4 w-1 h-1 bg-purple-300 rounded-full animate-ping animation-delay-2000 opacity-40"></div>
+            <div className="absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-blue-300 rounded-full animate-ping animation-delay-3000 opacity-50"></div>
+            <div className="absolute top-1/6 right-1/4 w-2 h-2 bg-pink-300 rounded-full animate-ping animation-delay-4000 opacity-30"></div>
+          </div>
+          
+          {/* Floating Shapes for Visual Interest - Enhanced */}
+          <div className="hero-floating-shape hero-floating-shape-1 opacity-30 bg-gradient-to-br from-purple-500/20 to-pink-500/20" aria-hidden="true"></div>
+          <div className="hero-floating-shape hero-floating-shape-2 opacity-30 bg-gradient-to-br from-blue-500/20 to-cyan-500/20" aria-hidden="true"></div>
+          <div className="hero-floating-shape hero-floating-shape-3 opacity-30 bg-gradient-to-br from-green-500/20 to-emerald-500/20" aria-hidden="true"></div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
             <div className="grid lg:grid-cols-2 gap-16 items-center hero-content">
               {/* Enhanced Content Section */}
               <div>
                 {/* Trust Badge */}
-                <div className="hero-trust-badge inline-flex items-center bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-gray-300 shadow-lg">
-                  <span className="w-2 h-2 bg-green-600 rounded-full mr-2 animate-pulse"></span>
-                  <span className="text-sm font-bold text-black">Trusted by 10,000+ young people across India</span>
-                </div>
+                {/* <div className="hero-trust-badge inline-flex items-center bg-white/95 backdrop-blur-md rounded-full px-6 py-3 mb-8 border border-white/10 shadow-2xl hover:shadow-white/10 hover:scale-105 transition-all duration-100">
+                  <span className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse shadow-lg shadow-green-400/50"></span>
+                  <span className="text-sm font-black text-black-9000 tracking-wide">Trusted by 10,000+ young people across India</span>
+                </div> */}
 
                 {/* Empathetic Headlines */}
-                <h1 id="hero-heading" className="hero-title text-4xl lg:text-6xl font-bold text-black leading-tight mb-6 drop-shadow-sm">
-                  You're Not Alone.{' '}
-                  <span className="text-black font-black">
-                    We Understand.
+                <h1 id="hero-heading" className="hero-title text-3xl lg:text-5xl font-black text-white leading-tight mb-8 drop-shadow-2xl">
+                  <span className="bg-white/30 text-black font-black px-3 py-3 rounded-2xl  inline-block mb-4 transform hover:scale-105 transition-all duration-300 border-2 border-gray-800">
+                    You're Not Alone. We Help You Heal.
                   </span>
+                  <br />
+                  {/* <span className="bg-white/30 text-black font-black text-4xl lg:text-6xl drop-shadow-2xl px-4 py-2 rounded-2xl border-2 border-gray-800 shadow-2xl backdrop-blur-sm">
+                    We Understand.
+                  </span> */}
                 </h1>
                 
                 {/* Supportive Subheading */}
-                <p className="hero-subtitle text-xl lg:text-2xl text-black font-semibold leading-relaxed mb-4 max-w-2xl drop-shadow-sm">
-                  Mental health support that honors your culture, respects your family values, and understands the unique pressures you face as a young person in India.
-                </p>
+                <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 border border-gray-200 shadow-2xl">
+                  <p className="hero-subtitle text-lg lg:text-xl text-black font-black leading-relaxed max-w-2xl">
+                    Mental health support that honors your culture, respects your family values, and understands the unique pressures you face as a young person in India.
+                  </p>
+                </div>
 
                 {/* Emotional Connection Point */}
-                <div className="hero-subtitle bg-white/95 backdrop-blur-sm rounded-lg p-4 mb-8 border-l-4 border-l-purple-600 shadow-lg hover-lift">
-                  <p className="text-black font-medium italic">
-                    "Finally, someone who gets what it's like to balance family expectations with my own dreams. The support feels like talking to an understanding older sibling."
-                  </p>
-                  <cite className="text-sm text-gray-800 font-medium not-italic">- Priya, 19, Delhi University</cite>
+                <div className="hero-subtitle bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 border-l-4 border-l-purple-600 shadow-2xl hover-lift transform hover:scale-[1.02] transition-all duration-300">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
+                      <span className="text-white text-xl">💬</span>
+                    </div>
+                    <div>
+                      <p className="text-black font-black italic text-base leading-relaxed">
+                        "Finally, someone who gets what it's like to balance family expectations with my own dreams. The support feels like talking to an understanding older sibling."
+                      </p>
+                      <cite className="text-sm text-black font-black not-italic mt-2 block">- Priya, 19, Delhi University</cite>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Enhanced CTA Section */}
-                <div className="hero-cta flex flex-col sm:flex-row gap-4 mb-6">
-                  <button className="group bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-lift button-press focus-ring shadow-lg relative overflow-hidden btn-ripple">
-                    <span className="relative z-10">Start Your Healing Journey</span>
+                <div className="hero-cta flex flex-col sm:flex-row gap-6 mb-8">
+                  <button className="group relative bg-gradient-to-r from-purple-700 via-pink-700 to-blue-700 text-white px-10 py-5 rounded-2xl font-black text-base transition-all duration-300 hover-lift shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 overflow-hidden border-2 border-white/30">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span className="relative z-10 flex items-center justify-center drop-shadow-lg">
+                      <span className="mr-2 text-2xl">🌟</span>
+                      Start Your Healing Journey
+                      <span className="ml-2 text-2xl">🌟</span>
+                    </span>
                   </button>
-                  <button className="group bg-white text-black border-2 border-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover-scale button-press focus-ring shadow-lg hover:bg-gray-100">
-                    <span className="flex items-center">
+                  <button className="group bg-white/98 text-black border-3 border-gray-800 px-10 py-5 rounded-2xl font-black text-base transition-all duration-300 hover-scale shadow-2xl hover:bg-white hover:shadow-xl transform hover:scale-105">
+                    <span className="flex items-center justify-center">
                       Learn How We Help
-                      <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform icon-float" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg className="w-6 h-6 ml-2 group-hover:translate-x-2 transition-transform font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                       </svg>
                     </span>
                   </button>
@@ -215,28 +240,47 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Inspirational Quote Section - Now on right side with nature background */}
+              {/* Inspirational Quote Section - Enhanced with stunning visuals */}
               <div className={`relative transform transition-all duration-1200 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'} flex items-center justify-center min-h-96`}>
-                {/* Inspirational Quote/Mantra - Enhanced for better visibility */}
+                {/* Floating orbs background */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute top-1/4 left-1/4 w-20 h-20 bg-purple-400/30 rounded-full blur-xl animate-pulse animation-delay-1000"></div>
+                  <div className="absolute bottom-1/3 right-1/3 w-16 h-16 bg-pink-400/30 rounded-full blur-xl animate-pulse animation-delay-2000"></div>
+                  <div className="absolute top-2/3 left-1/2 w-24 h-24 bg-blue-400/20 rounded-full blur-xl animate-pulse animation-delay-3000"></div>
+                </div>
+                
+                {/* Enhanced Inspirational Quote Card */}
                 <div 
-                  className="bg-black/80 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20 inspiration-quote max-w-md"
+                  className="relative bg-white/98 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border-2 border-gray-800 inspiration-quote max-w-lg transform hover:scale-105 transition-all duration-300 hover:shadow-purple-500/30"
                   role="region"
                   aria-label="Daily inspiration"
                   aria-live="polite"
                 >
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-white leading-relaxed mb-4 inspiration-text transition-opacity duration-500">
+                  {/* Glowing border effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-3xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+                  
+                  <div className="relative text-center">
+                    {/* Quote icon */}
+                    <div className="mb-4">
+                      <span className="text-4xl drop-shadow-lg">✨</span>
+                    </div>
+                    
+                    <p className="text-lg font-black text-black leading-relaxed mb-6 inspiration-text transition-opacity duration-500">
                       "{inspirationalQuotes[currentQuoteIndex]}"
                     </p>
-                    <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full mx-auto"></div>
-                    <div className="flex justify-center mt-4 space-x-2">
+                    
+                    {/* Enhanced separator */}
+                    <div className="w-20 h-1 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 rounded-full mx-auto mb-4 shadow-lg shadow-purple-500/50"></div>
+                    
+                    {/* Progress indicators */}
+                    <div className="flex justify-center mt-4 space-x-3">
                       {inspirationalQuotes.map((_, index) => (
                         <div
                           key={index}
-                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          className={`w-3 h-3 rounded-full transition-all duration-500 ${
                             index === currentQuoteIndex 
-                              ? 'bg-white' 
-                              : 'bg-gray-500'
+                              ? 'bg-purple-600 shadow-lg shadow-purple-600/50 scale-125' 
+                              : 'bg-gray-400 hover:bg-gray-600'
                           }`}
                           aria-hidden="true"
                         />
@@ -245,10 +289,14 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Cultural Elements - Enhanced for nature background */}
-                <div className="absolute top-1/2 -left-12 text-6xl opacity-30 animate-pulse drop-shadow-lg" aria-hidden="true">🪷</div>
-                <div className="absolute bottom-1/4 -right-12 text-5xl opacity-35 animate-pulse animation-delay-2000 drop-shadow-lg" aria-hidden="true">🕉️</div>
-                <div className="absolute top-1/4 -right-8 text-4xl opacity-25 animate-pulse animation-delay-3000 drop-shadow-lg" aria-hidden="true">☮️</div>
+                {/* Enhanced Cultural Elements with interactive effects */}
+                <div className="absolute top-1/2 -left-12 text-6xl opacity-40 animate-pulse drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer" aria-hidden="true">🪷</div>
+                <div className="absolute bottom-1/4 -right-12 text-5xl opacity-45 animate-pulse animation-delay-2000 drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer" aria-hidden="true">🕉️</div>
+                <div className="absolute top-1/4 -right-8 text-4xl opacity-35 animate-pulse animation-delay-3000 drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer" aria-hidden="true">☮️</div>
+                
+                {/* Additional floating elements for visual richness */}
+                <div className="absolute top-3/4 -left-8 text-3xl opacity-25 animate-bounce animation-delay-4000 hover:scale-125 transition-transform cursor-pointer" aria-hidden="true">🌸</div>
+                <div className="absolute bottom-1/2 right-0 text-4xl opacity-30 animate-pulse animation-delay-5000 hover:scale-110 transition-transform cursor-pointer" aria-hidden="true">✨</div>
               </div>
             </div>
           </div>

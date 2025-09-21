@@ -151,6 +151,205 @@ export const authAPI = {
     const response = await api.put('/auth/privacy-settings', settings)
     return response.data
   },
+
+}
+
+// Gamification API methods
+export const gamificationAPI = {
+  // Get ALL gamification data in one request (optimized)
+  getDashboard: async () => {
+    const response = await api.get('/gamification/dashboard')
+    return response.data
+  },
+
+  // Get user points and level
+  getPoints: async () => {
+    const response = await api.get('/gamification/points')
+    return response.data
+  },
+
+  // Get user badges
+  getBadges: async () => {
+    const response = await api.get('/gamification/badges')
+    return response.data
+  },
+
+  // Get complete gamification profile
+  getProfile: async () => {
+    const response = await api.get('/gamification/profile')
+    return response.data
+  },
+
+  // Get available activities
+  getActivities: async () => {
+    const response = await api.get('/gamification/activities')
+    return response.data
+  },
+
+  // Get available badges
+  getAvailableBadges: async () => {
+    const response = await api.get('/gamification/available-badges')
+    return response.data
+  },
+
+  // Award points (internal use)
+  awardPoints: async (activityType: string, metadata: any = {}) => {
+    const response = await api.post('/gamification/award-points', {
+      activity_type: activityType,
+      metadata
+    })
+    return response.data
+  },
+
+  // Get user streaks
+  getStreaks: async () => {
+    const response = await api.get('/gamification/streaks')
+    return response.data
+  },
+
+  // Get streak achievements
+  getStreakAchievements: async () => {
+    const response = await api.get('/gamification/streak-achievements')
+    return response.data
+  },
+
+  // Get available streak milestones
+  getStreakMilestones: async (activityType?: string) => {
+    const params = activityType ? `?activity_type=${activityType}` : '';
+    const response = await api.get(`/gamification/streak-milestones${params}`)
+    return response.data
+  },
+
+  // Get user's current level and progression
+  getUserLevel: async () => {
+    const response = await api.get('/gamification/level')
+    return response.data
+  },
+
+  // Get user's level achievements
+  getLevelAchievements: async () => {
+    const response = await api.get('/gamification/level-achievements')
+    return response.data
+  },
+
+  // Get all available wellness levels
+  getWellnessLevels: async () => {
+    const response = await api.get('/gamification/levels')
+    return response.data
+  },
+
+  // ========== CHALLENGE SYSTEM METHODS ==========
+
+  // Get user's daily challenges
+  getDailyChallenges: async () => {
+    const response = await api.get('/gamification/challenges/daily')
+    return response.data
+  },
+
+  // Get user's weekly challenges
+  getWeeklyChallenges: async () => {
+    const response = await api.get('/gamification/challenges/weekly')
+    return response.data
+  },
+
+  // Complete a challenge
+  completeChallenge: async (challengeId: string, completionData: {
+    quality?: 'excellent' | 'good' | 'satisfactory';
+    notes?: string;
+    progress_data?: any;
+  }) => {
+    const response = await api.post(`/gamification/challenges/${challengeId}/complete`, completionData)
+    return response.data
+  },
+
+  // Get challenge statistics
+  getChallengeStats: async () => {
+    const response = await api.get('/gamification/challenges/stats')
+    return response.data
+  },
+
+  // Get available challenge templates
+  getChallengeTemplates: async (filters?: {
+    type?: 'daily' | 'weekly';
+    category?: string;
+    difficulty?: number;
+    dosha?: string;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters?.type) params.append('type', filters.type);
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.difficulty) params.append('difficulty', filters.difficulty.toString());
+    if (filters?.dosha) params.append('dosha', filters.dosha);
+    
+    const response = await api.get(`/gamification/challenges/templates?${params.toString()}`)
+    return response.data
+  },
+
+  // Assign new daily challenges
+  assignDailyChallenges: async () => {
+    const response = await api.post('/gamification/challenges/assign-daily')
+    return response.data
+  },
+
+  // ========== ACHIEVEMENT SYSTEM METHODS ==========
+
+  // Get achievement categories
+  getAchievementCategories: async () => {
+    const response = await api.get('/gamification/achievements/categories')
+    return response.data
+  },
+
+  // Get achievement tiers
+  getAchievementTiers: async () => {
+    const response = await api.get('/gamification/achievements/tiers')
+    return response.data
+  },
+
+  // Get all available achievements
+  getAvailableAchievements: async (includeSecret: boolean = false) => {
+    const params = includeSecret ? '?include_secret=true' : ''
+    const response = await api.get(`/gamification/achievements/available${params}`)
+    return response.data
+  },
+
+  // Get user's achievement progress
+  getAchievementProgress: async () => {
+    const response = await api.get('/gamification/achievements/progress')
+    return response.data
+  },
+
+  // Get user's earned achievements
+  getEarnedAchievements: async () => {
+    const response = await api.get('/gamification/achievements/earned')
+    return response.data
+  },
+
+  // Get user's achievement statistics
+  getAchievementStats: async () => {
+    const response = await api.get('/gamification/achievements/stats')
+    return response.data
+  },
+
+  // Get achievement collections
+  getAchievementCollections: async () => {
+    const response = await api.get('/gamification/achievements/collections')
+    return response.data
+  },
+
+  // Get user's collection progress
+  getCollectionProgress: async () => {
+    const response = await api.get('/gamification/achievements/collections/progress')
+    return response.data
+  },
+
+  // Trigger achievement check
+  triggerAchievementCheck: async (actionType: string, actionData: any = {}) => {
+    const response = await api.post('/gamification/achievements/check', {
+      actionType,
+      actionData
+    })
+    return response.data
+  }
 }
 
 export default api

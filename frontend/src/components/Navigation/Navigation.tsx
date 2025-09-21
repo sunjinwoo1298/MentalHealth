@@ -20,6 +20,7 @@ export default function Navigation({
   onLogout 
 }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isWellnessDropdownOpen, setIsWellnessDropdownOpen] = useState(false)
   const location = useLocation()
 
   const isActiveRoute = (path: string) => {
@@ -56,24 +57,80 @@ export default function Navigation({
                   🏠 Dashboard
                 </Link>
                 <Link 
-                  to="/chat" 
+                  to="/vrm-avatar" 
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isActiveRoute('/chat') 
+                    isActiveRoute('/vrm-avatar') 
                       ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' 
                       : 'text-gray-300 hover:text-teal-300 hover:bg-teal-500/10'
                   }`}
                 >
                   💬 AI Chat
                 </Link>
+                {/* Wellness Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsWellnessDropdownOpen(!isWellnessDropdownOpen)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 ${
+                      ['/meditation', '/journal', '/mood', '/checkin'].includes(location.pathname)
+                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
+                        : 'text-gray-300 hover:text-purple-300 hover:bg-purple-500/10'
+                    }`}
+                  >
+                    <span>🌱 Wellness</span>
+                    <svg className={`w-4 h-4 transition-transform duration-200 ${isWellnessDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {/* Wellness Dropdown Menu */}
+                  {isWellnessDropdownOpen && (
+                    <div className="absolute left-0 mt-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl shadow-xl border border-white/10 overflow-hidden z-50">
+                      <div className="p-2">
+                        <Link 
+                          to="/meditation" 
+                          className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:bg-purple-500/10 hover:text-purple-300 rounded-lg transition-all duration-200"
+                          onClick={() => setIsWellnessDropdownOpen(false)}
+                        >
+                          <span>🧘</span>
+                          <span>Meditation</span>
+                        </Link>
+                        <Link 
+                          to="/journal" 
+                          className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:bg-purple-500/10 hover:text-purple-300 rounded-lg transition-all duration-200"
+                          onClick={() => setIsWellnessDropdownOpen(false)}
+                        >
+                          <span>📝</span>
+                          <span>Journal</span>
+                        </Link>
+                        <Link 
+                          to="/mood" 
+                          className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:bg-purple-500/10 hover:text-purple-300 rounded-lg transition-all duration-200"
+                          onClick={() => setIsWellnessDropdownOpen(false)}
+                        >
+                          <span>📊</span>
+                          <span>Mood Tracker</span>
+                        </Link>
+                        <Link 
+                          to="/checkin" 
+                          className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:bg-purple-500/10 hover:text-purple-300 rounded-lg transition-all duration-200"
+                          onClick={() => setIsWellnessDropdownOpen(false)}
+                        >
+                          <span>✅</span>
+                          <span>Daily Check-in</span>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <Link 
-                  to="/wellness" 
+                  to="/gamification" 
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isActiveRoute('/wellness') 
-                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
-                      : 'text-gray-300 hover:text-purple-300 hover:bg-purple-500/10'
+                    isActiveRoute('/gamification') 
+                      ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30' 
+                      : 'text-gray-300 hover:text-pink-300 hover:bg-pink-500/10'
                   }`}
                 >
-                  🌱 Wellness
+                  🎮 Progress
                 </Link>
                 
                 {/* User Menu */}
@@ -195,9 +252,9 @@ export default function Navigation({
                     <span>Dashboard</span>
                   </Link>
                   <Link 
-                    to="/chat" 
+                    to="/vrm-avatar" 
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                      isActiveRoute('/chat') 
+                      isActiveRoute('/vrm-avatar') 
                         ? 'bg-teal-500/20 text-teal-300' 
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
                     }`}
@@ -207,16 +264,64 @@ export default function Navigation({
                     <span>AI Chat</span>
                   </Link>
                   <Link 
-                    to="/wellness" 
+                    to="/meditation" 
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                      isActiveRoute('/wellness') 
+                      isActiveRoute('/meditation') 
                         ? 'bg-purple-500/20 text-purple-300' 
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <span>🌱</span>
-                    <span>Wellness</span>
+                    <span>🧘</span>
+                    <span>Meditation</span>
+                  </Link>
+                  <Link 
+                    to="/journal" 
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                      isActiveRoute('/journal') 
+                        ? 'bg-purple-500/20 text-purple-300' 
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span>📝</span>
+                    <span>Journal</span>
+                  </Link>
+                  <Link 
+                    to="/mood" 
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                      isActiveRoute('/mood') 
+                        ? 'bg-purple-500/20 text-purple-300' 
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span>📊</span>
+                    <span>Mood Tracker</span>
+                  </Link>
+                  <Link 
+                    to="/checkin" 
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                      isActiveRoute('/checkin') 
+                        ? 'bg-purple-500/20 text-purple-300' 
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span>✅</span>
+                    <span>Daily Check-in</span>
+                  </Link>
+                  <Link 
+                    to="/gamification" 
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                      isActiveRoute('/gamification') 
+                        ? 'bg-pink-500/20 text-pink-300' 
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span>🎮</span>
+                    <span>Progress</span>
                   </Link>
                   
                   <hr className="my-3 border-white/10" />

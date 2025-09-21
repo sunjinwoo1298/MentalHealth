@@ -193,18 +193,6 @@ const OptimizedGamificationPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Debug Panel - Remove this in production */}
-          <GamificationDebug />
-          
-          {/* Testing Instructions */}
-          <div className="bg-blue-900/30 backdrop-blur-md rounded-xl p-4 mb-6 border border-blue-400/30">
-            <h3 className="text-blue-300 font-semibold mb-2">🧪 Testing Chat Rewards</h3>
-            <p className="text-blue-200 text-sm">
-              To test chat completion rewards: Go to <strong>💬 AI Chat</strong> (VRM Avatar page), 
-              send 3+ messages, then return here to see your rewards processed!
-            </p>
-          </div>
-
           {/* Main Action Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             
@@ -358,21 +346,7 @@ const OptimizedGamificationPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            
-            <div>
-              <div className="bg-gradient-to-br from-pink-500/20 to-rose-600/20 backdrop-blur-md rounded-2xl p-6 border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1">🧪 Quick Actions</h3>
-                    <p className="text-pink-200 text-sm">Test & debug features</p>
-                  </div>
-                  <div className="text-4xl">⚡</div>
-                </div>
-                <TestPoints className="bg-transparent border-0 shadow-none p-0" />
-              </div>
-            </div>
           </div>
-
           {/* Wellness Journey Insights */}
           <div className="mb-8">
             <h3 className="text-lg font-bold text-white mb-4 text-center">🇮🇳 Your Spiritual Progress</h3>

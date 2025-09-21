@@ -150,14 +150,6 @@ export class SocketService {
       socket.on('join_room', async (userId: string) => {
         socket.join(`user_${userId}`);
         logger.info(`User ${userId} joined their room`);
-        
-        // Send welcome message
-        socket.emit('chat:system', {
-          id: `system-${Date.now()}`,
-          type: 'system',
-          text: 'नमस्ते! Welcome to MindCare AI. Your conversations are secure and private. I\'m here to listen and support you. 💙',
-          timestamp: new Date().toISOString()
-        });
 
         // Check for proactive conversation starter
         try {

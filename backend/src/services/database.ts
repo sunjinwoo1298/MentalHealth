@@ -23,9 +23,16 @@ export class DatabaseService {
       database: process.env.DATABASE_NAME || 'mental_health_db',
       user: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'admin',
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      max: 10, // Reduced max connections to prevent pool exhaustion
+      idleTimeoutMillis: 60000, // Increased to 60 seconds
+      connectionTimeoutMillis: 10000, // Increased to 10 seconds
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
+    });
+
+    // Handle pool errors
+    this.pool.on('error', (err) => {
+      console.error('Unexpected error on idle client', err);
     });
   }
 
@@ -58,6 +65,9 @@ export class DatabaseService {
     try {
       const result = await client.query(text, params);
       return result;
+    } catch (error) {
+      console.error('Database query error:', error);
+      throw error;
     } finally {
       client.release();
     }

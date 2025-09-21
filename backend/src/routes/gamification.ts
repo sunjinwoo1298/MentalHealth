@@ -8,6 +8,119 @@ import { logger } from '../utils/logger';
 
 const router = express.Router();
 
+// Simple request queue to prevent overwhelming the database
+const requestQueue: Array<() => Promise<void>> = [];
+let processing = false;
+
+const processQueue = async () => {
+  if (processing || requestQueue.length === 0) return;
+  
+  processing = true;
+  while (requestQueue.length > 0) {
+    const request = requestQueue.shift();
+    if (request) {
+      try {
+        await request();
+      } catch (error) {
+        logger.error('Queue processing error:', error);
+      }
+    }
+    // Small delay between requests to prevent overwhelming
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+  processing = false;
+};
+
+const queueRequest = <T>(fn: () => Promise<T>): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    requestQueue.push(async () => {
+      try {
+        const result = await fn();
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    });
+    processQueue();
+  });
+};
+
+// Get ALL gamification data in one request (optimized for dashboard)
+router.get('/dashboard', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Fetch all data with individual error handling
+    const results = await Promise.allSettled([
+      GameService.getUserPoints(userId),
+      GameService.getUserLevel(userId),
+      GameService.getUserStreaks(userId),
+      GameService.getUserBadges(userId),
+      ChallengeService.getDailyChallenges(userId),
+      ChallengeService.getWeeklyChallenges(userId),
+      GameService.getLevelAchievements(userId),
+      GameService.getStreakAchievements(userId),
+      AchievementService.getUserProgress(userId).catch(() => []),
+      AchievementService.getUserStats(userId).catch(() => ({}))
+    ]);
+
+    // Extract results with fallbacks
+    const [
+      userPoints,
+      userLevel,
+      userStreaks,
+      userBadges,
+      dailyChallenges,
+      weeklyChallenges,
+      levelAchievements,
+      streakAchievements,
+      achievementProgress,
+      achievementStats
+    ] = results.map((result, index) => {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      } else {
+        logger.error(`Dashboard data fetch error at index ${index}:`, result.reason);
+        // Return appropriate fallbacks
+        switch (index) {
+          case 0: return { total_points: 0, available_points: 0, current_level: 1 }; // points
+          case 1: return { current_level: 1, points_to_next_level: 100 }; // level
+          case 2: case 3: case 4: case 5: case 6: case 7: case 8: return []; // arrays
+          case 9: return {}; // stats object
+          default: return null;
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        points: userPoints,
+        level: userLevel,
+        streaks: userStreaks,
+        badges: userBadges,
+        challenges: {
+          daily: dailyChallenges,
+          weekly: weeklyChallenges
+        },
+        achievements: {
+          level: levelAchievements,
+          streak: streakAchievements,
+          progress: achievementProgress,
+          stats: achievementStats
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching gamification dashboard:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get user's points and level information
 router.get('/points', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {

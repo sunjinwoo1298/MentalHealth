@@ -65,13 +65,17 @@ app.use(helmet({
 
 app.use(compression());
 
-// Rate limiting
+// Rate limiting - more lenient for development
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // limit each IP to 100 requests per windowMs
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'), // 1 minute
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '200'), // increased to 200 requests per minute
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  // Skip rate limiting for gamification endpoints during development
+  skip: (req) => {
+    return process.env.NODE_ENV === 'development' && req.path.includes('/api/gamification');
+  }
 });
 
 app.use(limiter);
@@ -136,17 +140,37 @@ app.use('*', (req, res) => {
 });
 
 // Graceful shutdown handling
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down gracefully');
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`${signal} received, shutting down gracefully`);
   
+  // Stop accepting new connections
   httpServer.close(() => {
     logger.info('HTTP server closed');
   });
   
-  // Close database connections
-  await db.close();
+  try {
+    // Close database connections
+    await db.close();
+    logger.info('Database connections closed');
+  } catch (error) {
+    logger.error('Error closing database connections:', error);
+  }
   
   process.exit(0);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
 
 process.on('SIGINT', async () => {

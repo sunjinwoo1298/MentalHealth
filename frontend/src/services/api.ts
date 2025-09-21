@@ -156,6 +156,12 @@ export const authAPI = {
 
 // Gamification API methods
 export const gamificationAPI = {
+  // Get ALL gamification data in one request (optimized)
+  getDashboard: async () => {
+    const response = await api.get('/gamification/dashboard')
+    return response.data
+  },
+
   // Get user points and level
   getPoints: async () => {
     const response = await api.get('/gamification/points')

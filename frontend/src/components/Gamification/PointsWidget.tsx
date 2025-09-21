@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { gamificationAPI } from '../../services/api';
+import { useGamificationDashboard } from '../../contexts/GamificationDashboardContext';
 
 interface UserPoints {
   total_points: number;
@@ -22,33 +22,20 @@ interface PointsWidgetProps {
 }
 
 const PointsWidget: React.FC<PointsWidgetProps> = ({ className = '' }) => {
-  const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
+  const { data, loading, error, refetch } = useGamificationDashboard();
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   const isDarkTheme = className?.includes('bg-transparent');
 
-  useEffect(() => {
-    fetchPointsData();
-  }, []);
+  // Extract points data from dashboard context
+  const userPoints = data?.points || null;
 
-  const fetchPointsData = async () => {
-    try {
-      setLoading(true);
-      const response = await gamificationAPI.getPoints();
-      
-      if (response.success) {
-        setUserPoints(response.data.points);
-        setRecentActivity(response.data.recent_activity || []);
-      }
-    } catch (err) {
-      console.error('Error fetching points data:', err);
-      setError('Failed to load points data');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (data?.points) {
+      // If there's recent activity data in the dashboard response, use it
+      setRecentActivity(data.points.recent_activity || []);
     }
-  };
+  }, [data]);
 
   const calculateLevelProgress = () => {
     if (!userPoints) return 0;
@@ -94,7 +81,7 @@ const PointsWidget: React.FC<PointsWidgetProps> = ({ className = '' }) => {
         <div className={`text-center ${isDarkTheme ? 'text-red-300' : 'text-red-600'}`}>
           <p>{error}</p>
           <button 
-            onClick={fetchPointsData}
+            onClick={refetch}
             className={`mt-2 px-4 py-2 rounded transition-colors ${isDarkTheme ? 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
           >
             Retry

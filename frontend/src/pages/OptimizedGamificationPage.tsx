@@ -1,28 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import PointsWidget from '../components/Gamification/PointsWidget';
-import LevelsWidget from '../components/Gamification/LevelsWidget';
-import StreaksWidget from '../components/Gamification/StreaksWidget';
-import BadgesWidget from '../components/Gamification/BadgesWidget';
-import ChallengesWidget from '../components/Gamification/ChallengesWidget';
-import TestPoints from '../components/Gamification/TestPoints';
-import GamificationDebug from '../components/Debug/GamificationDebug';
+import { gamificationAPI } from '../services/api';
 import Navigation from '../components/Navigation/Navigation';
+import GamificationDebug from '../components/Debug/GamificationDebug';
+import TestPoints from '../components/Gamification/TestPoints';
 import { useAuth } from '../contexts/AuthContext';
 import { useGamification } from '../contexts/GamificationContext';
-import { GamificationDashboardProvider } from '../contexts/GamificationDashboardContext';
 
-const GamificationPage: React.FC = () => {
-  return (
-    <GamificationDashboardProvider>
-      <GamificationPageContent />
-    </GamificationDashboardProvider>
-  );
-};
+interface GamificationData {
+  points: any;
+  level: any;
+  streaks: any[];
+  badges: any[];
+  challenges: {
+    daily: any[];
+    weekly: any[];
+  };
+  achievements: {
+    level: any[];
+    streak: any[];
+    progress: any[];
+    stats: any;
+  };
+}
 
-const GamificationPageContent: React.FC = () => {
+const OptimizedGamificationPage: React.FC = () => {
   const { user, logout } = useAuth();
-  const { pendingRewards, processPendingRewards, isProcessing } = useGamification();
+  const { pendingRewards, processPendingRewards } = useGamification();
+  const [data, setData] = useState<GamificationData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [rewardNotification, setRewardNotification] = useState<string | null>(null);
 
   const handleLogout = async () => {
@@ -70,6 +77,60 @@ const GamificationPageContent: React.FC = () => {
 
     processPendingOnMount();
   }, [pendingRewards, processPendingRewards]);
+
+  // Single API call to fetch all gamification data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const response = await gamificationAPI.getDashboard();
+        
+        if (response.success) {
+          setData(response.data);
+        } else {
+          setError('Failed to load dashboard data');
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <p className="text-purple-200">Loading your wellness journey...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-white mb-2">Failed to Load Progress</h2>
+          <p className="text-purple-200 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const { points, level, streaks, badges, challenges } = data;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 relative">
@@ -156,7 +217,17 @@ const GamificationPageContent: React.FC = () => {
                 </div>
                 <div className="text-4xl">🕉️</div>
               </div>
-              <PointsWidget className="bg-transparent border-0 shadow-none p-0" />
+              <div className="text-white">
+                <p className="text-3xl font-bold text-orange-300 mb-2">
+                  {points?.total_points || 0}
+                </p>
+                <p className="text-orange-200 text-sm">Total Karma Points Earned</p>
+                {points?.weekly_points && (
+                  <p className="text-orange-300 text-xs mt-1">
+                    +{points.weekly_points} this week
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Wellness Levels Section */}
@@ -168,7 +239,25 @@ const GamificationPageContent: React.FC = () => {
                 </div>
                 <div className="text-4xl">🌟</div>
               </div>
-              <LevelsWidget className="bg-transparent border-0 shadow-none p-0" />
+              <div className="text-white">
+                <p className="text-3xl font-bold text-indigo-300 mb-2">
+                  Level {level?.current_level || 1}
+                </p>
+                <p className="text-indigo-200 text-sm">Current Spiritual Level</p>
+                {level?.progress_to_next && (
+                  <div className="mt-3">
+                    <div className="w-full bg-indigo-900/30 rounded-full h-2">
+                      <div 
+                        className="bg-indigo-400 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(level.progress_to_next / level.points_needed) * 100}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-indigo-300 text-xs mt-1">
+                      {level.progress_to_next}/{level.points_needed} to next level
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -184,7 +273,24 @@ const GamificationPageContent: React.FC = () => {
                 </div>
                 <div className="text-4xl">🏅</div>
               </div>
-              <StreaksWidget className="bg-transparent border-0 shadow-none p-0" />
+              <div className="text-white">
+                {streaks && streaks.length > 0 ? (
+                  <div>
+                    <p className="text-3xl font-bold text-purple-300 mb-2">
+                      {streaks[0]?.current_streak || 0}
+                    </p>
+                    <p className="text-purple-200 text-sm">Days Active Streak</p>
+                    <p className="text-purple-300 text-xs mt-1">
+                      Best: {streaks[0]?.max_streak || 0} days
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-3xl font-bold text-purple-300 mb-2">0</p>
+                    <p className="text-purple-200 text-sm">Start your first streak!</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Badges & Achievements Section */}
@@ -196,7 +302,22 @@ const GamificationPageContent: React.FC = () => {
                 </div>
                 <div className="text-4xl">🎖️</div>
               </div>
-              <BadgesWidget className="bg-transparent border-0 shadow-none p-0" />
+              <div className="text-white">
+                <p className="text-3xl font-bold text-emerald-300 mb-2">
+                  {badges?.length || 0}
+                </p>
+                <p className="text-emerald-200 text-sm">Badges Earned</p>
+                {badges && badges.length > 0 && (
+                  <div className="flex space-x-1 mt-2">
+                    {badges.slice(0, 3).map((badge: any, index: number) => (
+                      <div key={index} className="text-lg">{badge.icon || '🏅'}</div>
+                    ))}
+                    {badges.length > 3 && (
+                      <span className="text-emerald-300 text-xs">+{badges.length - 3} more</span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -211,7 +332,30 @@ const GamificationPageContent: React.FC = () => {
                   </div>
                   <div className="text-4xl">🧘‍♀️</div>
                 </div>
-                <ChallengesWidget className="bg-transparent border-0 shadow-none p-0" />
+                <div className="space-y-3">
+                  {challenges?.daily && challenges.daily.length > 0 ? (
+                    challenges.daily.slice(0, 3).map((challenge: any, index: number) => (
+                      <div key={index} className="bg-teal-900/20 rounded-lg p-3 border border-teal-500/30">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-white font-medium text-sm">{challenge.name || challenge.title}</p>
+                            <p className="text-teal-200 text-xs">{challenge.description}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-teal-300 text-xs">+{challenge.points} points</span>
+                            {challenge.completed && (
+                              <div className="text-green-400 text-lg">✅</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="bg-teal-900/20 rounded-lg p-4 border border-teal-500/30 text-center">
+                      <p className="text-teal-200 text-sm">No daily challenges available</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -231,7 +375,7 @@ const GamificationPageContent: React.FC = () => {
 
           {/* Wellness Journey Insights */}
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-white mb-4 text-center">�🇳 Your Spiritual Progress</h3>
+            <h3 className="text-lg font-bold text-white mb-4 text-center">🇮🇳 Your Spiritual Progress</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 backdrop-blur-md rounded-xl p-6 border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300">
                 <div className="text-center">
@@ -298,9 +442,9 @@ const GamificationPageContent: React.FC = () => {
             </div>
           </div>
         </div>
-        </main>
+      </main>
     </div>
   );
 };
 
-export default GamificationPage;
+export default OptimizedGamificationPage;

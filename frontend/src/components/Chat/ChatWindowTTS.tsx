@@ -32,6 +32,10 @@ export default function ChatWindowTTS() {
   const [chatStartTime, setChatStartTime] = useState<Date | null>(null);
   const [messageCount, setMessageCount] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // Refs to track values for cleanup without dependency issues
+  const chatStartTimeRef = useRef<Date | null>(null);
+  const messageCountRef = useRef<number>(0);
 
   // Gamification integration
   const { addPendingReward } = useGamification();
@@ -83,26 +87,40 @@ export default function ChatWindowTTS() {
   };
 
   useEffect(() => {
-    // Set as connected for TTS mode
+    // Set as connected for TTS mode - only run once on mount
     setIsConnected(true);
-    setChatStartTime(new Date());
+    const startTime = new Date();
+    setChatStartTime(startTime);
     setMessageCount(0);
+    
+    // Update refs for cleanup
+    chatStartTimeRef.current = startTime;
+    messageCountRef.current = 0;
+  }, []); // Empty dependency array - run only on mount
 
-    // Cleanup function for gamification tracking
+  // Update refs when state changes
+  useEffect(() => {
+    chatStartTimeRef.current = chatStartTime;
+    messageCountRef.current = messageCount;
+  }, [chatStartTime, messageCount]);
+
+  // Separate effect for cleanup handling
+  useEffect(() => {
     return () => {
-      if (chatStartTime && messageCount >= 3) {
-        const sessionDuration = Date.now() - chatStartTime.getTime();
+      // Cleanup function for gamification tracking using refs
+      if (chatStartTimeRef.current && messageCountRef.current >= 3) {
+        const sessionDuration = Date.now() - chatStartTimeRef.current.getTime();
         const durationMinutes = Math.floor(sessionDuration / (1000 * 60));
         
         addPendingReward('chat_completion', {
-          messageCount,
+          messageCount: messageCountRef.current,
           durationMinutes,
           sessionId: 'tts-session',
           completedAt: new Date().toISOString()
         });
       }
     };
-  }, [addPendingReward, chatStartTime, messageCount]);
+  }, []); // Empty dependency - cleanup only on unmount
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import io from 'socket.io-client';
 import { useVrmAvatar } from '../../hooks/useVrmAvatar';
 import { EmotionControls } from '../VrmControls';
 import { useGamification } from '../../contexts/GamificationContext';
+import { mentalHealthContext } from '../../App';
 
 export type ChatMessage = {
   id: string;
@@ -10,6 +11,7 @@ export type ChatMessage = {
   text: string;
   timestamp: string;
   userId?: string;
+  context?: string; // Added support context
 };
 
 const systemWelcome: ChatMessage = {
@@ -30,13 +32,75 @@ const socket = io(SOCKET_URL, {
   reconnectionDelay: 1000,
 });
 
+// Chat Window Props
+interface ChatWindowProps {
+  context?: string; // Support context (academic, family, general)
+}
+
+// Context-specific information
+const getContextInfo = (context: string) => {
+  const contextMap = {
+    general: {
+      name: 'General Support',
+      description: 'Overall mental health and emotional wellness support',
+      icon: '💙',
+      color: 'blue-500',
+      bgColor: 'blue-50',
+      borderColor: 'blue-200'
+    },
+    academic: {
+      name: 'Academic Pressure Support',
+      description: 'Study stress, exam anxiety, career guidance, and educational challenges',
+      icon: '📚',
+      color: 'green-500',
+      bgColor: 'green-50',
+      borderColor: 'green-200'
+    },
+    family: {
+      name: 'Family Relationships Support',
+      description: 'Family relationships, communication, and household dynamics',
+      icon: '🏠',
+      color: 'yellow-500',
+      bgColor: 'yellow-50',
+      borderColor: 'yellow-200'
+    }
+  };
+  
+  return contextMap[context as keyof typeof contextMap] || contextMap.general;
+};
+
+// Context-specific welcome message
+const createContextWelcome = (context: string): ChatMessage => {
+  const contextInfo = getContextInfo(context);
+  const welcomeMessages = {
+    general: 'You are now connected to MindCare AI. All conversations are private and monitored for your safety.',
+    academic: `Welcome to ${contextInfo.name} ${contextInfo.icon} I understand the unique pressures students face. Let's talk about your academic journey and mental wellness.`,
+    family: `Welcome to ${contextInfo.name} ${contextInfo.icon} I know family relationships can be complex. This is a safe space to discuss family dynamics and emotions.`
+  };
+  
+  return {
+    id: 'system-welcome',
+    type: 'system',
+    text: welcomeMessages[context as keyof typeof welcomeMessages] || welcomeMessages.general,
+    timestamp: new Date().toISOString(),
+    context: context
+  };
+};
+
 export default function ChatWindow() {
-  const [messages, setMessages] = useState<ChatMessage[]>([systemWelcome]);
+  // Access context from App
+  const context=useContext(mentalHealthContext);
+  const contextInfo = getContextInfo(context?.currentContext || 'general');
+  const [messages, setMessages] = useState<ChatMessage[]>([createContextWelcome(context?.currentContext || 'general')]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [chatStartTime, setChatStartTime] = useState<Date | null>(null);
   const [messageCount, setMessageCount] = useState(0);
+  const [emotionalContext, setEmotionalContext] = useState<string[]>([]);
+  const [showEmotionalIndicator, setShowEmotionalIndicator] = useState(false);
+  const [conversationCount, setConversationCount] = useState(0);
+  const [aiInitiative, setAiInitiative] = useState<string | null>(null); // Track current context
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Gamification integration
@@ -155,6 +219,38 @@ export default function ChatWindow() {
       setIsTyping(false);
     });
 
+    // Handle emotional awareness updates
+    socket.on('chat:emotional_awareness', (data: { 
+      emotions?: string[]; 
+      type?: string; 
+      message?: string; 
+      conversation_count?: number;
+    }) => {
+      console.log('Emotional awareness update:', data);
+      if (data.emotions) {
+        setEmotionalContext(data.emotions);
+        setShowEmotionalIndicator(true);
+        setTimeout(() => setShowEmotionalIndicator(false), 5000); // Hide after 5 seconds
+      }
+      if (data.conversation_count) {
+        setConversationCount(data.conversation_count);
+      }
+      if (data.type && data.message) {
+        setAiInitiative(data.message);
+        setTimeout(() => setAiInitiative(null), 3000); // Hide after 3 seconds
+      }
+    });
+
+    // Handle emotional status updates
+    socket.on('emotional_status_update', (data: { 
+      userId: string; 
+      emotional_state: any; 
+      timestamp: string; 
+    }) => {
+      console.log('Emotional status update:', data);
+      // You can use this data to show emotional trends or insights
+    });
+
     // Cleanup on unmount
     return () => {
       socket.off('connect');
@@ -163,6 +259,8 @@ export default function ChatWindow() {
       socket.off('chat:system');
       socket.off('chat:typing');
       socket.off('chat:error');
+      socket.off('chat:emotional_awareness');
+      socket.off('emotional_status_update');
       socket.disconnect();
     };
   }, []);
@@ -205,6 +303,7 @@ export default function ChatWindow() {
       text: input,
       timestamp: new Date().toISOString(),
       userId: socket.id,
+      context: context?.currentContext, // Include support context
     };
 
     // Update avatar emotion based on user message
@@ -219,6 +318,27 @@ export default function ChatWindow() {
     }));
     
     setInput('');
+  };
+
+  // Function to request proactive conversation
+  const requestProactiveMessage = () => {
+    if (isConnected) {
+      socket.emit('request_proactive_message', socket.id);
+    }
+  };
+
+  // Function to request emotional check-in
+  const requestCheckIn = () => {
+    if (isConnected) {
+      socket.emit('initiate_check_in', socket.id);
+    }
+  };
+
+  // Function to request emotional status
+  const requestEmotionalStatus = () => {
+    if (isConnected) {
+      socket.emit('request_emotional_status', socket.id);
+    }
   };
 
   return (
@@ -259,14 +379,78 @@ export default function ChatWindow() {
 
         {/* Connection Status - Top Center */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 pointer-events-auto">
-          <span className={`text-xs px-3 py-1 rounded-full backdrop-blur-md ${
-            isConnected 
-              ? 'bg-green-500/30 text-green-300 border border-green-500/50' 
-              : 'bg-red-500/30 text-red-300 border border-red-500/50'
-          }`}>
-            {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
-          </span>
+          <div className="flex items-center space-x-2">
+            <span className={`text-xs px-3 py-1 rounded-full backdrop-blur-md ${
+              isConnected 
+                ? 'bg-green-500/30 text-green-300 border border-green-500/50' 
+                : 'bg-red-500/30 text-red-300 border border-red-500/50'
+            }`}>
+              {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+            </span>
+            {conversationCount > 0 && (
+              <span className="text-xs px-2 py-1 rounded-full bg-blue-500/30 text-blue-300 border border-blue-500/50 backdrop-blur-md">
+                Messages: {conversationCount}
+              </span>
+            )}
+          </div>
         </div>
+
+        {/* Emotional Awareness Indicator - Top Right */}
+        {showEmotionalIndicator && emotionalContext.length > 0 && (
+          <div className="absolute top-4 right-4 z-10 pointer-events-auto">
+            <div className="bg-purple-500/30 border border-purple-400/50 rounded-lg p-3 backdrop-blur-md">
+              <div className="text-xs text-purple-200 mb-1">AI is aware of:</div>
+              <div className="flex flex-wrap gap-1">
+                {emotionalContext.map((emotion, index) => (
+                  <span key={index} className="text-xs px-2 py-1 bg-purple-600/40 text-purple-100 rounded-full">
+                    {emotion}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* AI Initiative Indicator - Center Top */}
+        {aiInitiative && (
+          <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-10 pointer-events-auto">
+            <div className="bg-teal-500/30 border border-teal-400/50 rounded-lg p-2 backdrop-blur-md">
+              <span className="text-xs text-teal-200">💡 {aiInitiative}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Context Header - Top Right */}
+        <div className="absolute top-4 right-4 z-10 pointer-events-auto">
+          <div className={`rounded-lg p-3 backdrop-blur-md ${
+            context?.currentContext === 'academic' 
+              ? 'bg-green-500/20 border border-green-400/50' 
+              : context?.currentContext === 'family'
+              ? 'bg-yellow-500/20 border border-yellow-400/50'
+              : 'bg-blue-500/20 border border-blue-400/50'
+          }`}>
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">{getContextInfo(context?.currentContext || 'general').icon}</span>
+              <div>
+                <div className={`text-sm font-semibold ${
+                  context?.currentContext === 'academic' 
+                    ? 'text-green-300' 
+                    : context?.currentContext === 'family'
+                    ? 'text-yellow-300'
+                    : 'text-blue-300'
+                }`}>
+                  {getContextInfo(context?.currentContext || 'general').name}
+                </div>
+                <div className="text-xs text-gray-300 max-w-40">
+                  {getContextInfo(context?.currentContext || 'general').description}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Proactive Conversation Controls - Bottom Left */}
+        
 
         {/* Chat Messages - Center/Bottom Area */}
         <div className="flex-1 flex flex-col justify-end p-6 pointer-events-none">
@@ -276,10 +460,26 @@ export default function ChatWindow() {
                 <div className="max-w-[30%]">
                   {msg.type !== 'user' && (
                     <div className="flex items-center space-x-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                        <span className="text-white text-sm font-bold">AI</span>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        msg.id.includes('proactive') || msg.id.includes('checkin') 
+                          ? 'bg-gradient-to-r from-teal-500 to-blue-500' 
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                      }`}>
+                        <span className="text-white text-sm font-bold">
+                          {msg.id.includes('proactive') || msg.id.includes('checkin') ? '🤗' : 'AI'}
+                        </span>
                       </div>
-                      <span className="text-white/90 text-sm drop-shadow-lg">MindCare AI</span>
+                      <span className="text-white/90 text-sm drop-shadow-lg">
+                        {msg.id.includes('proactive') || msg.id.includes('checkin') 
+                          ? 'MindCare AI (reaching out)' 
+                          : 'MindCare AI'
+                        }
+                      </span>
+                      {msg.id.includes('proactive') && (
+                        <span className="text-xs px-2 py-1 bg-teal-500/30 text-teal-200 rounded-full border border-teal-400/30">
+                          💡 proactive
+                        </span>
+                      )}
                     </div>
                   )}
                   <div
@@ -287,7 +487,9 @@ export default function ChatWindow() {
                       msg.type === 'user'
                         ? 'bg-gradient-to-r from-pink-500/80 to-teal-500/80 text-white ml-auto border-pink-300/30'
                         : msg.type === 'ai'
-                        ? 'bg-gradient-to-r from-purple-500/80 to-indigo-600/80 text-white border-purple-300/30'
+                        ? msg.id.includes('proactive') || msg.id.includes('checkin')
+                          ? 'bg-gradient-to-r from-teal-500/80 to-blue-600/80 text-white border-teal-300/30'
+                          : 'bg-gradient-to-r from-purple-500/80 to-indigo-600/80 text-white border-purple-300/30'
                         : 'bg-gray-800/60 border-gray-500/40 text-gray-100'
                     }`}
                   >
@@ -360,7 +562,14 @@ export default function ChatWindow() {
             
             {/* Quick Response Suggestions */}
             <div className="flex flex-wrap gap-2">
-              {['I feel anxious today', 'Can you help me relax?', 'I need someone to talk to'].map((suggestion) => (
+              {[
+                'I feel anxious today', 
+                'Can you help me relax?', 
+                'I need someone to talk to',
+                'How can I manage stress?',
+                'I\'m feeling overwhelmed',
+                'Tell me something positive'
+              ].map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
@@ -377,4 +586,4 @@ export default function ChatWindow() {
       </div>
     </div>
   );
-}
+};

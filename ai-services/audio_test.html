@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Generation Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .result { 
+            margin: 10px 0; 
+            padding: 10px; 
+            background: #f8f9fa; 
+            border-radius: 4px; 
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        audio { width: 100%; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🎵 Mental Health AI - Audio Generation Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: TTS Endpoint Direct Test</h2>
+        <button onclick="testTTSEndpoint()">Test TTS Generation</button>
+        <div id="tts-result" class="result"></div>
+        <audio id="tts-audio" controls style="display: none;"></audio>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Chat with Audio</h2>
+        <input type="text" id="chat-input" placeholder="Enter your message..." style="width: 70%; padding: 8px;">
+        <button onclick="testChatWithAudio()">Send Message</button>
+        <div id="chat-result" class="result"></div>
+        <audio id="chat-audio" controls style="display: none;"></audio>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Audio Pipeline Analysis</h2>
+        <button onclick="analyzePipeline()">Analyze Audio Pipeline</button>
+        <div id="pipeline-result" class="result"></div>
+    </div>
+
+    <script>
+        async function testTTSEndpoint() {
+            const resultDiv = document.getElementById('tts-result');
+            const audioElement = document.getElementById('tts-audio');
+            
+            resultDiv.innerHTML = '⏳ Testing TTS endpoint...';
+            
+            try {
+                const response = await fetch('http://localhost:5010/tts/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: "Hello! This is a test of our mental health AI voice system.",
+                        voiceProfile: "compassionate_female",
+                        emotionContext: "supportive"
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.tts_result && data.tts_result.audio_base64) {
+                    const audioBase64 = data.tts_result.audio_base64;
+                    
+                    // Convert base64 to blob and create URL
+                    const audioBlob = new Blob(
+                        [Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0))], 
+                        { type: 'audio/mpeg' }
+                    );
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    audioElement.src = audioUrl;
+                    audioElement.style.display = 'block';
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ TTS Success!<br>
+                            🎙️ Provider: ${data.tts_result.provider}<br>
+                            🎭 Voice: ${data.tts_result.voice_profile}<br>
+                            😊 Emotion: ${data.tts_result.emotion_context}<br>
+                            ⏱️ Duration: ${data.tts_result.duration_seconds}s<br>
+                            📦 Audio Size: ${audioBase64.length} chars (${audioBlob.size} bytes)
+                        </div>
+                    `;
+                    
+                    // Auto-play after a short delay
+                    setTimeout(() => {
+                        audioElement.play().then(() => {
+                            console.log('✅ Audio playback started successfully');
+                        }).catch(err => {
+                            console.error('❌ Audio playback failed:', err);
+                        });
+                    }, 500);
+                    
+                } else {
+                    resultDiv.innerHTML = '<div class="error">❌ No audio data in TTS response</div>';
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ TTS Test Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testChatWithAudio() {
+            const input = document.getElementById('chat-input');
+            const resultDiv = document.getElementById('chat-result');
+            const audioElement = document.getElementById('chat-audio');
+            
+            const message = input.value.trim() || "I'm feeling anxious about my upcoming presentation";
+            
+            resultDiv.innerHTML = '⏳ Sending chat message...';
+            
+            try {
+                const response = await fetch('http://localhost:5010/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        userId: 'test-user',
+                        voice_preference: 'compassionate_female'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        💬 <strong>AI Response:</strong><br>
+                        ${data.response}<br><br>
+                        ${data.tts ? `
+                            🎵 <strong>Audio Generated:</strong><br>
+                            🎙️ Provider: ${data.tts.provider}<br>
+                            ✅ Success: ${data.tts.success}<br>
+                            📦 Has Audio: ${!!data.tts.audio_base64}
+                        ` : '❌ No TTS data'}
+                    </div>
+                `;
+                
+                if (data.tts && data.tts.audio_base64) {
+                    // Convert base64 to blob and play
+                    const audioBlob = new Blob(
+                        [Uint8Array.from(atob(data.tts.audio_base64), c => c.charCodeAt(0))], 
+                        { type: 'audio/mpeg' }
+                    );
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    audioElement.src = audioUrl;
+                    audioElement.style.display = 'block';
+                    
+                    setTimeout(() => audioElement.play(), 500);
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Chat Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function analyzePipeline() {
+            const resultDiv = document.getElementById('pipeline-result');
+            
+            resultDiv.innerHTML = '⏳ Analyzing audio pipeline...';
+            
+            let analysis = [];
+            
+            // Test 1: Backend Health
+            try {
+                const health = await fetch('http://localhost:5010/health');
+                const healthData = await health.json();
+                analysis.push(`✅ Backend: ${healthData.status} (Gemini: ${healthData.gemini_configured})`);
+            } catch (e) {
+                analysis.push('❌ Backend: Not accessible');
+            }
+            
+            // Test 2: TTS Voices
+            try {
+                const voices = await fetch('http://localhost:5010/tts/voices');
+                const voicesData = await voices.json();
+                analysis.push(`✅ TTS Voices: ${Object.keys(voicesData.mental_health_voices || {}).length} available`);
+            } catch (e) {
+                analysis.push('❌ TTS Voices: Not accessible');
+            }
+            
+            // Test 3: Browser Audio Support
+            const audio = new Audio();
+            const canPlayMP3 = audio.canPlayType('audio/mpeg');
+            analysis.push(`${canPlayMP3 ? '✅' : '❌'} Browser MP3 Support: ${canPlayMP3}`);
+            
+            // Test 4: Base64 Decoding
+            try {
+                const testB64 = btoa('test');
+                const decoded = atob(testB64);
+                analysis.push('✅ Base64 Decoding: Working');
+            } catch (e) {
+                analysis.push('❌ Base64 Decoding: Failed');
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="success">
+                    <strong>🔍 Audio Pipeline Analysis:</strong><br>
+                    ${analysis.join('<br>')}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

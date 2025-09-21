@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
 import ChatWindowWithTTS from '../components/Chat/ChatWindowWithTTS'
 import VRMAvatar from '../components/VRMAvatar/VRMAvatar_Simple'
 import '../styles/dashboard-animations.css'
+import ChatWindow from '../components/Chat/ChatWindow'
 
 // Sound effect URLs (you can replace these with actual audio files)
 const SOUNDS = {
@@ -24,6 +25,7 @@ const SOUNDS = {
 
 export default function ChatPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const [avatarState, setAvatarState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle')
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -32,6 +34,9 @@ export default function ChatPage() {
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [volume, setVolume] = useState(0.3)
   const [showSoundControls, setShowSoundControls] = useState(false)
+  
+  // Extract context from URL parameters
+  const chatContext = searchParams.get('context')
   
   // Audio refs
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null)
@@ -349,7 +354,7 @@ export default function ChatPage() {
 
             {/* Chat Messages Area */}
             <div className="flex-1 overflow-hidden">
-              <ChatWindowWithTTS />
+              <ChatWindow />
             </div>
           </div>
         </div>

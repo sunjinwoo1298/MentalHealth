@@ -1,193 +1,181 @@
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import uvicorn
+import sys
+import json
 import os
 from dotenv import load_dotenv
-
-# Import routers
-from app.routers import chat, intervention, wellness, analytics
-
-# Import services
-from app.services.gemini_service import GeminiService
-from app.services.intervention_service import InterventionService
-from app.services.emotion_analysis import EmotionAnalysisService
-from app.services.crisis_detection import CrisisDetectionService
-
-# Import models
-from app.models.chat_models import ChatRequest, ChatResponse
-from app.models.intervention_models import InterventionRequest, InterventionResponse
+import re
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import HumanMessage, AIMessage
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from systemprompt import PROMPT
+import requests
+import time
 
 load_dotenv()
 
-# Initialize FastAPI app
-app = FastAPI(
-    title="Mental Health AI Services",
-    description="AI-powered mental health support services using Google Gemini and LangChain",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
+# Initialize environment
+os.environ["GOOGLE_API_KEY"] = os.environ.get("GEMINI_API_KEY", "")
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all domains
 
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # Frontend
-        "http://localhost:3001",  # Backend API
-        os.getenv("FRONTEND_URL", "http://localhost:3000")
-    ],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
-)
+# Initialize AI components with simpler approach
+try:
+    geminiLlm = ChatGoogleGenerativeAI(
+        model="gemini-2.0-flash", 
+        temperature=0.7
+    )
+except Exception as e:
+    print(f"Warning: Could not initialize Gemini LLM: {e}")
+    geminiLlm = None
 
-# Security
-security = HTTPBearer()
+# Global conversation history per user (simplified approach)
+user_conversations = {}
 
-# Initialize services
-gemini_service = GeminiService()
-intervention_service = InterventionService()
-emotion_service = EmotionAnalysisService()
-crisis_service = CrisisDetectionService()
+def get_conversation_history(user_id):
+    """Get conversation history for a specific user"""
+    if user_id not in user_conversations:
+        user_conversations[user_id] = []
+    return user_conversations[user_id]
 
-# Include routers
-app.include_router(chat.router, prefix="/api/ai/chat", tags=["Chat AI"])
-app.include_router(intervention.router, prefix="/api/ai/intervention", tags=["Smart Interventions"])
-app.include_router(wellness.router, prefix="/api/ai/wellness", tags=["Wellness AI"])
-app.include_router(analytics.router, prefix="/api/ai/analytics", tags=["Analytics"])
+def add_to_conversation(user_id, human_message, ai_message):
+    """Add messages to conversation history"""
+    history = get_conversation_history(user_id)
+    history.append(HumanMessage(content=human_message))
+    history.append(AIMessage(content=ai_message))
+    
+    # Keep only last 20 messages to prevent context overflow
+    if len(history) > 20:
+        user_conversations[user_id] = history[-20:]
 
-@app.get("/")
-async def root():
-    return {
-        "message": "Mental Health AI Services",
-        "version": "1.0.0",
-        "status": "healthy",
-        "endpoints": {
-            "chat": "/api/ai/chat",
-            "intervention": "/api/ai/intervention", 
-            "wellness": "/api/ai/wellness",
-            "analytics": "/api/ai/analytics",
-            "docs": "/docs"
-        }
-    }
+def create_conversation_prompt(user_id, current_message):
+    """Create a conversation prompt with history and system instructions"""
+    history = get_conversation_history(user_id)
+    
+    # Build the conversation context
+    conversation_text = f"System Instructions: {PROMPT}\n\n"
+    conversation_text += "Previous Conversation:\n"
+    
+    for msg in history[-10:]:  # Only include last 10 messages for context
+        if isinstance(msg, HumanMessage):
+            conversation_text += f"Human: {msg.content}\n"
+        elif isinstance(msg, AIMessage):
+            conversation_text += f"AI: {msg.content}\n"
+    
+    conversation_text += f"\nHuman: {current_message}\nAI: "
+    return conversation_text
 
-@app.get("/health")
-async def health_check():
-    """Health check endpoint for monitoring"""
+@app.route("/health", methods=["GET"])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "healthy", 
+        "service": "MindCare AI Service",
+        "gemini_configured": bool(os.environ.get("GEMINI_API_KEY")),
+        "timestamp": time.time()
+    })
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    """Simple chat endpoint for real-time conversations"""
     try:
-        # Test Gemini connection
-        gemini_status = await gemini_service.health_check()
+        data = request.get_json()
+        print("Received chat request:", data)
         
-        return {
-            "status": "healthy",
-            "services": {
-                "gemini": gemini_status,
-                "intervention": "operational",
-                "emotion_analysis": "operational",
-                "crisis_detection": "operational"
-            },
-            "timestamp": "2024-01-01T00:00:00Z"
-        }
+        message = data.get("message", "")
+        user_id = data.get("userId", "anonymous")
+        
+        if not message:
+            return jsonify({"error": "Message is required"}), 400
+        
+        # Check if GEMINI_API_KEY is configured
+        if not os.environ.get("GEMINI_API_KEY") or not geminiLlm:
+            print("Warning: GEMINI_API_KEY not configured or LLM not initialized, using fallback response")
+            fallback_responses = [
+                "Everything will be okay. 🌟 I'm here to support you through whatever you're going through.",
+                "I hear you, and I want you to know that your feelings are valid. Take a deep breath with me. 💙",
+                "You're not alone in this. सब कुछ ठीक हो जाएगा (Everything will be fine). 🌈",
+                "Thank you for sharing with me. Your courage to reach out shows how strong you are. ✨"
+            ]
+            import random
+            return jsonify({
+                "response": random.choice(fallback_responses),
+                "userId": user_id,
+                "timestamp": time.time(),
+                "fallback": True
+            })
+        
+        # Create conversation prompt with history
+        conversation_prompt = create_conversation_prompt(user_id, message)
+        
+        # Get AI response using invoke method
+        response = geminiLlm.invoke(conversation_prompt)
+        
+        # Extract the content from the response
+        if hasattr(response, 'content'):
+            ai_response = response.content
+        else:
+            ai_response = str(response)
+        
+        print(f"AI Response for user {user_id}:", ai_response)
+        
+        # Add to conversation history
+        add_to_conversation(user_id, message, ai_response)
+        
+        # Format response: clean up any markdown formatting
+        formatted_response = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", ai_response)
+        formatted_response = formatted_response.replace("\\n", "\n")
+        formatted_response = formatted_response.replace("\\*", "*")
+        
+        return jsonify({
+            "response": formatted_response,
+            "userId": user_id,
+            "timestamp": time.time()
+        })
+        
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Service unhealthy: {str(e)}")
+        print(f"Error in chat endpoint: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        # Fallback response for any errors
+        fallback_responses = [
+            "Everything will be okay. 🌟 I'm here to support you through whatever you're going through.",
+            "I hear you, and I want you to know that your feelings are valid. Take a deep breath with me. 💙",
+            "You're not alone in this. Every challenge you face is making you stronger. सब कुछ ठीक हो जाएगा (Everything will be fine). 🌈"
+        ]
+        
+        import random
+        return jsonify({
+            "response": random.choice(fallback_responses),
+            "userId": user_id,
+            "timestamp": time.time(),
+            "error": "AI service temporarily unavailable, using fallback response"
+        }), 200  # Return 200 to avoid frontend errors
 
-@app.post("/api/ai/process-message")
-async def process_message(
-    request: ChatRequest,
-    background_tasks: BackgroundTasks,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-):
-    """
-    Main endpoint for processing user messages with AI analysis
-    Includes emotion detection, crisis assessment, and response generation
-    """
+@app.route("/clear_memory", methods=["POST"])
+def clear_memory():
+    """Clear conversation memory for a user"""
     try:
-        # Validate user token (would integrate with main backend auth)
-        user_id = request.user_id
+        data = request.get_json()
+        user_id = data.get("userId", "anonymous")
         
-        # 1. Analyze emotion and sentiment
-        emotion_analysis = await emotion_service.analyze_message(request.message)
-        
-        # 2. Crisis detection
-        crisis_assessment = await crisis_service.assess_risk(
-            message=request.message,
-            user_history=request.conversation_history,
-            emotion_data=emotion_analysis
-        )
-        
-        # 3. Generate AI response using Gemini
-        ai_response = await gemini_service.generate_response(
-            message=request.message,
-            context=request.conversation_history,
-            user_profile=request.user_profile,
-            emotion_state=emotion_analysis,
-            crisis_level=crisis_assessment.risk_level
-        )
-        
-        # 4. Check if intervention is needed
-        if crisis_assessment.intervention_needed:
-            intervention_response = await intervention_service.trigger_intervention(
-                user_id=user_id,
-                crisis_level=crisis_assessment.risk_level,
-                trigger_message=request.message,
-                recommended_actions=crisis_assessment.recommended_actions
-            )
+        if user_id in user_conversations:
+            del user_conversations[user_id]
+            return jsonify({"status": "Memory cleared", "userId": user_id})
+        else:
+            return jsonify({"status": "No memory found", "userId": user_id})
             
-            # Add intervention to background tasks
-            background_tasks.add_task(
-                intervention_service.log_intervention,
-                user_id,
-                intervention_response
-            )
-        
-        # 5. Prepare response
-        response = ChatResponse(
-            message=ai_response.content,
-            emotion_analysis=emotion_analysis,
-            crisis_assessment=crisis_assessment,
-            intervention_triggered=crisis_assessment.intervention_needed,
-            confidence_score=ai_response.confidence,
-            suggested_actions=ai_response.suggested_actions,
-            wellness_recommendations=ai_response.wellness_recommendations
-        )
-        
-        # Log conversation for learning (in background)
-        background_tasks.add_task(
-            log_conversation,
-            user_id,
-            request.message,
-            response
-        )
-        
-        return response
-        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing message: {str(e)}")
-
-async def log_conversation(user_id: str, user_message: str, ai_response: ChatResponse):
-    """Background task to log conversations for improvement"""
-    try:
-        # Log to database for analytics and model improvement
-        # This would integrate with the main backend database
-        pass
-    except Exception as e:
-        print(f"Error logging conversation: {e}")
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
-    return {
-        "error": exc.detail,
-        "status_code": exc.status_code,
-        "timestamp": "2024-01-01T00:00:00Z"
-    }
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.getenv("AI_SERVICES_PORT", 8000))
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=port,
-        reload=True if os.getenv("NODE_ENV") == "development" else False,
-        log_level="info"
-    )
+    print("Starting MindCare AI Service...")
+    print(f"System Prompt configured: {bool(PROMPT)}")
+    print(f"GEMINI_API_KEY configured: {bool(os.environ.get('GEMINI_API_KEY'))}")
+    
+    if not os.environ.get("GEMINI_API_KEY"):
+        print("⚠️  WARNING: GEMINI_API_KEY not found in environment variables!")
+        print("   The service will work with fallback responses, but AI functionality will be limited.")
+        print("   Please add GEMINI_API_KEY to your .env file for full functionality.")
+    
+    app.run(host='0.0.0.0', port=5010, debug=True)

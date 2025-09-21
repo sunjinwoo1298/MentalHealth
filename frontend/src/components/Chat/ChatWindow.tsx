@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import io from 'socket.io-client';
 import { useVrmAvatar } from '../../hooks/useVrmAvatar';
-import { EmotionControls } from '../VrmControls';
+// import { EmotionControls } from '../VrmControls'; // Unused - emotion control via analysis service
 import { useGamification } from '../../contexts/GamificationContext';
 import { mentalHealthContext } from '../../App';
+import { emotionAnalysisService, type EmotionAnalysisResult } from '../../services/emotionAnalysis';
 
 export type ChatMessage = {
   id: string;
@@ -14,12 +15,13 @@ export type ChatMessage = {
   context?: string; // Added support context
 };
 
-const systemWelcome: ChatMessage = {
-  id: 'system-welcome',
-  type: 'system',
-  text: 'You are now connected to MindCare AI. All conversations are private and monitored for your safety.',
-  timestamp: new Date().toISOString(),
-};
+// System welcome message (currently unused)
+// const systemWelcome: ChatMessage = {
+//   id: 'system-welcome',
+//   type: 'system',
+//   text: 'You are now connected to MindCare AI. All conversations are private and monitored for your safety.',
+//   timestamp: new Date().toISOString(),
+// };
 
 // Initialize socket outside the component to avoid multiple connections
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -32,10 +34,10 @@ const socket = io(SOCKET_URL, {
   reconnectionDelay: 1000,
 });
 
-// Chat Window Props
-interface ChatWindowProps {
-  context?: string; // Support context (academic, family, general)
-}
+// Chat Window Props (interface currently unused)
+// interface ChatWindowProps {
+//   context?: string; // Support context (academic, family, general)
+// }
 
 // Context-specific information
 const getContextInfo = (context: string) => {
@@ -90,7 +92,7 @@ const createContextWelcome = (context: string): ChatMessage => {
 export default function ChatWindow() {
   // Access context from App
   const context=useContext(mentalHealthContext);
-  const contextInfo = getContextInfo(context?.currentContext || 'general');
+  // const contextInfo = getContextInfo(context?.currentContext || 'general'); // Currently unused
   const [messages, setMessages] = useState<ChatMessage[]>([createContextWelcome(context?.currentContext || 'general')]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -115,27 +117,121 @@ export default function ChatWindow() {
     switchToEmotion
   } = useVrmAvatar();
 
-  // Auto-switch avatar emotions based on conversation
-  const updateAvatarEmotion = (messageText: string, messageType: 'user' | 'ai') => {
-    if (vrmLoading || isTransitioning) {
+  // Enhanced avatar emotion system
+  const [lastEmotionAnalysis, setLastEmotionAnalysis] = useState<EmotionAnalysisResult | null>(null);
+  const [emotionDebugInfo, setEmotionDebugInfo] = useState<string>('');
+  const [conversationTone, setConversationTone] = useState(emotionAnalysisService.getCurrentTone());
+
+  // Test function to manually trigger emotions (for debugging)
+  const testEmotionSwitch = async (emotion: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprised') => {
+    console.log('🧪 Manual emotion test:', emotion);
+    console.log('🧪 Current VRM state:', { vrmLoading, isTransitioning, currentEmotion });
+    
+    if (vrmLoading) {
+      console.log('🧪 Cannot test - VRM is loading');
       return;
     }
-
-    const text = messageText.toLowerCase();
     
-    if (messageType === 'ai') {
-      // AI is responding - show empathetic/happy expression
-      switchToEmotion('neutral');
-    } else if (messageType === 'user') {
-      // Analyze user message sentiment
-      if (text.includes('sad') || text.includes('depressed') || text.includes('down')) {
-        switchToEmotion('neutral'); // Compassionate listening
-      } else if (text.includes('angry') || text.includes('frustrated') || text.includes('mad')) {
-        switchToEmotion('neutral'); // Calm, understanding
-      } else if (text.includes('happy') || text.includes('good') || text.includes('great')) {
-        switchToEmotion('neutral'); // Share the joy
+    if (isTransitioning) {
+      console.log('🧪 Cannot test - VRM is transitioning');
+      return;
+    }
+    
+    console.log('🧪 Calling switchToEmotion directly:', emotion);
+    try {
+      await switchToEmotion(emotion);
+      console.log('🧪 Manual switchToEmotion completed successfully');
+    } catch (error) {
+      console.error('🧪 Manual switchToEmotion failed:', error);
+    }
+  };
+
+  // Enhanced auto-switch avatar emotions based on conversation
+  const updateAvatarEmotion = async (messageText: string, messageType: 'user' | 'ai', aiEmotions?: string[]) => {
+    console.log('🎭 updateAvatarEmotion called:', { messageText, messageType, aiEmotions, vrmLoading, isTransitioning });
+    
+    // if (vrmLoading || isTransitioning) {
+    //   console.log('🎭 Skipping emotion update - VRM loading or transitioning:', { vrmLoading, isTransitioning });
+    //   return;
+    // }
+
+    try {
+      // Use the emotion analysis service with throttling to determine the appropriate emotion
+      const analysis = emotionAnalysisService.analyzeMessageWithThrottling(
+        messageText,
+        messageType,
+        context?.currentContext || 'general',
+        aiEmotions
+      );
+
+      console.log('🎭 Emotion analysis result:', analysis);
+
+      setLastEmotionAnalysis(analysis);
+      setEmotionDebugInfo(`${analysis.primaryEmotion} (${Math.round(analysis.confidence * 100)}%) - ${analysis.reason}`);
+
+      // Only change emotion if analysis suggests it's appropriate and throttling allows it
+      if (analysis.shouldTransition) {
+        console.log(`🎭 Avatar emotion change: ${currentEmotion} → ${analysis.primaryEmotion}`, {
+          reason: analysis.reason,
+          confidence: analysis.confidence,
+          intensity: analysis.intensity,
+          messageType,
+          context: context?.currentContext,
+          throttled: false
+        });
+
+        console.log('🎭 Calling switchToEmotion with:', analysis.primaryEmotion);
+        try {
+          await switchToEmotion(analysis.primaryEmotion);
+          console.log('🎭 switchToEmotion completed successfully');
+        } catch (error) {
+          console.error('🎭 switchToEmotion failed:', error);
+        }
+
+        // Update conversation tone tracking
+        const updatedTone = emotionAnalysisService.updateConversationTone(analysis.primaryEmotion, messageText);
+        setConversationTone(updatedTone);
+
+        // Apply conversation-wide tone adjustments
+        applyConversationToneInfluence(updatedTone);
       } else {
-        switchToEmotion('neutral'); // Default neutral listening pose
+        console.log(`🎭 Avatar emotion change blocked: ${currentEmotion}`, {
+          reason: analysis.reason,
+          suggestedEmotion: analysis.primaryEmotion,
+          messageType,
+          throttled: analysis.reason.includes('throttled')
+        });
+      }
+    } catch (error) {
+      console.error('🎭 Error in emotion analysis:', error);
+      // Fallback to basic emotion logic
+      if (messageType === 'ai') {
+        console.log('🎭 Fallback: switching to neutral');
+        switchToEmotion('neutral');
+      }
+    }
+  };
+
+  // Apply conversation-wide tone influence to avatar behavior
+  const applyConversationToneInfluence = (tone: typeof conversationTone) => {
+    // If conversation has been consistently sad/negative, show more empathy
+    if (tone.overallMood === 'sad' && tone.stabilityScore > 0.7) {
+      console.log('🌊 Conversation tone: Sustained sadness detected - showing sustained empathy');
+      // The avatar will naturally show sad/empathetic expressions
+    }
+    
+    // If conversation has been positive and stable, maintain upbeat demeanor
+    else if (tone.overallMood === 'happy' && tone.stabilityScore > 0.8) {
+      console.log('🌊 Conversation tone: Positive mood sustained - maintaining cheerful demeanor');
+      // Avatar will naturally show happy expressions
+    }
+    
+    // If emotions are very unstable, be more neutral/calming
+    else if (tone.stabilityScore < 0.3) {
+      console.log('🌊 Conversation tone: Emotional instability detected - providing calm presence');
+      // Bias toward neutral, calming expressions
+      if (currentEmotion !== 'neutral') {
+        setTimeout(() => switchToEmotion('neutral'), 2000); // Gentle return to neutral
       }
     }
   };
@@ -143,6 +239,9 @@ export default function ChatWindow() {
   useEffect(() => {
     // Connect to socket
     socket.connect();
+
+    // Reset emotion analysis for new chat session
+    emotionAnalysisService.resetConversation();
 
     // Socket event listeners
     socket.on('connect', () => {
@@ -188,7 +287,7 @@ export default function ChatWindow() {
         setMessageCount(prev => prev + 1);
       }
       
-      // Update avatar emotion based on message
+      // Update avatar emotion based on message - no AI emotions for regular messages
       updateAvatarEmotion(msg.text, msg.type as 'user' | 'ai');
     });
 
@@ -225,16 +324,49 @@ export default function ChatWindow() {
       type?: string; 
       message?: string; 
       conversation_count?: number;
+      context?: string;
+      timestamp?: string;
     }) => {
-      console.log('Emotional awareness update:', data);
-      if (data.emotions) {
+      console.log('🧠 AI Emotional Awareness Update:', data);
+      
+      if (data.emotions && data.emotions.length > 0) {
         setEmotionalContext(data.emotions);
         setShowEmotionalIndicator(true);
         setTimeout(() => setShowEmotionalIndicator(false), 5000); // Hide after 5 seconds
+        
+        // Get the most recent AI message to apply emotion to
+        setMessages(prevMessages => {
+          const lastAIMessage = [...prevMessages].reverse().find(msg => msg.type === 'ai');
+          if (lastAIMessage && data.emotions) {
+            // Apply AI-detected emotions to the avatar with higher priority
+            console.log('🤖 Applying AI-detected emotions to avatar:', data.emotions);
+            updateAvatarEmotion(lastAIMessage.text, 'ai', data.emotions);
+            
+            // Update conversation tone with AI emotions for better tracking
+            const primaryAIEmotion = data.emotions[0];
+            const mappedEmotion = emotionAnalysisService.analyzeMessage(
+              `AI detected: ${primaryAIEmotion}`,
+              'ai',
+              data.context || context?.currentContext || 'general',
+              data.emotions
+            );
+            
+            if (mappedEmotion.shouldTransition) {
+              const updatedTone = emotionAnalysisService.updateConversationTone(
+                mappedEmotion.primaryEmotion, 
+                `AI emotional insight: ${data.emotions.join(', ')}`
+              );
+              setConversationTone(updatedTone);
+            }
+          }
+          return prevMessages;
+        });
       }
+      
       if (data.conversation_count) {
         setConversationCount(data.conversation_count);
       }
+      
       if (data.type && data.message) {
         setAiInitiative(data.message);
         setTimeout(() => setAiInitiative(null), 3000); // Hide after 3 seconds
@@ -306,7 +438,7 @@ export default function ChatWindow() {
       context: context?.currentContext, // Include support context
     };
 
-    // Update avatar emotion based on user message
+    // Update avatar emotion based on user message immediately
     updateAvatarEmotion(msg.text, 'user');
 
     // Emit message to server
@@ -320,26 +452,26 @@ export default function ChatWindow() {
     setInput('');
   };
 
-  // Function to request proactive conversation
-  const requestProactiveMessage = () => {
-    if (isConnected) {
-      socket.emit('request_proactive_message', socket.id);
-    }
-  };
+  // Function to request proactive conversation (currently disabled)
+  // const requestProactiveMessage = () => {
+  //   if (isConnected) {
+  //     socket.emit('request_proactive_message', socket.id);
+  //   }
+  // };
 
-  // Function to request emotional check-in
-  const requestCheckIn = () => {
-    if (isConnected) {
-      socket.emit('initiate_check_in', socket.id);
-    }
-  };
+  // Function to request emotional check-in (currently disabled)
+  // const requestCheckIn = () => {
+  //   if (isConnected) {
+  //     socket.emit('initiate_check_in', socket.id);
+  //   }
+  // };
 
-  // Function to request emotional status
-  const requestEmotionalStatus = () => {
-    if (isConnected) {
-      socket.emit('request_emotional_status', socket.id);
-    }
-  };
+  // Function to request emotional status (currently disabled)
+  // const requestEmotionalStatus = () => {
+  //   if (isConnected) {
+  //     socket.emit('request_emotional_status', socket.id);
+  //   }
+  // };
 
   return (
     <div className="h-full relative bg-transparent overflow-hidden">
@@ -369,6 +501,138 @@ export default function ChatWindow() {
       <div className="absolute inset-0 flex flex-col pointer-events-none">
         {/* Emotion Controls - Top Left */}
         <div className="absolute top-4 left-4 z-20 pointer-events-auto">
+          {/* Show emotion debug info in development */}
+          {process.env.NODE_ENV === 'development' && emotionDebugInfo && (
+            <div className="bg-black/70 text-white p-2 rounded text-xs mb-2 max-w-xs">
+              <div className="font-bold mb-1">🎭 Avatar Emotion System</div>
+              <div className="text-yellow-300">VRM Avatar: {currentEmotion}</div>
+              <div className="text-blue-300">Analysis: {emotionDebugInfo}</div>
+              <div className="text-purple-300">Is Transitioning: {isTransitioning ? 'Yes' : 'No'}</div>
+              <div className="text-red-300">VRM Loading: {vrmLoading ? 'Yes' : 'No'}</div>
+              {lastEmotionAnalysis && (
+                <div className="mt-1 text-xs opacity-75">
+                  Intensity: {lastEmotionAnalysis.intensity} | 
+                  Confidence: {Math.round(lastEmotionAnalysis.confidence * 100)}% |
+                  Should Transition: {lastEmotionAnalysis.shouldTransition ? 'Yes' : 'No'}
+                </div>
+              )}
+              
+              {/* Transition Throttling Info */}
+              <div className="mt-2 border-t border-white/20 pt-2">
+                <div className="font-bold mb-1">⏱️ Transition Control</div>
+                {(() => {
+                  const state = emotionAnalysisService.getCurrentEmotionState();
+                  const timeSinceLastTransition = Date.now() - state.lastTransition;
+                  return (
+                    <>
+                      <div>Last Transition: {timeSinceLastTransition < 1000 ? '<1s' : `${Math.round(timeSinceLastTransition / 1000)}s`} ago</div>
+                      <div className="text-green-300">Analysis Tracked: {state.emotion}</div>
+                      <div className={timeSinceLastTransition < 2000 ? 'text-red-300' : 'text-green-300'}>
+                        Status: {timeSinceLastTransition < 2000 ? 'Throttled' : 'Ready'}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+              
+              {/* Manual Emotion Test Buttons */}
+              <div className="mt-2 border-t border-white/20 pt-2">
+                <div className="font-bold mb-1">🧪 Manual Tests</div>
+                <div className="grid grid-cols-3 gap-1">
+                  <button 
+                    onClick={() => testEmotionSwitch('happy')}
+                    className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
+                  >
+                    Happy
+                  </button>
+                  <button 
+                    onClick={() => testEmotionSwitch('sad')}
+                    className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
+                  >
+                    Sad
+                  </button>
+                  <button 
+                    onClick={() => testEmotionSwitch('angry')}
+                    className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
+                  >
+                    Angry
+                  </button>
+                  <button 
+                    onClick={() => testEmotionSwitch('surprised')}
+                    className="bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded text-xs"
+                  >
+                    Surprised
+                  </button>
+                  <button 
+                    onClick={() => testEmotionSwitch('neutral')}
+                    className="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs col-span-2"
+                  >
+                    Neutral
+                  </button>
+                </div>
+                <div className="mt-1">
+                  <button 
+                    onClick={() => updateAvatarEmotion('I am so happy and excited!', 'user')}
+                    className="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs w-full mb-1"
+                  >
+                    Test Auto Emotion (Happy Message)
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      console.log('🧪 Testing emotion WITHOUT throttling');
+                      const analysis = emotionAnalysisService.analyzeMessageWithoutThrottling(
+                        'I am so sad and depressed', 'user', context?.currentContext || 'general'
+                      );
+                      console.log('🧪 Analysis result:', analysis);
+                      if (analysis.shouldTransition) {
+                        try {
+                          await switchToEmotion(analysis.primaryEmotion);
+                          console.log('🧪 No-throttle test completed successfully');
+                        } catch (error) {
+                          console.error('🧪 No-throttle test failed:', error);
+                        }
+                      }
+                    }}
+                    className="bg-orange-600 hover:bg-orange-700 px-2 py-1 rounded text-xs w-full"
+                  >
+                    Test Bypass Throttling (Sad)
+                  </button>
+                </div>
+              </div>
+              
+              {/* Manual Test Controls */}
+              <div className="mt-2 border-t border-white/20 pt-2">
+                <div className="font-bold mb-1">🧪 Manual Test</div>
+                <div className="flex gap-1 flex-wrap">
+                  {(['neutral', 'happy', 'sad', 'angry', 'surprised'] as const).map((emotion) => (
+                    <button
+                      key={emotion}
+                      onClick={() => {
+                        console.log('🧪 Manual test - switching to:', emotion);
+                        switchToEmotion(emotion);
+                      }}
+                      className="px-1 py-0.5 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+                    >
+                      {emotion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Conversation Tone Analysis */}
+              <div className="mt-2 border-t border-white/20 pt-2">
+                <div className="font-bold mb-1">🌊 Conversation Tone</div>
+                <div>Overall Mood: {conversationTone.overallMood}</div>
+                <div>Stability: {Math.round(conversationTone.stabilityScore * 100)}%</div>
+                <div>Recent: {conversationTone.recentEmotions.slice(-3).join(' → ')}</div>
+                <div className="text-xs opacity-75 mt-1">
+                  Messages: {conversationTone.emotionHistory.length}
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Uncomment to show manual emotion controls */}
           {/* <EmotionControls
             currentEmotion={currentEmotion}
             isLoading={vrmLoading}

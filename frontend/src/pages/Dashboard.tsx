@@ -331,7 +331,12 @@ export default function Dashboard() {
               )}
               
               <button 
-                onClick={() => navigate('/vrm-avatar')}
+                onClick={() => {
+                  navigate('/vrm-avatar')
+                  // Reset chat state or set context if needed
+                  context?.setCurrentContext("general");
+                  }
+                }
                 className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all duration-300 font-semibold"
               >
                 Continue Chat

@@ -10,6 +10,10 @@ from flask_cors import CORS
 from systemprompt import PROMPT
 import requests
 import time
+from gtts import gTTS
+import pygame
+import io
+import tempfile
 
 load_dotenv()
 
@@ -30,6 +34,36 @@ except Exception as e:
 
 # Global conversation history per user (simplified approach)
 user_conversations = {}
+
+def speak(text: str, lang: str = 'en'):
+    """
+    Convert text to speech and play it immediately using pygame.
+    No FFmpeg required.
+
+    Parameters:
+    - text: str -> The text you want to speak
+    - lang: str -> Language code (default is 'en')
+    
+    Usage:
+    >>> speak("Hello, this is a test")
+    """
+    # Generate speech with gTTS
+    tts = gTTS(text=text, lang=lang)
+
+    # Save to a temporary file
+    with tempfile.NamedTemporaryFile(delete=True, suffix=".mp3") as fp:
+        tts.write_to_fp(fp)
+        fp.seek(0)
+
+        # Initialize pygame mixer
+        pygame.mixer.init()
+        pygame.mixer.music.load(fp.name)
+        pygame.mixer.music.play()
+
+        # Wait until audio finishes
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+
 
 def get_conversation_history(user_id):
     """Get conversation history for a specific user"""
@@ -98,7 +132,7 @@ def chat():
             ]
             import random
             return jsonify({
-                "response": random.choice(fallback_responses),
+                "response": speak(random.choice(fallback_responses)) or random.choice(fallback_responses),
                 "userId": user_id,
                 "timestamp": time.time(),
                 "fallback": True
@@ -127,7 +161,7 @@ def chat():
         formatted_response = formatted_response.replace("\\*", "*")
         
         return jsonify({
-            "response": formatted_response,
+            "response": speak(formatted_response) or formatted_response,
             "userId": user_id,
             "timestamp": time.time()
         })
@@ -146,7 +180,7 @@ def chat():
         
         import random
         return jsonify({
-            "response": random.choice(fallback_responses),
+            "response": speak(random.choice(fallback_responses)) or random.choice(fallback_responses),
             "userId": user_id,
             "timestamp": time.time(),
             "error": "AI service temporarily unavailable, using fallback response"

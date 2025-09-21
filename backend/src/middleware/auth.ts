@@ -48,5 +48,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
       success: false,
       message: 'Authentication failed'
     });
+    return;
   }
 };

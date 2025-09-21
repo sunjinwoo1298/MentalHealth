@@ -20,6 +20,7 @@ import CheckInPage from './pages/CheckInPage'
 import TestGamificationPage from './pages/TestGamificationPage'
 import './App.css'
 
+
 function App() {
   return (
     <AuthProvider>
@@ -32,7 +33,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/onboarding" element={<OnboardingFlow />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat" element={<VrmAvatarPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/settings" element={<SettingsPage />} />

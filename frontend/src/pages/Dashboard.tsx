@@ -2,12 +2,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
-import PointsWidget from '../components/Gamification/PointsWidget'
-import BadgesWidget from '../components/Gamification/BadgesWidget'
-import StreaksWidget from '../components/Gamification/StreaksWidget'
-import LevelsWidget from '../components/Gamification/LevelsWidget'
-import ChallengesWidget from '../components/Gamification/ChallengesWidget'
-import TestPoints from '../components/Gamification/TestPoints'
 import '../styles/dashboard-animations.css'
 
 // Types for dashboard data
@@ -291,47 +285,7 @@ export default function Dashboard() {
 
           </div>
 
-          {/* Gamification Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Points Widget */}
-            <div className="fadeInUp" style={{ animationDelay: '0.9s' }}>
-              <PointsWidget />
-            </div>
-            
-            {/* Levels Widget */}
-            <div className="fadeInUp" style={{ animationDelay: '1.0s' }}>
-              <LevelsWidget />
-            </div>
-          </div>
 
-          {/* Second Row of Gamification */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Streaks Widget */}
-            <div className="fadeInUp" style={{ animationDelay: '1.1s' }}>
-              <StreaksWidget />
-            </div>
-            
-            {/* Badges Widget */}
-            <div className="fadeInUp" style={{ animationDelay: '1.2s' }}>
-              <BadgesWidget />
-            </div>
-          </div>
-
-          {/* Third Row - Challenges Widget */}
-          <div className="grid grid-cols-1 gap-8 mb-12">
-            {/* Daily/Weekly Challenges Widget */}
-            <div className="fadeInUp" style={{ animationDelay: '1.25s' }}>
-              <ChallengesWidget />
-            </div>
-          </div>
-
-          {/* Fourth Row - Test Component */}
-          <div className="grid grid-cols-1 gap-8 mb-12">
-            {/* Test Points Component */}
-            <div className="fadeInUp" style={{ animationDelay: '1.3s' }}>
-              <TestPoints />
-            </div>
-          </div>
 
           {/* Enhanced Progress Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">

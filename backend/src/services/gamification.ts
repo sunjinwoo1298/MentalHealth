@@ -419,13 +419,19 @@ export class GameService {
   // Update user streak for an activity
   static async updateStreak(userId: string, activityType: string, activityDate: string): Promise<any> {
     try {
-      // Get current streak or create new one
+      // Use a transaction + row-level lock to avoid races when updating streaks
+      await db.query('BEGIN');
+
+      // Try to select row FOR UPDATE
       let streakResult = await db.query(`
-        SELECT * FROM user_streaks 
+        SELECT *, (last_activity_date::date) as last_date FROM user_streaks 
         WHERE user_id = $1 AND activity_type = $2
+        FOR UPDATE
       `, [userId, activityType]);
 
-      const yesterday = new Date();
+      // Compute yesterday string relative to activityDate (not server now)
+      const activityDt = new Date(activityDate);
+      const yesterday = new Date(activityDt);
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
 
@@ -434,47 +440,62 @@ export class GameService {
         const newStreak = await db.query(`
           INSERT INTO user_streaks (user_id, activity_type, current_streak, longest_streak, 
                                    last_activity_date, streak_start_date, is_active)
-          VALUES ($1, $2, 1, 1, $3, $3, true)
+          VALUES ($1, $2, 1, 1, $3::date, $3::date, true)
           RETURNING *
         `, [userId, activityType, activityDate]);
-        
+
+        await db.query('COMMIT');
         return newStreak.rows[0];
       } else {
         const currentStreak = streakResult.rows[0];
-        const lastActivityDate = currentStreak.last_activity_date;
-        
+
+        // Let PostgreSQL do the date comparisons to avoid JS timezone issues
+        const cmp = await db.query(`
+          SELECT (last_activity_date::date = $1::date) as is_same_day,
+                 (last_activity_date::date = ($1::date - INTERVAL '1 day')) as is_yesterday
+          FROM user_streaks
+          WHERE user_id = $2 AND activity_type = $3
+        `, [activityDate, userId, activityType]);
+
+        const isSameDay = cmp.rows.length > 0 && (cmp.rows[0].is_same_day === true || cmp.rows[0].is_same_day === 't');
+        const isYesterday = cmp.rows.length > 0 && (cmp.rows[0].is_yesterday === true || cmp.rows[0].is_yesterday === 't');
+
         // Check if activity was done yesterday (continuing streak) or today (same day)
-        if (lastActivityDate === activityDate) {
+        if (isSameDay) {
           // Same day - no change to streak count
+          await db.query('COMMIT');
           return currentStreak;
-        } else if (lastActivityDate === yesterdayStr) {
+        } else if (isYesterday) {
           // Consecutive day - increment streak
           const newStreakCount = currentStreak.current_streak + 1;
           const newLongest = Math.max(newStreakCount, currentStreak.longest_streak);
-          
+
           const updatedStreak = await db.query(`
             UPDATE user_streaks 
-            SET current_streak = $1, longest_streak = $2, last_activity_date = $3, 
+            SET current_streak = $1, longest_streak = $2, last_activity_date = $3::date, 
                 is_active = true, updated_at = NOW()
             WHERE user_id = $4 AND activity_type = $5
             RETURNING *
           `, [newStreakCount, newLongest, activityDate, userId, activityType]);
-          
+
+          await db.query('COMMIT');
           return updatedStreak.rows[0];
         } else {
           // Streak broken - reset to 1
           const updatedStreak = await db.query(`
             UPDATE user_streaks 
-            SET current_streak = 1, last_activity_date = $1, streak_start_date = $1,
+            SET current_streak = 1, last_activity_date = $1::date, streak_start_date = $1::date,
                 is_active = true, updated_at = NOW()
             WHERE user_id = $2 AND activity_type = $3
             RETURNING *
           `, [activityDate, userId, activityType]);
-          
+
+          await db.query('COMMIT');
           return updatedStreak.rows[0];
         }
       }
     } catch (error) {
+      try { await db.query('ROLLBACK'); } catch (e) { /* ignore */ }
       logger.error('Error updating streak:', error);
       throw error;
     }
@@ -518,31 +539,41 @@ export class GameService {
         return {};
       }
 
-      // Award milestone achievement
+      // Award milestone achievement idempotently (insert only if not exists)
+      const streakId = streakRecord.rows[0].id;
       await db.query(`
-        INSERT INTO user_streak_achievements (user_id, streak_id, milestone_id, points_awarded)
-        VALUES ($1, $2, $3, $4)
-      `, [userId, streakRecord.rows[0].id, milestone.id, milestone.reward_points]);
+        INSERT INTO user_streak_achievements (user_id, streak_id, milestone_id, points_awarded, achieved_at)
+        SELECT $1, $2, $3, $4, NOW()
+        WHERE NOT EXISTS (
+          SELECT 1 FROM user_streak_achievements WHERE user_id = $1 AND streak_id = $2 AND milestone_id = $3
+        )
+      `, [userId, streakId, milestone.id, milestone.reward_points]);
 
-      // Award points if any
+      // Award points if any — do this directly to avoid re-entering recordDailyActivity
       if (milestone.reward_points > 0) {
-        await this.awardPoints(userId, 'streak_milestone', {
-          milestone_name: milestone.milestone_name,
-          streak_days: currentStreak,
-          activity_type: activityType
-        });
+        // Update or create user_points
+        const upRes = await db.query('SELECT * FROM user_points WHERE user_id = $1', [userId]);
+        if (upRes.rows.length === 0) {
+          await db.query(`INSERT INTO user_points (user_id, total_points, available_points, lifetime_points) VALUES ($1, $2, $2, $2)`, [userId, milestone.reward_points]);
+        } else {
+          const u = upRes.rows[0];
+          const newTotal = (u.total_points || 0) + milestone.reward_points;
+          const newAvailable = (u.available_points || 0) + milestone.reward_points;
+          const newLifetime = (u.lifetime_points || 0) + milestone.reward_points;
+          await db.query(`UPDATE user_points SET total_points = $1, available_points = $2, lifetime_points = $3, updated_at = NOW() WHERE user_id = $4`, [newTotal, newAvailable, newLifetime, userId]);
+          // trigger level check
+          await this.checkLevelUp(userId, newTotal);
+        }
+
+        // Insert a transaction record
+        await db.query(`INSERT INTO point_transactions (user_id, activity_id, transaction_type, points_amount, description, metadata) VALUES ($1, NULL, 'earned', $2, $3, $4)`, [userId, milestone.reward_points, `Streak milestone: ${milestone.milestone_name}`, JSON.stringify({ activity_type: activityType, streak_days: currentStreak })]);
       }
 
-      // Award badge if associated
+      // Award badge if associated (idempotent)
       if (milestone.badge_id) {
-        const existingBadge = await db.query(`
-          SELECT * FROM user_badges WHERE user_id = $1 AND badge_id = $2
-        `, [userId, milestone.badge_id]);
-
+        const existingBadge = await db.query(`SELECT * FROM user_badges WHERE user_id = $1 AND badge_id = $2`, [userId, milestone.badge_id]);
         if (existingBadge.rows.length === 0) {
-          await db.query(`
-            INSERT INTO user_badges (user_id, badge_id) VALUES ($1, $2)
-          `, [userId, milestone.badge_id]);
+          await db.query(`INSERT INTO user_badges (user_id, badge_id) VALUES ($1, $2)`, [userId, milestone.badge_id]);
         }
       }
 

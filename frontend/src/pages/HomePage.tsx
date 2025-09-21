@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation/Navigation'
+import { Link } from 'react-router-dom'
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -938,7 +939,7 @@ export default function HomePage() {
               <ul className="space-y-2">
                 {['Services', 'About', 'Contact'].map((link) => (
                   <li key={link}>
-                    <a href="#" className="text-neutral-300 hover:text-white transition-colors">{link}</a>
+                    <Link to="/" className="text-neutral-300 hover:text-white transition-colors">{link}</Link>
                   </li>
                 ))}
               </ul>
@@ -948,7 +949,7 @@ export default function HomePage() {
               <ul className="space-y-2">
                 {['Blog', 'Self-Help', 'Crisis Help'].map((link) => (
                   <li key={link}>
-                    <a href="#" className="text-neutral-300 hover:text-white transition-colors">{link}</a>
+                    <Link to="/" className="text-neutral-300 hover:text-white transition-colors">{link}</Link>
                   </li>
                 ))}
               </ul>

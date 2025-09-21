@@ -42,10 +42,9 @@ const TestPoints: React.FC<TestPointsProps> = ({ className = '' }) => {
         
         setMessage(msg);
         
-        // Refresh the page components after 2 seconds
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        // Do not force a full page reload; update local UI state so components can
+        // react to the new data. If a parent refresh is required, pass a callback
+        // prop (onSuccess) or use a shared data store / React Query to refetch.
       }
     } catch (err) {
       console.error('Error awarding points:', err);

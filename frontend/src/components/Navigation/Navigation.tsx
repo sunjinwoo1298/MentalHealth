@@ -99,6 +99,9 @@ export default function Navigation({
                           <Link to="/privacy" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-purple-400">
                             Privacy
                           </Link>
+                          <Link to="/gamification" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-blue-400">
+                            Gamification
+                          </Link>
                           <hr className="my-1 border-gray-600" />
                           <button
                             onClick={onLogout}

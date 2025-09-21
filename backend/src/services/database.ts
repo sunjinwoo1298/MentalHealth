@@ -1,4 +1,5 @@
 import { Pool, Client } from 'pg';
+import { types as pgTypes } from 'pg';
 import crypto from 'crypto';
 
 export class DatabaseService {
@@ -7,7 +8,15 @@ export class DatabaseService {
 
   constructor() {
     this.encryptionKey = process.env.ENCRYPTION_KEY || 'fallback-key';
-    
+    // Ensure Postgres DATE types are returned as strings (YYYY-MM-DD) to avoid timezone shifts
+    // 1082 is the OID for DATE
+    try {
+      pgTypes.setTypeParser(1082, (val: string) => val);
+    } catch (e: any) {
+      // Non-fatal if this fails in some environments
+      // eslint-disable-next-line no-console
+      console.warn('Warning: could not set pg type parser for DATE:', e?.message ?? e);
+    }
     this.pool = new Pool({
       host: process.env.DATABASE_HOST || 'localhost',
       port: parseInt(process.env.DATABASE_PORT || '5432'),

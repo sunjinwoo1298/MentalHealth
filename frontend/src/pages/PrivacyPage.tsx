@@ -10,8 +10,6 @@ import {
   FormControlLabel,
   Switch,
   Divider,
-  Card,
-  CardContent,
   Alert,
   Dialog,
   DialogTitle,
@@ -22,7 +20,11 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListItemSecondaryAction
+  ListItemSecondaryAction,
+  Fade,
+  Slide,
+  Zoom,
+  Chip
 } from '@mui/material'
 import {
   Security as SecurityIcon,
@@ -32,8 +34,12 @@ import {
   Lock as LockIcon,
   Visibility as VisibilityIcon,
   Warning as WarningIcon,
-  Check as CheckIcon
+  Check as CheckIcon,
+  ArrowBack as ArrowBackIcon,
+  PrivacyTip as PrivacyIcon,
+  DataUsage as DataUsageIcon
 } from '@mui/icons-material'
+import Navigation from '../components/Navigation/Navigation'
 
 interface PrivacySettings {
   dataVisibility: {
@@ -84,7 +90,7 @@ const DEFAULT_PRIVACY_SETTINGS: PrivacySettings = {
 }
 
 export default function PrivacyPage() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const [settings, setSettings] = useState<PrivacySettings>(() => DEFAULT_PRIVACY_SETTINGS)
   const [loading, setLoading] = useState(true)
@@ -96,6 +102,11 @@ export default function PrivacyPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
+
+  const handleLogout = () => {
+    localStorage.clear()
+    navigate('/')
+  }
   
   useEffect(() => {
     if (!isAuthenticated) {
@@ -261,342 +272,858 @@ export default function PrivacyPage() {
 
   if (loading) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography variant="h4" gutterBottom>Privacy & Data Settings</Typography>
-        <Card>
-          <CardContent>
-            <Typography>Loading privacy settings...</Typography>
-          </CardContent>
-        </Card>
-      </Container>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 flex items-center justify-center">
+        <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-md rounded-3xl p-8 border border-blue-400/30 shadow-xl">
+          <Typography variant="h6" sx={{ color: 'white', textAlign: 'center' }}>
+            Loading privacy settings...
+          </Typography>
+        </div>
+      </div>
     )
   }
 
   // Safety check to ensure settings are properly initialized
   if (!settings || !settings.dataVisibility || !settings.dataRetention || !settings.thirdPartySharing || !settings.security) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography variant="h4" gutterBottom>Privacy & Data Settings</Typography>
-        <Card>
-          <CardContent>
-            <Typography>Initializing privacy settings...</Typography>
-          </CardContent>
-        </Card>
-      </Container>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 flex items-center justify-center">
+        <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-md rounded-3xl p-8 border border-blue-400/30 shadow-xl">
+          <Typography variant="h6" sx={{ color: 'white', textAlign: 'center' }}>
+            Initializing privacy settings...
+          </Typography>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <SecurityIcon fontSize="large" />
-          Privacy & Data Settings
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Manage how your data is collected, stored, and shared. Your privacy is our top priority.
-        </Typography>
-      </Box>
-
-      {/* Success/Error Messages */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess('')}>
-          {success}
-        </Alert>
-      )}
-
-      {/* Data Visibility Settings */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <VisibilityIcon />
-            Data Visibility
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Control what information is visible and how it's used.
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.dataVisibility.profilePublic}
-                  onChange={(e) => updateSetting('dataVisibility', 'profilePublic', e.target.checked)}
-                />
-              }
-              label="Make profile information public"
-              sx={{ mb: 1 }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.dataVisibility.activityVisible}
-                  onChange={(e) => updateSetting('dataVisibility', 'activityVisible', e.target.checked)}
-                />
-              }
-              label="Show activity status to other users"
-              sx={{ mb: 1 }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.dataVisibility.progressSharing}
-                  onChange={(e) => updateSetting('dataVisibility', 'progressSharing', e.target.checked)}
-                />
-              }
-              label="Allow progress sharing with healthcare providers"
-              sx={{ mb: 1 }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.dataVisibility.anonymousAnalytics}
-                  onChange={(e) => updateSetting('dataVisibility', 'anonymousAnalytics', e.target.checked)}
-                />
-              }
-              label="Anonymous usage analytics to improve the platform"
-            />
-          </FormGroup>
-        </CardContent>
-      </Card>
-
-      {/* Data Retention Settings */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <LockIcon />
-            Data Retention
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Control how long your data is stored on our servers.
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.dataRetention.keepChatHistory}
-                  onChange={(e) => updateSetting('dataRetention', 'keepChatHistory', e.target.checked)}
-                />
-              }
-              label="Keep chat history for personalized experience"
-              sx={{ mb: 2 }}
-            />
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                Data retention period: {settings.dataRetention.retentionPeriodDays} days
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 relative">
+      {/* Animated Background Effects */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mix-blend-soft-light filter blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-20 left-20 w-64 h-64 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full mix-blend-soft-light filter blur-2xl animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mix-blend-soft-light filter blur-3xl opacity-30"></div>
+      </div>
+      
+      <Navigation 
+        isAuthenticated={isAuthenticated}
+        user={user || undefined}
+        onLogout={handleLogout}
+      />
+      
+      <div className="relative z-10 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
+        <Container maxWidth="md">
+          {/* Header */}
+          <Fade in timeout={800}>
+            <Box sx={{ mb: 4 }}>
+              <Button
+                startIcon={<ArrowBackIcon />}
+                onClick={() => navigate('/dashboard')}
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  mb: 3,
+                  '&:hover': {
+                    color: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    transform: 'translateX(-4px)'
+                  },
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '12px',
+                  px: 2,
+                  py: 1
+                }}
+              >
+                Back to Dashboard
+              </Button>
+              
+              <Typography 
+                variant="h3" 
+                component="h1" 
+                fontWeight="bold"
+                sx={{
+                  color: 'white',
+                  mb: 2,
+                  background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}
+              >
+                🔒 Privacy & Data Settings
               </Typography>
-              <input
-                type="range"
-                min="30"
-                max="1095"
-                step="30"
-                value={settings.dataRetention.retentionPeriodDays}
-                onChange={(e) => updateSetting('dataRetention', 'retentionPeriodDays', parseInt(e.target.value))}
-                style={{ width: '100%' }}
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'text.secondary' }}>
-                <span>30 days</span>
-                <span>3 years</span>
-              </Box>
-            </Box>
-            
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.dataRetention.autoDeleteInactive}
-                  onChange={(e) => updateSetting('dataRetention', 'autoDeleteInactive', e.target.checked)}
-                />
-              }
-              label="Auto-delete data after 1 year of inactivity"
-            />
-          </FormGroup>
-        </CardContent>
-      </Card>
-
-      {/* Third-party Sharing */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ShieldIcon />
-            Third-party Sharing
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Control how your anonymized data may be used for research and improvement.
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.thirdPartySharing.researchParticipation}
-                  onChange={(e) => updateSetting('thirdPartySharing', 'researchParticipation', e.target.checked)}
-                />
-              }
-              label="Participate in mental health research (anonymized data)"
-              sx={{ mb: 1 }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.thirdPartySharing.improvementAnalytics}
-                  onChange={(e) => updateSetting('thirdPartySharing', 'improvementAnalytics', e.target.checked)}
-                />
-              }
-              label="Help improve AI responses through anonymized feedback"
-              sx={{ mb: 1 }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.thirdPartySharing.marketingCommunications}
-                  onChange={(e) => updateSetting('thirdPartySharing', 'marketingCommunications', e.target.checked)}
-                />
-              }
-              label="Receive marketing communications and updates"
-            />
-          </FormGroup>
-        </CardContent>
-      </Card>
-
-      {/* Security Settings */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <SecurityIcon />
-            Security Settings
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Additional security measures to protect your account.
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.security.twoFactorEnabled}
-                  onChange={(e) => updateSetting('security', 'twoFactorEnabled', e.target.checked)}
-                />
-              }
-              label="Enable two-factor authentication"
-              sx={{ mb: 1 }}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.security.deviceTracking}
-                  onChange={(e) => updateSetting('security', 'deviceTracking', e.target.checked)}
-                />
-              }
-              label="Track login devices for security monitoring"
-              sx={{ mb: 2 }}
-            />
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                Session timeout: {settings.security.sessionTimeout} minutes
+              
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontWeight: 400
+                }}
+              >
+                Manage how your data is collected, stored, and shared. Your privacy is our top priority.
               </Typography>
-              <input
-                type="range"
-                min="15"
-                max="120"
-                step="15"
-                value={settings.security.sessionTimeout}
-                onChange={(e) => updateSetting('security', 'sessionTimeout', parseInt(e.target.value))}
-                style={{ width: '100%' }}
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'text.secondary' }}>
-                <span>15 min</span>
-                <span>2 hours</span>
-              </Box>
             </Box>
-          </FormGroup>
-        </CardContent>
-      </Card>
+          </Fade>
 
-      {/* Data Management Actions */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Data Management
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Download or delete your personal data.
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          
-          <List>
-            <ListItem>
-              <ListItemIcon>
-                <DownloadIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Export Your Data"
-                secondary="Download all your personal data in JSON format"
-              />
-              <ListItemSecondaryAction>
-                <Button
-                  variant="outlined"
-                  onClick={() => setExportDialogOpen(true)}
-                  startIcon={<DownloadIcon />}
-                >
-                  Export
-                </Button>
-              </ListItemSecondaryAction>
-            </ListItem>
-            
-            <ListItem>
-              <ListItemIcon>
-                <DeleteIcon color="error" />
-              </ListItemIcon>
-              <ListItemText
-                primary="Delete Account"
-                secondary="Permanently delete your account and all associated data"
-              />
-              <ListItemSecondaryAction>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => setDeleteDialogOpen(true)}
-                  startIcon={<DeleteIcon />}
-                >
-                  Delete
-                </Button>
-              </ListItemSecondaryAction>
-            </ListItem>
-          </List>
-        </CardContent>
-      </Card>
+          {/* Success/Error Messages */}
+          {error && (
+            <Fade in timeout={600}>
+              <Alert 
+                severity="error" 
+                sx={{ 
+                  mb: 4,
+                  bgcolor: 'rgba(239, 68, 68, 0.1)',
+                  color: 'white',
+                  '& .MuiAlert-icon': { 
+                    color: '#ef4444' 
+                  },
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  borderRadius: '16px'
+                }}
+                onClose={() => setError('')}
+              >
+                {error}
+              </Alert>
+            </Fade>
+          )}
+          {success && (
+            <Fade in timeout={600}>
+              <Alert 
+                severity="success" 
+                sx={{ 
+                  mb: 4,
+                  bgcolor: 'rgba(34, 197, 94, 0.1)',
+                  color: 'white',
+                  '& .MuiAlert-icon': { 
+                    color: '#22c55e' 
+                  },
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(34, 197, 94, 0.2)',
+                  borderRadius: '16px'
+                }}
+                onClose={() => setSuccess('')}
+              >
+                {success}
+              </Alert>
+            </Fade>
+          )}
 
-      {/* Save Settings Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={handleSaveSettings}
-          disabled={saving}
-          startIcon={<CheckIcon />}
-        >
-          {saving ? 'Saving...' : 'Save Privacy Settings'}
-        </Button>
-      </Box>
+          <div className="space-y-8">
+            {/* Data Visibility Settings */}
+            <Slide in direction="left" timeout={1000}>
+              <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-md rounded-3xl p-8 border border-blue-400/30 shadow-xl hover:shadow-blue-500/10 transition-all duration-500 hover:scale-[1.02]">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+                  <VisibilityIcon sx={{ color: '#06b6d4', fontSize: '2rem' }} />
+                  <Typography 
+                    variant="h5" 
+                    fontWeight="bold"
+                    sx={{ color: 'white' }}
+                  >
+                    Data Visibility
+                  </Typography>
+                  <Chip 
+                    label="Control" 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: 'rgba(6, 182, 212, 0.2)',
+                      color: '#06b6d4',
+                      border: '1px solid rgba(6, 182, 212, 0.3)'
+                    }} 
+                  />
+                </Box>
+                
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    mb: 3
+                  }}
+                >
+                  Control what information is visible and how it's used.
+                </Typography>
+                
+                <Divider sx={{ mb: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.dataVisibility.profilePublic}
+                        onChange={(e) => updateSetting('dataVisibility', 'profilePublic', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#06b6d4',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#06b6d4',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Make profile information public
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Allow others to see your profile details
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 2 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.dataVisibility.activityVisible}
+                        onChange={(e) => updateSetting('dataVisibility', 'activityVisible', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#06b6d4',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#06b6d4',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Show activity status to other users
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Display when you're active on the platform
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 2 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.dataVisibility.progressSharing}
+                        onChange={(e) => updateSetting('dataVisibility', 'progressSharing', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#06b6d4',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#06b6d4',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Allow progress sharing with healthcare providers
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Share wellness data with your care team
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 2 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.dataVisibility.anonymousAnalytics}
+                        onChange={(e) => updateSetting('dataVisibility', 'anonymousAnalytics', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#06b6d4',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#06b6d4',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Anonymous usage analytics to improve the platform
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Help us enhance your experience with anonymized data
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </FormGroup>
+              </div>
+            </Slide>
+
+            {/* Data Retention Settings */}
+            <Slide in direction="right" timeout={1200}>
+              <div className="bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-md rounded-3xl p-8 border border-purple-400/30 shadow-xl hover:shadow-purple-500/10 transition-all duration-500 hover:scale-[1.02]">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+                  <LockIcon sx={{ color: '#a855f7', fontSize: '2rem' }} />
+                  <Typography 
+                    variant="h5" 
+                    fontWeight="bold"
+                    sx={{ color: 'white' }}
+                  >
+                    Data Retention
+                  </Typography>
+                  <Chip 
+                    label="Storage" 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: 'rgba(168, 85, 247, 0.2)',
+                      color: '#a855f7',
+                      border: '1px solid rgba(168, 85, 247, 0.3)'
+                    }} 
+                  />
+                </Box>
+                
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    mb: 3
+                  }}
+                >
+                  Control how long your data is stored on our servers.
+                </Typography>
+                
+                <Divider sx={{ mb: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.dataRetention.keepChatHistory}
+                        onChange={(e) => updateSetting('dataRetention', 'keepChatHistory', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#a855f7',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#a855f7',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Keep chat history for personalized experience
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Maintain conversation context for better AI responses
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 3 }}
+                  />
+                  
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 600, mb: 2 }}>
+                      Data retention period: {settings.dataRetention.retentionPeriodDays} days
+                    </Typography>
+                    <input
+                      type="range"
+                      min="30"
+                      max="1095"
+                      step="30"
+                      value={settings.dataRetention.retentionPeriodDays}
+                      onChange={(e) => updateSetting('dataRetention', 'retentionPeriodDays', parseInt(e.target.value))}
+                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider-purple"
+                    />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', mt: 1 }}>
+                      <span>30 days</span>
+                      <span>3 years</span>
+                    </Box>
+                  </Box>
+                  
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.dataRetention.autoDeleteInactive}
+                        onChange={(e) => updateSetting('dataRetention', 'autoDeleteInactive', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#a855f7',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#a855f7',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Auto-delete data after 1 year of inactivity
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Automatically clean up unused accounts
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </FormGroup>
+              </div>
+            </Slide>
+
+            {/* Third-party Sharing */}
+            <Slide in direction="left" timeout={1400}>
+              <div className="bg-gradient-to-br from-teal-500/20 to-green-600/20 backdrop-blur-md rounded-3xl p-8 border border-teal-400/30 shadow-xl hover:shadow-teal-500/10 transition-all duration-500 hover:scale-[1.02]">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+                  <ShieldIcon sx={{ color: '#14b8a6', fontSize: '2rem' }} />
+                  <Typography 
+                    variant="h5" 
+                    fontWeight="bold"
+                    sx={{ color: 'white' }}
+                  >
+                    Third-party Sharing
+                  </Typography>
+                  <Chip 
+                    label="Research" 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: 'rgba(20, 184, 166, 0.2)',
+                      color: '#14b8a6',
+                      border: '1px solid rgba(20, 184, 166, 0.3)'
+                    }} 
+                  />
+                </Box>
+                
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    mb: 3
+                  }}
+                >
+                  Control how your anonymized data may be used for research and improvement.
+                </Typography>
+                
+                <Divider sx={{ mb: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.thirdPartySharing.researchParticipation}
+                        onChange={(e) => updateSetting('thirdPartySharing', 'researchParticipation', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#14b8a6',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#14b8a6',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Participate in mental health research (anonymized data)
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Contribute to advancing mental health understanding
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 2 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.thirdPartySharing.improvementAnalytics}
+                        onChange={(e) => updateSetting('thirdPartySharing', 'improvementAnalytics', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#14b8a6',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#14b8a6',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Help improve AI responses through anonymized feedback
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Enhance AI accuracy and helpfulness
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 2 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.thirdPartySharing.marketingCommunications}
+                        onChange={(e) => updateSetting('thirdPartySharing', 'marketingCommunications', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#14b8a6',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#14b8a6',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Receive marketing communications and updates
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Stay informed about new features and wellness content
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </FormGroup>
+              </div>
+            </Slide>
+
+            {/* Security Settings */}
+            <Slide in direction="right" timeout={1600}>
+              <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-md rounded-3xl p-8 border border-orange-400/30 shadow-xl hover:shadow-orange-500/10 transition-all duration-500 hover:scale-[1.02]">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+                  <SecurityIcon sx={{ color: '#f97316', fontSize: '2rem' }} />
+                  <Typography 
+                    variant="h5" 
+                    fontWeight="bold"
+                    sx={{ color: 'white' }}
+                  >
+                    Security Settings
+                  </Typography>
+                  <Chip 
+                    label="Protection" 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: 'rgba(249, 115, 22, 0.2)',
+                      color: '#f97316',
+                      border: '1px solid rgba(249, 115, 22, 0.3)'
+                    }} 
+                  />
+                </Box>
+                
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    mb: 3
+                  }}
+                >
+                  Additional security measures to protect your account.
+                </Typography>
+                
+                <Divider sx={{ mb: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.security.twoFactorEnabled}
+                        onChange={(e) => updateSetting('security', 'twoFactorEnabled', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#f97316',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#f97316',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Enable two-factor authentication
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Add an extra layer of security to your account
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 2 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.security.deviceTracking}
+                        onChange={(e) => updateSetting('security', 'deviceTracking', e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#f97316',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#f97316',
+                          },
+                          '& .MuiSwitch-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Track login devices for security monitoring
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Monitor account access from different devices
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 3 }}
+                  />
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 600, mb: 2 }}>
+                      Session timeout: {settings.security.sessionTimeout} minutes
+                    </Typography>
+                    <input
+                      type="range"
+                      min="15"
+                      max="120"
+                      step="15"
+                      value={settings.security.sessionTimeout}
+                      onChange={(e) => updateSetting('security', 'sessionTimeout', parseInt(e.target.value))}
+                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider-orange"
+                    />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', mt: 1 }}>
+                      <span>15 min</span>
+                      <span>2 hours</span>
+                    </Box>
+                  </Box>
+                </FormGroup>
+              </div>
+            </Slide>
+
+            {/* Data Management Actions */}
+            <Zoom in timeout={1800}>
+              <div className="bg-gradient-to-br from-indigo-500/20 to-violet-600/20 backdrop-blur-md rounded-3xl p-8 border border-indigo-400/30 shadow-xl hover:shadow-indigo-500/10 transition-all duration-500 hover:scale-[1.02]">
+                <Box sx={{ mb: 4 }}>
+                  <Typography 
+                    variant="h5" 
+                    fontWeight="bold"
+                    sx={{ 
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      mb: 2
+                    }}
+                  >
+                    <DataUsageIcon sx={{ color: '#6366f1', fontSize: '2rem' }} />
+                    Data Management
+                    <Chip 
+                      label="Actions" 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: 'rgba(99, 102, 241, 0.2)',
+                        color: '#6366f1',
+                        border: '1px solid rgba(99, 102, 241, 0.3)'
+                      }} 
+                    />
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: 'rgba(255, 255, 255, 0.7)'
+                    }}
+                  >
+                    Download or delete your personal data.
+                  </Typography>
+                </Box>
+                
+                <Divider sx={{ mb: 4, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                
+                <List sx={{ p: 0 }}>
+                  <ListItem sx={{ 
+                    bgcolor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '16px',
+                    mb: 2,
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    <ListItemIcon>
+                      <DownloadIcon sx={{ color: '#22c55e' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Export Your Data
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Download all your personal data in JSON format
+                        </Typography>
+                      }
+                    />
+                    <ListItemSecondaryAction>
+                      <Button
+                        variant="outlined"
+                        onClick={() => setExportDialogOpen(true)}
+                        startIcon={<DownloadIcon />}
+                        sx={{
+                          borderColor: 'rgba(34, 197, 94, 0.5)',
+                          color: '#22c55e',
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: '12px',
+                          '&:hover': {
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)'
+                          }
+                        }}
+                      >
+                        Export
+                      </Button>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                  
+                  <ListItem sx={{ 
+                    bgcolor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '16px',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    <ListItemIcon>
+                      <DeleteIcon sx={{ color: '#ef4444' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                          Delete Account
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          Permanently delete your account and all associated data
+                        </Typography>
+                      }
+                    />
+                    <ListItemSecondaryAction>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => setDeleteDialogOpen(true)}
+                        startIcon={<DeleteIcon />}
+                        sx={{
+                          borderColor: 'rgba(239, 68, 68, 0.5)',
+                          color: '#ef4444',
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: '12px',
+                          '&:hover': {
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)'
+                          }
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                </List>
+              </div>
+            </Zoom>
+
+            {/* Save Settings Button */}
+            <Zoom in timeout={2000}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={handleSaveSettings}
+                  disabled={saving}
+                  startIcon={<CheckIcon />}
+                  sx={{
+                    background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                    color: 'white',
+                    py: 2,
+                    px: 6,
+                    borderRadius: '20px',
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    textTransform: 'none',
+                    boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #16a34a, #15803d)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 12px 40px rgba(34, 197, 94, 0.4)'
+                    },
+                    '&:disabled': {
+                      opacity: 0.6
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {saving ? 'Saving...' : 'Save Privacy Settings'}
+                </Button>
+              </Box>
+            </Zoom>
+          </div>
+        </Container>
+      </div>
 
       {/* Export Data Dialog */}
-      <Dialog open={exportDialogOpen} onClose={() => setExportDialogOpen(false)}>
-        <DialogTitle>Export Your Data</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+      <Dialog 
+        open={exportDialogOpen} 
+        onClose={() => setExportDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            bgcolor: 'rgba(15, 23, 42, 0.95)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '20px',
+            color: 'white'
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          Export Your Data
+        </DialogTitle>
+        <DialogContent sx={{ color: 'white' }}>
+          <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.9)' }}>
             This will download all your personal data including:
           </Typography>
           <Box component="ul" sx={{ pl: 2 }}>
@@ -605,30 +1132,74 @@ export default function PrivacyPage() {
             <li>Mood tracking data</li>
             <li>Activity and progress logs</li>
           </Box>
-          <Alert severity="info" sx={{ mt: 2 }}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              mt: 2,
+              bgcolor: 'rgba(59, 130, 246, 0.1)',
+              color: 'white',
+              '& .MuiAlert-icon': { color: '#3b82f6' },
+              border: '1px solid rgba(59, 130, 246, 0.2)'
+            }}
+          >
             The exported data will be in JSON format and may contain sensitive information. 
             Please store it securely.
           </Alert>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setExportDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDataExport} variant="contained">
+        <DialogActions sx={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', p: 3 }}>
+          <Button 
+            onClick={() => setExportDialogOpen(false)}
+            sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDataExport} 
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #16a34a, #15803d)'
+              }
+            }}
+          >
             Download Data
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Account Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle sx={{ color: 'error.main' }}>
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            bgcolor: 'rgba(15, 23, 42, 0.95)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '20px',
+            color: 'white'
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: '#ef4444', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
           <WarningIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
           Delete Account
         </DialogTitle>
-        <DialogContent>
-          <Alert severity="error" sx={{ mb: 2 }}>
+        <DialogContent sx={{ color: 'white' }}>
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 2,
+              bgcolor: 'rgba(239, 68, 68, 0.1)',
+              color: 'white',
+              '& .MuiAlert-icon': { color: '#ef4444' },
+              border: '1px solid rgba(239, 68, 68, 0.2)'
+            }}
+          >
             This action is irreversible! All your data will be permanently deleted.
           </Alert>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.9)' }}>
             This will permanently delete:
           </Typography>
           <Box component="ul" sx={{ pl: 2, mb: 2 }}>
@@ -637,7 +1208,7 @@ export default function PrivacyPage() {
             <li>Mood tracking and progress data</li>
             <li>Settings and preferences</li>
           </Box>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.9)' }}>
             To confirm deletion, please type <strong>"DELETE MY ACCOUNT"</strong> below:
           </Typography>
           <TextField
@@ -646,13 +1217,36 @@ export default function PrivacyPage() {
             onChange={(e) => setDeleteConfirmText(e.target.value)}
             placeholder="DELETE MY ACCOUNT"
             error={deleteConfirmText !== '' && deleteConfirmText !== 'DELETE MY ACCOUNT'}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                color: 'white',
+                '& fieldset': {
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#ef4444',
+                },
+                '&.Mui-error fieldset': {
+                  borderColor: '#ef4444',
+                }
+              },
+              '& .MuiInputLabel-root': {
+                color: 'rgba(255, 255, 255, 0.7)',
+              }
+            }}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => {
-            setDeleteDialogOpen(false)
-            setDeleteConfirmText('')
-          }}>
+        <DialogActions sx={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', p: 3 }}>
+          <Button 
+            onClick={() => {
+              setDeleteDialogOpen(false)
+              setDeleteConfirmText('')
+            }}
+            sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+          >
             Cancel
           </Button>
           <Button 
@@ -660,11 +1254,20 @@ export default function PrivacyPage() {
             color="error" 
             variant="contained"
             disabled={deleteConfirmText !== 'DELETE MY ACCOUNT'}
+            sx={{
+              bgcolor: '#ef4444',
+              '&:hover': {
+                bgcolor: '#dc2626'
+              },
+              '&:disabled': {
+                opacity: 0.5
+              }
+            }}
           >
             Delete Account
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </div>
   )
 }

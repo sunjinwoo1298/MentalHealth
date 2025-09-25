@@ -1,0 +1,688 @@
+/**
+ * Enhanced Appointment Card Animations
+ * Advanced CSS animations for appointment display with urgency indicators
+ * Includes avatar animations, button ripples, and accessibility features
+ */
+
+/* Base card styling with animations */
+.appointment-card {
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(209, 245, 229, 0.05) 100%);
+  border: 1px solid rgba(209, 245, 229, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.appointment-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    rgba(209, 245, 229, 0.6) 25%,
+    rgba(255, 214, 224, 0.4) 50%,
+    rgba(217, 232, 246, 0.6) 75%,
+    transparent 100%);
+  opacity: 0;
+  animation: shimmerLine 3s infinite;
+  animation-delay: 1s;
+}
+
+.appointment-card--loaded::before {
+  opacity: 1;
+}
+
+/* Urgency-based styling */
+.appointment-card--urgent {
+  border-color: rgba(255, 214, 224, 0.6);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 214, 224, 0.08) 100%);
+}
+
+.appointment-card--urgent::before {
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    rgba(255, 214, 224, 0.8) 50%,
+    transparent 100%);
+  animation-duration: 2s;
+}
+
+.appointment-card--soon {
+  border-color: rgba(243, 240, 255, 0.5);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(243, 240, 255, 0.06) 100%);
+}
+
+/* Header with urgency indicator */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+}
+
+.card-title {
+  color: #262B47;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.urgency-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.urgency-pulse {
+  width: 8px;
+  height: 8px;
+  background: #FF6B6B;
+  border-radius: 50%;
+  animation: urgentPulse 1.5s infinite;
+}
+
+.urgency-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #FF6B6B;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Main content layout */
+.appointment-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  opacity: 0;
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+/* Enhanced therapist avatar */
+.therapist-avatar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-ring {
+  position: relative;
+  padding: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, 
+    rgba(209, 245, 229, 0.8) 0%,
+    rgba(255, 214, 224, 0.8) 100%);
+  animation: avatarEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s both;
+}
+
+.avatar-ring::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, 
+    rgba(209, 245, 229, 0.6),
+    rgba(255, 214, 224, 0.6),
+    rgba(217, 232, 246, 0.6));
+  z-index: -1;
+  opacity: 0;
+  animation: ringPulse 3s infinite;
+  animation-delay: 1.5s;
+}
+
+.appointment-card:hover .avatar-ring::before {
+  opacity: 1;
+}
+
+.avatar-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-card:hover .avatar-image {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.online-status {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  background: #10B981;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: onlineIndicator 2s infinite;
+}
+
+/* Session details animations */
+.session-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.therapist-name {
+  color: #262B47;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  opacity: 0;
+  animation: fadeInScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards;
+}
+
+.session-type-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(209, 245, 229, 0.4);
+  padding: 8px 16px;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  
+  /* Initial animation state */
+  opacity: 0;
+  transform: translateY(10px);
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.session-type-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%);
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.session-type-badge:hover::before {
+  left: 100%;
+}
+
+.session-type-badge:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(209, 245, 229, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.badge-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: badgePulse 2s infinite;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.badge-text {
+  color: #262B47;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* DateTime information */
+.session-datetime {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.datetime-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(209, 245, 229, 0.3);
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Initial animation state */
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.datetime-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(209, 245, 229, 0.5);
+  transform: translateX(2px);
+}
+
+.datetime-label {
+  color: #6B7280;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.datetime-value {
+  color: #262B47;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Enhanced join button */
+.join-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border: none;
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  
+  /* Initial animation state */
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  animation: buttonEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.join-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%);
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.join-button:hover::before {
+  left: 100%;
+}
+
+.join-button:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.join-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.join-button--urgent {
+  background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  animation: urgentButtonPulse 2s infinite;
+}
+
+.join-button--urgent:hover {
+  background: linear-gradient(135deg, #EE5A52 0%, #DC2626 100%);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+}
+
+.join-button--loading {
+  pointer-events: none;
+  background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.join-button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 2;
+  position: relative;
+}
+
+.join-button-text {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.join-button-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.join-button:hover .join-button-icon {
+  transform: translateX(2px);
+}
+
+.join-button-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-ring {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #FFFFFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.button-ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.join-button:active .button-ripple {
+  width: 200%;
+  height: 200%;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Keyframe animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes avatarEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes buttonEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmerLine {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes urgentPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes ringPulse {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes onlineIndicator {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+  }
+}
+
+@keyframes urgentButtonPulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .appointment-card {
+    padding: 20px;
+  }
+  
+  .appointment-content {
+    gap: 16px;
+  }
+  
+  .avatar-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .online-status {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .therapist-name {
+    font-size: 16px;
+  }
+  
+  .join-button {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Accessibility - Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .appointment-card,
+  .appointment-card::before,
+  .card-header,
+  .appointment-content,
+  .avatar-ring,
+  .avatar-ring::before,
+  .avatar-image,
+  .online-status,
+  .therapist-name,
+  .session-type-badge,
+  .session-type-badge::before,
+  .badge-dot,
+  .datetime-item,
+  .join-button,
+  .join-button::before,
+  .join-button-icon,
+  .spinner-ring,
+  .button-ripple,
+  .urgency-pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .card-header,
+  .appointment-content,
+  .avatar-ring,
+  .therapist-name,
+  .session-type-badge,
+  .datetime-item,
+  .join-button {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .appointment-card {
+    border: 2px solid #262B47;
+    background: #FFFFFF;
+  }
+  
+  .session-type-badge,
+  .datetime-item {
+    border: 2px solid #262B47;
+    background: #FFFFFF;
+  }
+  
+  .join-button {
+    border: 2px solid #10B981;
+  }
+  
+  .join-button--urgent {
+    border: 2px solid #FF6B6B;
+  }
+}
+
+/* Focus styles for accessibility */
+.join-button:focus-visible {
+  outline: 2px solid #4F46E5;
+  outline-offset: 2px;
+}

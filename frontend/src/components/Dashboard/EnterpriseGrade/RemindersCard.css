@@ -1,0 +1,358 @@
+/**
+ * Reminders Card CSS Styles
+ * Enterprise-grade styling for reminders component
+ */
+
+.reminders-card {
+  background: #FFFFFF;
+  border-radius: 18px;
+  box-shadow: 0 4px 6px rgba(181, 197, 223, 0.3);
+  padding: 24px;
+  transition: all 0.3s ease-in-out;
+  opacity: 0;
+  transform: translateY(20px);
+  height: fit-content;
+}
+
+.reminders-card--loaded {
+  opacity: 1;
+  transform: translateY(0);
+  animation: slideInRight 0.3s ease-in-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #262B47;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.reminders-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.count-number {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #EF4444;
+  line-height: 1;
+}
+
+.count-label {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: #6B7280;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.reminders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.reminder-item {
+  position: relative;
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideInItem 0.3s ease-out forwards;
+}
+
+@keyframes slideInItem {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.reminder-item--completed {
+  opacity: 0.6;
+}
+
+.reminder-item--completed .reminder-text {
+  text-decoration: line-through;
+  color: #6B7280;
+}
+
+.reminder-button {
+  width: 100%;
+  background: rgba(243, 240, 255, 0.3);
+  border: 1px solid rgba(243, 240, 255, 0.5);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.reminder-button:hover {
+  background: rgba(255, 214, 224, 0.2);
+  border-color: rgba(255, 214, 224, 0.5);
+  transform: translateX(2px);
+}
+
+.reminder-button:active {
+  transform: translateX(0) scale(0.98);
+}
+
+.reminder-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.reminder-text {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #262B47;
+  line-height: 1.3;
+  text-align: left;
+  transition: all 0.2s ease-in-out;
+}
+
+.reminder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.bell-icon {
+  transition: all 0.2s ease-in-out;
+}
+
+.bell-icon--muted {
+  opacity: 0.5;
+}
+
+.reminder-button:hover .bell-icon {
+  transform: rotate(15deg) scale(1.1);
+}
+
+.completion-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(209, 245, 229, 0.5) 50%, transparent 100%);
+  animation: completionSweep 0.5s ease-out;
+  pointer-events: none;
+}
+
+@keyframes completionSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.reminders-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.empty-icon {
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.reminders-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(181, 197, 223, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #D1F5E5 0%, #B8F2D1 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease-in-out;
+}
+
+.progress-text {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6B7280;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Focus styles for accessibility */
+.reminder-button:focus {
+  outline: 2px solid #FFD6E0;
+  outline-offset: 2px;
+}
+
+.reminder-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.reminder-button:focus-visible {
+  outline: 2px solid #FFD6E0;
+  outline-offset: 2px;
+}
+
+/* Confetti animation for completion */
+.reminder-item--completed::after {
+  content: '✨';
+  position: absolute;
+  top: 50%;
+  right: 40px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  animation: confetti 0.5s ease-out;
+  pointer-events: none;
+}
+
+@keyframes confetti {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.5) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scale(1) rotate(360deg);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .reminders-card {
+    padding: 20px;
+  }
+  
+  .card-title {
+    font-size: 20px;
+  }
+  
+  .reminder-button {
+    padding: 10px 12px;
+  }
+  
+  .reminder-text {
+    font-size: 13px;
+  }
+  
+  .reminders-empty {
+    padding: 24px 12px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .reminders-card {
+    border: 2px solid #262B47;
+  }
+  
+  .reminder-button {
+    border: 1px solid #262B47;
+    background: #FFFFFF;
+  }
+  
+  .reminder-button:hover {
+    background: #F3F0FF;
+  }
+  
+  .priority-dot {
+    border: 2px solid #262B47;
+  }
+  
+  .progress-bar {
+    border: 1px solid #262B47;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .reminders-card,
+  .reminder-item,
+  .reminder-button,
+  .bell-icon,
+  .completion-overlay,
+  .progress-fill {
+    animation: none;
+    transition: none;
+  }
+  
+  .reminders-card--loaded {
+    opacity: 1;
+    transform: none;
+  }
+  
+  .reminder-button:hover {
+    transform: none;
+  }
+}

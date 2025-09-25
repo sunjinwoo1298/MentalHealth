@@ -1,0 +1,534 @@
+/**
+ * Enterprise Dashboard Main Layout CSS
+ * Implements 12-column grid system with responsive design
+ * Based on Dribbble design specifications
+ */
+
+.enterprise-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  font-family: "Poppins", "Roboto", sans-serif;
+  overflow-x: hidden;
+}
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Main content area */
+.dashboard-main {
+  flex: 1;
+  margin-left: 70px; /* Space for fixed sidebar */
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.dashboard-content {
+  padding: 80px 32px 32px; /* Top padding for fixed navbar */
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Grid system - 12 column layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+/* Grid item classes for responsive layout */
+.grid-col-1 { grid-column: span 1; }
+.grid-col-2 { grid-column: span 2; }
+.grid-col-3 { grid-column: span 3; }
+.grid-col-4 { grid-column: span 4; }
+.grid-col-5 { grid-column: span 5; }
+.grid-col-6 { grid-column: span 6; }
+.grid-col-7 { grid-column: span 7; }
+.grid-col-8 { grid-column: span 8; }
+.grid-col-9 { grid-column: span 9; }
+.grid-col-10 { grid-column: span 10; }
+.grid-col-11 { grid-column: span 11; }
+.grid-col-12 { grid-column: span 12; }
+
+/* Row span utilities */
+.grid-row-2 { grid-row: span 2; }
+.grid-row-3 { grid-row: span 3; }
+
+/* Card positioning in grid */
+.mood-summary-position {
+  grid-column: span 4;
+  grid-row: span 1;
+}
+
+.appointment-position {
+  grid-column: span 4;
+  grid-row: span 1;
+}
+
+.reminders-position {
+  grid-column: span 4;
+  grid-row: span 1;
+}
+
+.activity-feed-position {
+  grid-column: span 6;
+  grid-row: span 2;
+}
+
+.daily-progress-position {
+  grid-column: span 6;
+  grid-row: span 2;
+}
+
+/* Dashboard welcome section */
+.dashboard-welcome {
+  margin-bottom: 32px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideInUp 0.6s ease-out forwards;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-title {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #262B47;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.welcome-subtitle {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Dashboard stats overview */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(181, 197, 223, 0.2);
+  transition: all 0.2s ease-in-out;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideInStat 0.4s ease-out forwards;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(181, 197, 223, 0.3);
+}
+
+@keyframes slideInStat {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-value {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #262B47;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6B7280;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Loading states */
+.dashboard-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(217, 232, 246, 0.3);
+  border-top: 4px solid #D9E8F6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+}
+
+/* Error states */
+.dashboard-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  flex-direction: column;
+  gap: 16px;
+  padding: 40px;
+  text-align: center;
+}
+
+.error-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-title {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #262B47;
+  margin: 0;
+}
+
+.error-message {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.error-retry {
+  background: #D9E8F6;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #262B47;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.error-retry:hover {
+  background: #B5C5DF;
+  transform: translateY(-1px);
+}
+
+/* Responsive breakpoints */
+
+/* Large Desktop (1200px+) */
+@media (min-width: 1200px) {
+  .dashboard-content {
+    padding: 80px 40px 40px;
+  }
+  
+  .dashboard-grid {
+    gap: 28px;
+  }
+  
+  .dashboard-stats {
+    gap: 20px;
+  }
+}
+
+/* Desktop (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .dashboard-content {
+    padding: 80px 28px 32px;
+  }
+  
+  .mood-summary-position {
+    grid-column: span 6;
+  }
+  
+  .appointment-position {
+    grid-column: span 6;
+  }
+  
+  .reminders-position {
+    grid-column: span 12;
+  }
+}
+
+/* Tablet (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .dashboard-main {
+    margin-left: 0;
+  }
+  
+  .dashboard-content {
+    padding: 80px 20px 24px;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 20px;
+  }
+  
+  .mood-summary-position,
+  .appointment-position,
+  .reminders-position {
+    grid-column: span 8;
+  }
+  
+  .activity-feed-position,
+  .daily-progress-position {
+    grid-column: span 8;
+    grid-row: span 1;
+  }
+  
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .welcome-title {
+    font-size: 28px;
+  }
+}
+
+/* Mobile (up to 767px) */
+@media (max-width: 767px) {
+  .dashboard-main {
+    margin-left: 0;
+  }
+  
+  .dashboard-content {
+    padding: 80px 16px 20px;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .mood-summary-position,
+  .appointment-position,
+  .reminders-position,
+  .activity-feed-position,
+  .daily-progress-position {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+  
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+  }
+  
+  .stat-value {
+    font-size: 20px;
+  }
+  
+  .welcome-title {
+    font-size: 24px;
+  }
+  
+  .welcome-subtitle {
+    font-size: 14px;
+  }
+  
+  .dashboard-welcome {
+    margin-bottom: 24px;
+  }
+}
+
+/* Extra small mobile (up to 480px) */
+@media (max-width: 480px) {
+  .dashboard-content {
+    padding: 80px 12px 16px;
+  }
+  
+  .dashboard-grid {
+    gap: 12px;
+  }
+  
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .welcome-title {
+    font-size: 20px;
+  }
+  
+  .welcome-subtitle {
+    font-size: 13px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .enterprise-dashboard {
+    background: #FFFFFF;
+  }
+  
+  .stat-card {
+    border: 2px solid #262B47;
+  }
+  
+  .loading-spinner {
+    border: 4px solid #E5E7EB;
+    border-top: 4px solid #262B47;
+  }
+  
+  .error-retry {
+    border: 2px solid #262B47;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-welcome,
+  .stat-card,
+  .loading-spinner,
+  .error-retry {
+    animation: none;
+    transition: none;
+  }
+  
+  .stat-card:hover,
+  .error-retry:hover {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .enterprise-dashboard {
+    background: white;
+  }
+  
+  .dashboard-main {
+    margin-left: 0;
+  }
+  
+  .dashboard-content {
+    padding: 20px;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .mood-summary-position,
+  .appointment-position,
+  .reminders-position,
+  .activity-feed-position,
+  .daily-progress-position {
+    grid-column: span 1;
+  }
+}
+
+/* Focus management for accessibility */
+.dashboard-content:focus {
+  outline: 2px solid #FFD6E0;
+  outline-offset: 4px;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #262B47;
+  color: #FFFFFF;
+  padding: 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  transition: top 0.2s ease-in-out;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Theme transitions */
+.enterprise-dashboard * {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+/* Ensure proper stacking contexts */
+.dashboard-layout {
+  isolation: isolate;
+}
+
+/* Smooth scrolling */
+.enterprise-dashboard {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling */
+.enterprise-dashboard::-webkit-scrollbar {
+  width: 6px;
+}
+
+.enterprise-dashboard::-webkit-scrollbar-track {
+  background: rgba(181, 197, 223, 0.1);
+}
+
+.enterprise-dashboard::-webkit-scrollbar-thumb {
+  background: rgba(181, 197, 223, 0.3);
+  border-radius: 3px;
+}
+
+.enterprise-dashboard::-webkit-scrollbar-thumb:hover {
+  background: rgba(181, 197, 223, 0.5);
+}

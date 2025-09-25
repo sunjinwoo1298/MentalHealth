@@ -111,22 +111,22 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
     <Box className="p-8">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
           <SentimentSatisfied className="text-white text-2xl" />
         </div>
-        <Typography variant="h4" className="font-bold text-gray-900 mb-2">
+        <Typography variant="h4" className="font-bold text-white mb-2">
           Tell us about yourself
         </Typography>
-        <Typography variant="body1" className="text-gray-600">
+        <Typography variant="body1" className="text-gray-300">
           This helps us provide better, personalized support
         </Typography>
       </div>
 
       <div className="space-y-8">
         {/* Current Mood */}
-        <Paper className="p-6 border border-gray-200">
-          <Typography variant="h6" className="font-semibold text-gray-900 mb-4 flex items-center">
-            <Mood className="mr-2 text-blue-600" />
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50" sx={{ backgroundColor: 'rgba(51, 65, 85, 0.5)' }}>
+          <Typography variant="h6" className="font-semibold text-white mb-4 flex items-center">
+            <Mood className="mr-2 text-pink-400" />
             How are you feeling today?
           </Typography>
           <Box className="px-4">
@@ -156,6 +156,9 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
                     boxShadow: 'inherit',
                   },
                 },
+                '& .MuiSlider-markLabel': {
+                  color: '#D1D5DB',
+                },
               }}
             />
             <div className="text-center mt-4">
@@ -167,8 +170,8 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
         </Paper>
 
         {/* Stress Level */}
-        <Paper className="p-6 border border-gray-200">
-          <Typography variant="h6" className="font-semibold text-gray-900 mb-4">
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50" sx={{ backgroundColor: 'rgba(51, 65, 85, 0.5)' }}>
+          <Typography variant="h6" className="font-semibold text-white mb-4">
             What's your current stress level?
           </Typography>
           <Box className="px-4">
@@ -186,10 +189,13 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
               sx={{
                 color: stressLevel <= 3 ? '#10B981' : stressLevel <= 6 ? '#F59E0B' : '#EF4444',
                 height: 8,
+                '& .MuiSlider-markLabel': {
+                  color: '#D1D5DB',
+                },
               }}
             />
             <div className="text-center mt-4">
-              <Typography variant="body1">
+              <Typography variant="body1" className="text-gray-300">
                 {getStressLabel(stressLevel)} ({stressLevel}/10)
               </Typography>
             </div>
@@ -197,11 +203,11 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
         </Paper>
 
         {/* Primary Concerns */}
-        <Paper className="p-6 border border-gray-200">
-          <Typography variant="h6" className="font-semibold text-gray-900 mb-4">
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50" sx={{ backgroundColor: 'rgba(51, 65, 85, 0.5)' }}>
+          <Typography variant="h6" className="font-semibold text-white mb-4">
             What areas would you like support with? *
           </Typography>
-          <Typography variant="body2" className="text-gray-600 mb-4">
+          <Typography variant="body2" className="text-gray-300 mb-4">
             Select all that apply
           </Typography>
           <FormGroup>
@@ -214,14 +220,20 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
                       checked={concerns.includes(concern)}
                       onChange={() => handleConcernChange(concern)}
                       sx={{
+                        color: '#64748B',
                         '&.Mui-checked': {
-                          color: '#3B82F6',
+                          color: '#EC4899',
                         },
                       }}
                     />
                   }
                   label={concern}
-                  className="text-gray-700"
+                  className="text-gray-300"
+                  sx={{
+                    '& .MuiFormControlLabel-label': {
+                      color: '#D1D5DB',
+                    },
+                  }}
                 />
               ))}
             </div>
@@ -229,9 +241,9 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
         </Paper>
 
         {/* Therapy Experience */}
-        <Paper className="p-6 border border-gray-200">
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50" sx={{ backgroundColor: 'rgba(51, 65, 85, 0.5)' }}>
           <FormControl component="fieldset">
-            <FormLabel component="legend" className="font-semibold text-gray-900 mb-4">
+            <FormLabel component="legend" className="font-semibold text-white mb-4" sx={{ color: '#FFFFFF !important' }}>
               Have you tried therapy or counseling before? *
             </FormLabel>
             <RadioGroup
@@ -245,14 +257,20 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
                   control={
                     <Radio 
                       sx={{
+                        color: '#64748B',
                         '&.Mui-checked': {
-                          color: '#3B82F6',
+                          color: '#14B8A6',
                         },
                       }}
                     />
                   }
                   label={option.label}
-                  className="text-gray-700"
+                  className="text-gray-300"
+                  sx={{
+                    '& .MuiFormControlLabel-label': {
+                      color: '#D1D5DB',
+                    },
+                  }}
                 />
               ))}
             </RadioGroup>
@@ -266,7 +284,15 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
           variant="outlined"
           onClick={onPrev}
           startIcon={<ArrowBack />}
-          className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+          className="px-6 py-2 text-gray-300 hover:bg-slate-700/50 transition-all duration-300"
+          sx={{
+            borderColor: '#64748B',
+            color: '#D1D5DB',
+            '&:hover': {
+              borderColor: '#EC4899',
+              backgroundColor: 'rgba(51, 65, 85, 0.5)',
+            },
+          }}
         >
           Back
         </Button>
@@ -276,23 +302,24 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
           onClick={onNext}
           disabled={!canProceed}
           endIcon={<ArrowForward />}
-          className={`px-8 py-3 rounded-lg font-medium ${
+          className={`px-8 py-3 rounded-lg font-medium transition-all duration-300 ${
             canProceed 
-              ? 'bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600' 
-              : 'bg-gray-300 text-gray-500'
+              ? 'bg-gradient-to-r from-pink-500 to-teal-500 text-white hover:from-pink-600 hover:to-teal-600 transform hover:scale-105 shadow-lg' 
+              : 'bg-gray-600 text-gray-400'
           }`}
           sx={{
-            background: canProceed ? 'linear-gradient(to right, #3B82F6, #10B981)' : undefined,
+            background: canProceed ? 'linear-gradient(to right, #EC4899, #14B8A6)' : '#4B5563',
             '&:hover': {
-              background: canProceed ? 'linear-gradient(to right, #2563EB, #059669)' : undefined,
+              background: canProceed ? 'linear-gradient(to right, #DB2777, #0D9488)' : '#4B5563',
+              transform: canProceed ? 'scale(1.05)' : 'none',
             },
             '&:disabled': {
-              background: '#D1D5DB',
-              color: '#6B7280',
+              background: '#4B5563',
+              color: '#9CA3AF',
             },
           }}
         >
-          Continue
+          Continue ✨
         </Button>
       </div>
     </Box>

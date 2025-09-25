@@ -1,0 +1,344 @@
+/**
+ * Appointment Card CSS Styles
+ * Enterprise-grade styling for appointment display component
+ */
+
+.appointment-card {
+  background: #FFFFFF;
+  border-radius: 18px;
+  box-shadow: 0 4px 6px rgba(181, 197, 223, 0.3);
+  padding: 24px;
+  transition: all 0.3s ease-in-out;
+  opacity: 0;
+  transform: translateY(20px);
+  height: fit-content;
+}
+
+.appointment-card--loaded {
+  opacity: 1;
+  transform: translateY(0);
+  animation: slideInUp 0.3s ease-in-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-header {
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #262B47;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.appointment-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.therapist-avatar {
+  position: relative;
+}
+
+.avatar-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 214, 224, 0.3);
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(181, 197, 223, 0.2);
+}
+
+.avatar-image:hover {
+  border-color: rgba(255, 214, 224, 0.6);
+  transform: scale(1.05);
+}
+
+.session-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.therapist-name {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #262B47;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.session-type-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(243, 240, 255, 0.5);
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(243, 240, 255, 0.8);
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-text {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #262B47;
+  line-height: 1;
+}
+
+.session-datetime {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.datetime-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(181, 197, 223, 0.1);
+}
+
+.datetime-item:last-child {
+  border-bottom: none;
+}
+
+.datetime-label {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #6B7280;
+  line-height: 1;
+}
+
+.datetime-value {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #262B47;
+  line-height: 1;
+}
+
+.join-button {
+  width: 100%;
+  background: linear-gradient(135deg, #FFD6E0 0%, #F3B8C4 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #262B47;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(255, 214, 224, 0.3);
+  position: relative;
+  overflow: hidden;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.join-button:hover {
+  background: linear-gradient(135deg, #FFC7D3 0%, #F0A5B5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 214, 224, 0.4);
+}
+
+.join-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.join-button--loading {
+  background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
+  cursor: not-allowed;
+  color: #6B7280;
+}
+
+.join-button--loading:hover {
+  transform: none;
+  background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
+}
+
+.join-button-text {
+  transition: all 0.2s ease-in-out;
+}
+
+.join-button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid #6B7280;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Success animation after join */
+.join-button--success {
+  background: linear-gradient(135deg, #D1F5E5 0%, #B8F2D1 100%);
+  color: #065F46;
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus styles for accessibility */
+.join-button:focus {
+  outline: 2px solid #FFD6E0;
+  outline-offset: 2px;
+}
+
+.join-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.join-button:focus-visible {
+  outline: 2px solid #FFD6E0;
+  outline-offset: 2px;
+}
+
+/* Pulse animation for urgent appointments */
+.appointment-card--urgent .join-button {
+  animation: buttonPulse 2s infinite;
+}
+
+@keyframes buttonPulse {
+  0% {
+    box-shadow: 0 2px 4px rgba(255, 214, 224, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 4px rgba(255, 214, 224, 0.3), 0 0 0 4px rgba(255, 214, 224, 0.2);
+  }
+  100% {
+    box-shadow: 0 2px 4px rgba(255, 214, 224, 0.3);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .appointment-card {
+    padding: 20px;
+  }
+  
+  .card-title {
+    font-size: 20px;
+  }
+  
+  .therapist-name {
+    font-size: 16px;
+  }
+  
+  .avatar-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .session-datetime {
+    gap: 6px;
+  }
+  
+  .datetime-item {
+    padding: 6px 0;
+  }
+  
+  .join-button {
+    padding: 12px 16px;
+    font-size: 16px;
+    min-height: 48px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .appointment-card {
+    border: 2px solid #262B47;
+  }
+  
+  .session-type-badge {
+    border: 1px solid #262B47;
+    background: #F3F0FF;
+  }
+  
+  .join-button {
+    background: #FFD6E0;
+    border: 2px solid #262B47;
+  }
+  
+  .join-button:hover {
+    background: #FFC7D3;
+  }
+  
+  .datetime-item {
+    border-bottom-color: #262B47;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .appointment-card,
+  .avatar-image,
+  .join-button,
+  .join-button-spinner {
+    animation: none;
+    transition: none;
+  }
+  
+  .appointment-card--loaded {
+    opacity: 1;
+    transform: none;
+  }
+  
+  .join-button:hover {
+    transform: none;
+  }
+}

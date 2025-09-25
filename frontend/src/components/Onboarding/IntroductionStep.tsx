@@ -96,49 +96,69 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
             width: 80,
             height: 80,
             fontSize: '2rem',
-            margin: '0 auto 16px'
+            margin: '0 auto 16px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
           }}
         >
           {selectedAvatar.emoji}
         </Avatar>
-        <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
+        <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom sx={{ color: 'white' }}>
           Welcome to Your Mental Wellness Journey!
         </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="h6" sx={{ mb: 2, color: '#D1D5DB' }}>
           Meet {selectedAvatar.name}, your AI companion
         </Typography>
       </Box>
 
       {/* Personal Summary */}
-      <Paper elevation={2} sx={{ p: 3, mb: 4, bgcolor: '#f8f9fa' }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CheckCircle color="success" />
+      <Paper elevation={0} sx={{ 
+        p: 3, 
+        mb: 4, 
+        backgroundColor: 'rgba(51, 65, 85, 0.5)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(100, 116, 139, 0.5)',
+        borderRadius: 2
+      }}>
+        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'white' }}>
+          <CheckCircle sx={{ color: '#10B981' }} />
           Your Personalized Setup
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
           <Chip 
             label={`Communication: ${data.communicationStyle || 'Supportive'}`} 
-            color="primary" 
+            sx={{ 
+              backgroundColor: 'rgba(236, 72, 153, 0.2)', 
+              color: '#F9A8D4',
+              border: '1px solid rgba(236, 72, 153, 0.5)'
+            }}
             variant="outlined" 
           />
           <Chip 
             label={`Mood Level: ${data.initialMoodScore || 5}/10`} 
-            color="secondary" 
+            sx={{ 
+              backgroundColor: 'rgba(20, 184, 166, 0.2)', 
+              color: '#5EEAD4',
+              border: '1px solid rgba(20, 184, 166, 0.5)'
+            }}
             variant="outlined" 
           />
           <Chip 
             label={`Stress Level: ${data.stressLevel || 5}/10`} 
-            color="warning" 
+            sx={{ 
+              backgroundColor: 'rgba(168, 85, 247, 0.2)', 
+              color: '#C4B5FD',
+              border: '1px solid rgba(168, 85, 247, 0.5)'
+            }}
             variant="outlined" 
           />
         </Box>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{ color: '#D1D5DB' }}>
           We've customized your experience based on your preferences. You can always update these settings later.
         </Typography>
       </Paper>
 
       {/* Features Grid */}
-      <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', mb: 3 }}>
+      <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', mb: 3, color: 'white' }}>
         What You Can Do
       </Typography>
       <Box sx={{ 
@@ -148,22 +168,29 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
         mb: 4 
       }}>
         {FEATURES.map((feature, index) => (
-          <Card key={index} elevation={1} sx={{ height: '100%' }}>
+          <Card key={index} elevation={0} sx={{ 
+            height: '100%',
+            backgroundColor: 'rgba(51, 65, 85, 0.5)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(100, 116, 139, 0.5)',
+            borderRadius: 2
+          }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
               <Avatar
                 sx={{
                   bgcolor: feature.color,
                   width: 56,
                   height: 56,
-                  margin: '0 auto 16px'
+                  margin: '0 auto 16px',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
                 }}
               >
                 {feature.icon}
               </Avatar>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>
                 {feature.title}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#D1D5DB' }}>
                 {feature.description}
               </Typography>
             </CardContent>
@@ -172,28 +199,35 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
       </Box>
 
       {/* Getting Started */}
-      <Paper elevation={2} sx={{ p: 3, mb: 4, bgcolor: '#e3f2fd' }}>
-        <Typography variant="h6" gutterBottom>
+      <Paper elevation={0} sx={{ 
+        p: 3, 
+        mb: 4, 
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(59, 130, 246, 0.5)',
+        borderRadius: 2
+      }}>
+        <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>
           🌟 Getting Started Tips
         </Typography>
         <ul style={{ paddingLeft: '20px', margin: 0 }}>
           <li>
-            <Typography variant="body2" sx={{ mb: 1 }}>
+            <Typography variant="body2" sx={{ mb: 1, color: '#D1D5DB' }}>
               Start with a daily mood check-in to track your progress
             </Typography>
           </li>
           <li>
-            <Typography variant="body2" sx={{ mb: 1 }}>
+            <Typography variant="body2" sx={{ mb: 1, color: '#D1D5DB' }}>
               Try the guided breathing exercises when feeling stressed
             </Typography>
           </li>
           <li>
-            <Typography variant="body2" sx={{ mb: 1 }}>
+            <Typography variant="body2" sx={{ mb: 1, color: '#D1D5DB' }}>
               Chat with {selectedAvatar.name} whenever you need support
             </Typography>
           </li>
           <li>
-            <Typography variant="body2">
+            <Typography variant="body2" sx={{ color: '#D1D5DB' }}>
               Remember: This is a safe space - share what feels comfortable
             </Typography>
           </li>
@@ -206,6 +240,14 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
           variant="outlined"
           onClick={onPrevious}
           size="large"
+          sx={{
+            borderColor: '#64748B',
+            color: '#D1D5DB',
+            '&:hover': {
+              borderColor: '#EC4899',
+              backgroundColor: 'rgba(51, 65, 85, 0.5)',
+            },
+          }}
         >
           Previous
         </Button>
@@ -214,14 +256,19 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
           onClick={onNext}
           size="large"
           sx={{ 
-            bgcolor: selectedAvatar.color,
+            background: 'linear-gradient(to right, #EC4899, #14B8A6)',
+            color: 'white',
+            fontWeight: 'medium',
+            px: 4,
             '&:hover': { 
-              bgcolor: selectedAvatar.color,
-              filter: 'brightness(0.9)'
-            }
+              background: 'linear-gradient(to right, #DB2777, #0D9488)',
+              transform: 'scale(1.05)',
+            },
+            transition: 'all 0.3s',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
           }}
         >
-          Start My Journey
+          Start My Journey ✨
         </Button>
       </Box>
     </Box>

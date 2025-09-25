@@ -16,7 +16,6 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import chatRoutes from './routes/chat';
 import wellnessRoutes from './routes/wellness';
-import therapistRoutes from './routes/therapists';
 import interventionRoutes from './routes/interventions';
 import gamificationRoutes from './routes/gamification';
 
@@ -121,7 +120,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', authMiddleware, userRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/wellness', authMiddleware, wellnessRoutes);
-app.use('/api/therapists', authMiddleware, therapistRoutes);
 app.use('/api/interventions', authMiddleware, interventionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 

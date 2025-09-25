@@ -146,30 +146,36 @@ export default function OnboardingFlow() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900">
+      {/* Background Effects */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mix-blend-soft-light filter blur-2xl"></div>
+        <div className="absolute bottom-20 left-20 w-64 h-64 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full mix-blend-soft-light filter blur-2xl"></div>
+      </div>
+
       {/* Progress Bar */}
-      <div className="fixed top-0 left-0 w-full h-2 bg-gray-200 z-50">
+      <div className="fixed top-0 left-0 w-full h-2 bg-slate-700/50 z-50">
         <div 
-          className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500 ease-out"
+          className="h-full bg-gradient-to-r from-pink-500 to-teal-500 transition-all duration-500 ease-out shadow-lg"
           style={{ width: `${getProgressPercentage()}%` }}
         />
       </div>
 
       {/* Main Content */}
-      <div className="pt-8 px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 pt-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-teal-400 bg-clip-text text-transparent">
               Welcome to MindCare AI
             </h1>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-gray-300">
               Step {currentStep} of {TOTAL_STEPS} - Let's personalize your experience
             </p>
           </div>
 
           {/* Step Content */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="bg-slate-800/50 backdrop-blur-md rounded-2xl shadow-xl border border-slate-600/50 overflow-hidden">
             {currentStep === 1 && (
               <WelcomeStep
                 data={onboardingData}
@@ -210,7 +216,7 @@ export default function OnboardingFlow() {
           <div className="text-center mt-6">
             <button
               onClick={() => navigate('/dashboard')}
-              className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
+              className="text-gray-400 hover:text-gray-200 text-sm transition-colors duration-200"
             >
               Skip onboarding for now
             </button>

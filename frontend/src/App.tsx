@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
-import Dashboard from './pages/Dashboard'
+import Dashboard from './components/Dashboard/EnterpriseGrade/EnterpriseDashboard'
 import ChatPage from './pages/ChatPage'
 import OnboardingFlow from './pages/OnboardingFlow'
 import ProfilePage from './pages/ProfilePage'
@@ -20,6 +20,7 @@ import MoodPage from './pages/MoodPage'
 import CheckInPage from './pages/CheckInPage'
 import TestGamificationPage from './pages/TestGamificationPage'
 import './App.css'
+import './styles/animations.css'
 
 type MentalHealthContextType = {
   currentContext: string;

@@ -1,0 +1,184 @@
+/**
+ * Sidebar CSS Styles
+ * Enterprise-grade styling matching Dribbble design
+ */
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 70px;
+  height: 100vh;
+  background: linear-gradient(180deg, #E9EEFA 0%, #F3F0FF 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(181, 197, 223, 0.3);
+}
+
+.sidebar-logo {
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+.logo-circle {
+  width: 42px;
+  height: 42px;
+  background: #FFD6E0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(181, 197, 223, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+
+.logo-circle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(181, 197, 223, 0.4);
+}
+
+.logo-text {
+  font-family: "Poppins", "Roboto", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: #262B47;
+  user-select: none;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.nav-item {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: rgba(255, 214, 224, 0.2);
+  transform: translateY(-2px);
+}
+
+.nav-item:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.nav-item--active {
+  background: rgba(255, 214, 224, 0.3);
+  box-shadow: 0 2px 4px rgba(181, 197, 223, 0.2);
+}
+
+.nav-item--active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  width: 3px;
+  height: 24px;
+  background: #FFD6E0;
+  border-radius: 0 2px 2px 0;
+}
+
+.nav-icon {
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-item:hover .nav-icon {
+  transform: scale(1.1);
+}
+
+/* Focus styles for accessibility */
+.nav-item:focus {
+  outline: 2px solid #FFD6E0;
+  outline-offset: 2px;
+}
+
+.nav-item:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid #FFD6E0;
+  outline-offset: 2px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    height: 70px;
+    flex-direction: row;
+    justify-content: center;
+    padding: 0 16px;
+  }
+  
+  .sidebar-logo {
+    display: none;
+  }
+  
+  .sidebar-nav {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .sidebar-nav ul {
+    flex-direction: row;
+    gap: 32px;
+  }
+  
+  .nav-item--active::before {
+    left: 50%;
+    top: -12px;
+    width: 24px;
+    height: 3px;
+    transform: translateX(-50%);
+    border-radius: 0 0 2px 2px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .nav-item {
+    border: 1px solid #262B47;
+  }
+  
+  .nav-item--active {
+    background: #FFD6E0;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .nav-item,
+  .nav-icon,
+  .logo-circle {
+    transition: none;
+  }
+}

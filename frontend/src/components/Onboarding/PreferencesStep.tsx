@@ -116,22 +116,22 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
     <Box className="p-8">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
           <Settings className="text-white text-2xl" />
         </div>
-        <Typography variant="h4" className="font-bold text-gray-900 mb-2">
+        <Typography variant="h4" className="font-bold text-white mb-2">
           Customize your experience
         </Typography>
-        <Typography variant="body1" className="text-gray-600">
+        <Typography variant="body1" className="text-gray-300">
           Let's set up your preferences for the best support
         </Typography>
       </div>
 
       <div className="space-y-8">
         {/* Communication Style */}
-        <Paper className="p-6 border border-gray-200">
-          <Typography variant="h6" className="font-semibold text-gray-900 mb-4 flex items-center">
-            <Chat className="mr-2 text-blue-600" />
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50" sx={{ backgroundColor: 'rgba(51, 65, 85, 0.5)' }}>
+          <Typography variant="h6" className="font-semibold text-white mb-4 flex items-center">
+            <Chat className="mr-2 text-pink-400" />
             How would you like our AI to communicate with you? *
           </Typography>
           <FormControl component="fieldset" className="w-full">
@@ -141,29 +141,35 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
             >
               <div className="grid gap-3">
                 {COMMUNICATION_STYLES.map((style) => (
-                  <div key={style.value} className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors">
+                  <div key={style.value} className="border border-slate-600/50 bg-slate-600/30 rounded-lg p-3 hover:border-pink-400/50 transition-colors backdrop-blur-sm">
                     <FormControlLabel
                       value={style.value}
                       control={
                         <Radio 
                           sx={{
+                            color: '#64748B',
                             '&.Mui-checked': {
-                              color: '#3B82F6',
+                              color: '#14B8A6',
                             },
                           }}
                         />
                       }
                       label={
                         <div>
-                          <Typography variant="subtitle1" className="font-medium">
+                          <Typography variant="subtitle1" className="font-medium text-white">
                             {style.label}
                           </Typography>
-                          <Typography variant="body2" className="text-gray-600">
+                          <Typography variant="body2" className="text-gray-300">
                             {style.description}
                           </Typography>
                         </div>
                       }
                       className="w-full m-0"
+                      sx={{
+                        '& .MuiFormControlLabel-label': {
+                          width: '100%',
+                        },
+                      }}
                     />
                   </div>
                 ))}
@@ -173,19 +179,19 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
         </Paper>
 
         {/* Avatar Selection */}
-        <Paper className="p-6 border border-gray-200">
-          <Typography variant="h6" className="font-semibold text-gray-900 mb-4 flex items-center">
-            <Person className="mr-2 text-blue-600" />
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50" sx={{ backgroundColor: 'rgba(51, 65, 85, 0.5)' }}>
+          <Typography variant="h6" className="font-semibold text-white mb-4 flex items-center">
+            <Person className="mr-2 text-teal-400" />
             Choose your AI companion
           </Typography>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {AVATAR_OPTIONS.map((avatar) => (
               <div key={avatar.id}>
                 <div
-                  className={`cursor-pointer border-2 rounded-lg p-4 text-center transition-all ${
+                  className={`cursor-pointer border-2 rounded-lg p-4 text-center transition-all backdrop-blur-sm ${
                     selectedAvatar === avatar.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-pink-400 bg-pink-500/20'
+                      : 'border-slate-600/50 bg-slate-600/20 hover:border-slate-500'
                   }`}
                   onClick={() => handleAvatarChange(avatar.id)}
                 >
@@ -199,7 +205,7 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
                   >
                     {avatar.emoji}
                   </Avatar>
-                  <Typography variant="body2" className="font-medium">
+                  <Typography variant="body2" className="font-medium text-white">
                     {avatar.name}
                   </Typography>
                 </div>
@@ -209,12 +215,12 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
         </Paper>
 
         {/* Preferred Topics */}
-        <Paper className="p-6 border border-gray-200">
-          <Typography variant="h6" className="font-semibold text-gray-900 mb-4 flex items-center">
-            <Psychology className="mr-2 text-blue-600" />
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50" sx={{ backgroundColor: 'rgba(51, 65, 85, 0.5)' }}>
+          <Typography variant="h6" className="font-semibold text-white mb-4 flex items-center">
+            <Psychology className="mr-2 text-purple-400" />
             Topics you're interested in
           </Typography>
-          <Typography variant="body2" className="text-gray-600 mb-4">
+          <Typography variant="body2" className="text-gray-300 mb-4">
             This helps us suggest relevant conversations and resources
           </Typography>
           <FormGroup>
@@ -227,14 +233,20 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
                       checked={preferredTopics.includes(topic)}
                       onChange={() => handleTopicChange(topic)}
                       sx={{
+                        color: '#64748B',
                         '&.Mui-checked': {
-                          color: '#3B82F6',
+                          color: '#A855F7',
                         },
                       }}
                     />
                   }
                   label={topic}
-                  className="text-gray-700"
+                  className="text-gray-300"
+                  sx={{
+                    '& .MuiFormControlLabel-label': {
+                      color: '#D1D5DB',
+                    },
+                  }}
                 />
               ))}
             </div>
@@ -242,16 +254,16 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
         </Paper>
 
         {/* Notification Preferences */}
-        <Paper className="p-6 border border-gray-200">
-          <Typography variant="h6" className="font-semibold text-gray-900 mb-4 flex items-center">
-            <Notifications className="mr-2 text-blue-600" />
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50" sx={{ backgroundColor: 'rgba(51, 65, 85, 0.5)' }}>
+          <Typography variant="h6" className="font-semibold text-white mb-4 flex items-center">
+            <Notifications className="mr-2 text-orange-400" />
             Notification preferences
           </Typography>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body1" className="font-medium">Daily check-ins</Typography>
-                <Typography variant="body2" className="text-gray-600">
+                <Typography variant="body1" className="font-medium text-white">Daily check-ins</Typography>
+                <Typography variant="body2" className="text-gray-300">
                   Gentle reminders to track your mood
                 </Typography>
               </div>
@@ -260,10 +272,10 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
                 onChange={() => handleNotificationChange('dailyCheckins')}
                 sx={{
                   '& .MuiSwitch-switchBase.Mui-checked': {
-                    color: '#3B82F6',
+                    color: '#EC4899',
                   },
                   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                    backgroundColor: '#3B82F6',
+                    backgroundColor: '#EC4899',
                   },
                 }}
               />
@@ -271,8 +283,8 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
 
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body1" className="font-medium">Mood reminders</Typography>
-                <Typography variant="body2" className="text-gray-600">
+                <Typography variant="body1" className="font-medium text-white">Mood reminders</Typography>
+                <Typography variant="body2" className="text-gray-300">
                   Prompts to log your emotional state
                 </Typography>
               </div>
@@ -281,10 +293,10 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
                 onChange={() => handleNotificationChange('moodReminders')}
                 sx={{
                   '& .MuiSwitch-switchBase.Mui-checked': {
-                    color: '#3B82F6',
+                    color: '#14B8A6',
                   },
                   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                    backgroundColor: '#3B82F6',
+                    backgroundColor: '#14B8A6',
                   },
                 }}
               />
@@ -292,8 +304,8 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
 
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body1" className="font-medium">Progress updates</Typography>
-                <Typography variant="body2" className="text-gray-600">
+                <Typography variant="body1" className="font-medium text-white">Progress updates</Typography>
+                <Typography variant="body2" className="text-gray-300">
                   Weekly insights about your wellness journey
                 </Typography>
               </div>
@@ -302,10 +314,10 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
                 onChange={() => handleNotificationChange('progressUpdates')}
                 sx={{
                   '& .MuiSwitch-switchBase.Mui-checked': {
-                    color: '#3B82F6',
+                    color: '#A855F7',
                   },
                   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                    backgroundColor: '#3B82F6',
+                    backgroundColor: '#A855F7',
                   },
                 }}
               />
@@ -320,7 +332,15 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
           variant="outlined"
           onClick={onPrev}
           startIcon={<ArrowBack />}
-          className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+          className="px-6 py-2 text-gray-300 hover:bg-slate-700/50 transition-all duration-300"
+          sx={{
+            borderColor: '#64748B',
+            color: '#D1D5DB',
+            '&:hover': {
+              borderColor: '#EC4899',
+              backgroundColor: 'rgba(51, 65, 85, 0.5)',
+            },
+          }}
         >
           Back
         </Button>
@@ -330,23 +350,24 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
           onClick={onNext}
           disabled={!canProceed}
           endIcon={<ArrowForward />}
-          className={`px-8 py-3 rounded-lg font-medium ${
+          className={`px-8 py-3 rounded-lg font-medium transition-all duration-300 ${
             canProceed 
-              ? 'bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600' 
-              : 'bg-gray-300 text-gray-500'
+              ? 'bg-gradient-to-r from-pink-500 to-teal-500 text-white hover:from-pink-600 hover:to-teal-600 transform hover:scale-105 shadow-lg' 
+              : 'bg-gray-600 text-gray-400'
           }`}
           sx={{
-            background: canProceed ? 'linear-gradient(to right, #3B82F6, #10B981)' : undefined,
+            background: canProceed ? 'linear-gradient(to right, #EC4899, #14B8A6)' : '#4B5563',
             '&:hover': {
-              background: canProceed ? 'linear-gradient(to right, #2563EB, #059669)' : undefined,
+              background: canProceed ? 'linear-gradient(to right, #DB2777, #0D9488)' : '#4B5563',
+              transform: canProceed ? 'scale(1.05)' : 'none',
             },
             '&:disabled': {
-              background: '#D1D5DB',
-              color: '#6B7280',
+              background: '#4B5563',
+              color: '#9CA3AF',
             },
           }}
         >
-          Continue
+          Continue ✨
         </Button>
       </div>
     </Box>

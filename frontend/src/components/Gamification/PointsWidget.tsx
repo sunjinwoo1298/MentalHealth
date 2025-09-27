@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { gamificationAPI } from '../../services/api';
+import { gamificationCache } from '../../services/gamificationCache';
 
 interface UserPoints {
   total_points: number;
@@ -26,22 +27,35 @@ const PointsWidget: React.FC<PointsWidgetProps> = ({ className = '' }) => {
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
   
   const isDarkTheme = className?.includes('bg-transparent');
 
   useEffect(() => {
+    // Prevent duplicate calls in StrictMode
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    
     fetchPointsData();
   }, []);
 
   const fetchPointsData = async () => {
     try {
       setLoading(true);
-      const response = await gamificationAPI.getPoints();
       
-      if (response.success) {
-        setUserPoints(response.data.points);
-        setRecentActivity(response.data.recent_activity || []);
-      }
+      const data = await gamificationCache.get('points', async () => {
+        const response = await gamificationAPI.getPoints();
+        if (response.success) {
+          return {
+            points: response.data.points,
+            recent_activity: response.data.recent_activity || []
+          };
+        }
+        throw new Error('Failed to fetch points data');
+      });
+      
+      setUserPoints(data.points);
+      setRecentActivity(data.recent_activity);
     } catch (err) {
       console.error('Error fetching points data:', err);
       setError('Failed to load points data');

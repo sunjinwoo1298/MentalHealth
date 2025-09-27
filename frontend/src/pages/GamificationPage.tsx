@@ -142,6 +142,17 @@ const GamificationPage: React.FC = () => {
           {/* Debug Panel - Remove this in production */}
           <GamificationDebug />
           
+          {/* Development Notice */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="bg-yellow-900/30 backdrop-blur-md rounded-xl p-4 mb-6 border border-yellow-400/30">
+              <h3 className="text-yellow-300 font-semibold mb-2">🔧 Development Mode Notice</h3>
+              <p className="text-yellow-200 text-sm">
+                You may see duplicate API calls in the browser console. This is normal in development due to React's StrictMode 
+                and multiple gamification widgets loading their data. In production, this will be optimized.
+              </p>
+            </div>
+          )}
+          
           {/* Testing Instructions */}
           <div className="bg-blue-900/30 backdrop-blur-md rounded-xl p-4 mb-6 border border-blue-400/30">
             <h3 className="text-blue-300 font-semibold mb-2">🧪 Testing Chat Rewards</h3>

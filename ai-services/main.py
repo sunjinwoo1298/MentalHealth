@@ -409,7 +409,117 @@ def add_to_conversation(user_id, human_message, ai_message, emotions=None):
         user_conversations[user_id] = history[-20:]
 
 def analyze_emotional_state(message_text, user_id):
-    """Analyze emotional content of user message and update emotional state"""
+    """Analyze emotional content of user message using Gemini AI and update emotional state"""
+    try:
+        # Use Gemini AI for sophisticated emotion detection
+        if geminiLlm:
+            emotion_prompt = f"""
+Analyze the emotional content of this user message for mental health support purposes. 
+Be precise and empathetic in your analysis.
+
+User message: "{message_text}"
+
+Instructions:
+1. Identify the primary and secondary emotions present
+2. Rate the intensity of each emotion (1-5 scale)
+3. Consider cultural context (Indian youth mental health)
+4. Look for subtle emotional cues, not just obvious words
+
+Return ONLY a JSON object with this exact format:
+{{
+    "primary_emotion": "emotion_name",
+    "secondary_emotions": ["emotion1", "emotion2"],
+    "intensity": 3,
+    "emotional_context": "brief description",
+    "avatar_emotion": "neutral|happy|sad|concerned|supportive|excited"
+}}
+
+Available emotions: sadness, anxiety, anger, loneliness, joy, gratitude, confusion, hope, stress, fear, overwhelm, relief, pride, shame, guilt, love, excitement, calm, frustration, determination
+
+Avatar emotions map to:
+- sadness/grief/despair → sad
+- anxiety/stress/overwhelm → concerned  
+- joy/gratitude/pride/love → happy
+- hope/determination/relief → supportive
+- excitement/enthusiasm → excited
+- calm/peace/neutral → neutral
+"""
+
+            try:
+                response = geminiLlm.invoke(emotion_prompt)
+                emotion_content = response.content if hasattr(response, 'content') else str(response)
+                
+                # Parse JSON response
+                import json
+                emotion_data = json.loads(emotion_content.strip())
+                
+                detected_emotions = [emotion_data.get("primary_emotion", "neutral")]
+                if emotion_data.get("secondary_emotions"):
+                    detected_emotions.extend(emotion_data["secondary_emotions"][:2])  # Max 3 total
+                
+                # Store additional emotion analysis data
+                emotion_analysis = {
+                    'emotions': detected_emotions,
+                    'intensity': emotion_data.get("intensity", 3),
+                    'context': emotion_data.get("emotional_context", ""),
+                    'avatar_emotion': emotion_data.get("avatar_emotion", "neutral"),
+                    'timestamp': time.time(),
+                    'message': message_text[:100]
+                }
+                
+                print(f"🎭 Emotion Analysis for user {user_id}: {emotion_analysis}")
+                
+            except (json.JSONDecodeError, Exception) as e:
+                print(f"Error parsing emotion analysis: {e}, falling back to keyword detection")
+                detected_emotions = analyze_emotions_fallback(message_text)
+                emotion_analysis = {
+                    'emotions': detected_emotions,
+                    'intensity': 3,
+                    'context': 'fallback analysis',
+                    'avatar_emotion': map_emotions_to_avatar(detected_emotions),
+                    'timestamp': time.time(),
+                    'message': message_text[:100]
+                }
+        else:
+            # Fallback to keyword detection if Gemini not available
+            detected_emotions = analyze_emotions_fallback(message_text)
+            emotion_analysis = {
+                'emotions': detected_emotions,
+                'intensity': 3,
+                'context': 'keyword-based fallback',
+                'avatar_emotion': map_emotions_to_avatar(detected_emotions),
+                'timestamp': time.time(),
+                'message': message_text[:100]
+            }
+        
+        # Update user's emotional state
+        if user_id not in user_emotional_states:
+            user_emotional_states[user_id] = {
+                'current_emotions': [],
+                'emotion_history': [],
+                'last_updated': time.time(),
+                'conversation_count': 0
+            }
+        
+        state = user_emotional_states[user_id]
+        state['current_emotions'] = detected_emotions
+        state['current_analysis'] = emotion_analysis
+        state['emotion_history'].append(emotion_analysis)
+        state['last_updated'] = time.time()
+        state['conversation_count'] += 1
+        
+        # Keep only last 10 emotional states
+        if len(state['emotion_history']) > 10:
+            state['emotion_history'] = state['emotion_history'][-10:]
+        
+        return detected_emotions
+        
+    except Exception as e:
+        print(f"Error in emotion analysis: {e}")
+        return ["neutral"]
+
+def analyze_emotions_fallback(message_text):
+    """Fallback keyword-based emotion detection"""
     message_lower = message_text.lower()
     detected_emotions = []
     
@@ -420,30 +530,37 @@ def analyze_emotional_state(message_text, user_id):
                 detected_emotions.append(emotion)
                 break
     
-    # Update user's emotional state
-    if user_id not in user_emotional_states:
-        user_emotional_states[user_id] = {
-            'current_emotions': [],
-            'emotion_history': [],
-            'last_updated': time.time(),
-            'conversation_count': 0
-        }
+    return detected_emotions if detected_emotions else ["neutral"]
+
+def map_emotions_to_avatar(emotions):
+    """Map detected emotions to avatar animation states"""
+    if not emotions:
+        return "neutral"
     
-    state = user_emotional_states[user_id]
-    state['current_emotions'] = detected_emotions
-    state['emotion_history'].append({
-        'emotions': detected_emotions,
-        'timestamp': time.time(),
-        'message': message_text[:100]  # Store first 100 chars for context
-    })
-    state['last_updated'] = time.time()
-    state['conversation_count'] += 1
+    emotion_to_avatar = {
+        'sadness': 'sad',
+        'grief': 'sad', 
+        'despair': 'sad',
+        'anxiety': 'concerned',
+        'stress': 'concerned',
+        'overwhelm': 'concerned',
+        'worry': 'concerned',
+        'fear': 'concerned',
+        'joy': 'happy',
+        'gratitude': 'happy',
+        'pride': 'happy',
+        'love': 'happy',
+        'excitement': 'excited',
+        'enthusiasm': 'excited',
+        'hope': 'supportive',
+        'determination': 'supportive',
+        'relief': 'supportive',
+        'calm': 'neutral',
+        'peace': 'neutral'
+    }
     
-    # Keep only last 10 emotional states
-    if len(state['emotion_history']) > 10:
-        state['emotion_history'] = state['emotion_history'][-10:]
-    
-    return detected_emotions
+    primary_emotion = emotions[0] if emotions else "neutral"
+    return emotion_to_avatar.get(primary_emotion, "neutral")
 
 def generate_empathetic_response_prefix(emotions, user_id):
     """Generate an empathetic response prefix based on detected emotions"""
@@ -706,11 +823,19 @@ def chat():
         formatted_response = formatted_response.replace("\\n", "\n")
         formatted_response = formatted_response.replace("\\*", "*")
         
+        # Get avatar emotion from emotional state
+        user_state = user_emotional_states.get(user_id, {})
+        current_analysis = user_state.get('current_analysis', {})
+        avatar_emotion = current_analysis.get('avatar_emotion', 'neutral')
+        emotion_intensity = current_analysis.get('intensity', 3)
+        
         return jsonify({
             "response": formatted_response,
             "userId": user_id,
             "timestamp": time.time(),
             "emotional_context": detected_emotions,
+            "avatar_emotion": avatar_emotion,
+            "emotion_intensity": emotion_intensity,
             "conversation_count": user_conversation_context.get(user_id, {}).get('total_messages', 0),
             "context": support_context
         })

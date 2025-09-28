@@ -14,6 +14,9 @@ export type ChatMessage = {
   timestamp: string;
   userId?: string;
   context?: string; // Added support context
+  emotional_context?: string[]; // Backend emotion detection
+  avatar_emotion?: string; // Backend avatar emotion
+  emotion_intensity?: number; // Backend emotion intensity
 };
 
 // System welcome message (currently unused)
@@ -266,6 +269,27 @@ export default function ChatWindow() {
   };
 
   // Enhanced auto-switch avatar emotions based on conversation
+  // Function to map backend emotion names to VRM avatar emotions
+  const mapBackendEmotionToVRM = (backendEmotion: string): 'neutral' | 'happy' | 'sad' | 'concerned' | 'supportive' | 'excited' | 'angry' | 'surprised' => {
+    const emotionMap: Record<string, 'neutral' | 'happy' | 'sad' | 'concerned' | 'supportive' | 'excited' | 'angry' | 'surprised'> = {
+      'neutral': 'neutral',
+      'happy': 'happy',
+      'sad': 'sad',
+      'concerned': 'concerned',
+      'supportive': 'supportive',
+      'excited': 'excited',
+      'angry': 'angry',
+      'surprised': 'surprised',
+      // Fallback mappings for any missing emotions
+      'worried': 'concerned',
+      'anxious': 'concerned',
+      'joyful': 'happy',
+      'calm': 'neutral'
+    };
+    
+    return emotionMap[backendEmotion] || 'neutral';
+  };
+
   const updateAvatarEmotion = async (messageText: string, messageType: 'user' | 'ai', aiEmotions?: string[]) => {
     console.log('🎭 updateAvatarEmotion called:', { messageText, messageType, aiEmotions, vrmLoading, isTransitioning });
     
@@ -406,8 +430,32 @@ export default function ChatWindow() {
         setMessageCount(prev => prev + 1);
       }
       
-      // Update avatar emotion based on message - no AI emotions for regular messages
-      updateAvatarEmotion(msg.text, msg.type as 'user' | 'ai');
+      // Handle avatar emotion updates with enhanced backend integration
+      if (msg.type === 'ai' && msg.avatar_emotion) {
+        // Use backend-provided emotion data for AI messages
+        console.log('🎭 Using backend emotion data:', {
+          emotion: msg.avatar_emotion,
+          intensity: msg.emotion_intensity,
+          emotional_context: msg.emotional_context
+        });
+        
+        // Apply emotion with intensity support
+        const emotionIntensity = msg.emotion_intensity || 3;
+        
+        try {
+          // Map backend emotion to VRM emotion if needed
+          const mappedEmotion = mapBackendEmotionToVRM(msg.avatar_emotion);
+          console.log(`🎭 Switching to emotion: ${mappedEmotion} (intensity: ${emotionIntensity})`);
+          switchToEmotion(mappedEmotion);
+        } catch (error) {
+          console.error('🎭 Error applying backend emotion:', error);
+          // Fallback to analysis
+          updateAvatarEmotion(msg.text, msg.type as 'user' | 'ai', msg.emotional_context);
+        }
+      } else {
+        // Fallback to analysis for other messages or missing emotion data
+        updateAvatarEmotion(msg.text, msg.type as 'user' | 'ai', msg.emotional_context);
+      }
       
       // Generate TTS for AI messages
       if (msg.type === 'ai' && isTTSEnabled && msg.text) {

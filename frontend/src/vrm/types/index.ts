@@ -1,6 +1,6 @@
 // Core emotion types and interfaces for VRM avatar system
 
-export type EmotionType = 'neutral' | 'happy' | 'angry' | 'sad' | 'surprised'
+export type EmotionType = 'neutral' | 'happy' | 'angry' | 'sad' | 'surprised' | 'concerned' | 'supportive' | 'excited'
 
 export type TransitionState = 'STATIC' | 'PLAYING_TRANSITION' | 'COMPLETING'
 
@@ -14,6 +14,9 @@ export interface ExpressionPresets {
   angry: ExpressionPreset
   sad: ExpressionPreset
   surprised: ExpressionPreset
+  concerned: ExpressionPreset
+  supportive: ExpressionPreset
+  excited: ExpressionPreset
 }
 
 export interface TransitionStatus {
@@ -42,6 +45,9 @@ export interface AnimationFileMapping {
   angry: string
   sad: string
   surprised: string
+  concerned: string
+  supportive: string
+  excited: string
 }
 
 export interface TransitionFileMapping {

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import io from 'socket.io-client';
 import { useVrmAvatar } from '../../hooks/useVrmAvatar';
+import { generateAndPlaySpeech, checkTTSStatus, audioManager } from '../../services/audioManager';
 // import { EmotionControls } from '../VrmControls'; // Unused - emotion control via analysis service
 import { useGamification } from '../../contexts/GamificationContext';
 import { mentalHealthContext } from '../../App';
@@ -103,6 +104,9 @@ export default function ChatWindow() {
   const [showEmotionalIndicator, setShowEmotionalIndicator] = useState(false);
   const [conversationCount, setConversationCount] = useState(0);
   const [aiInitiative, setAiInitiative] = useState<string | null>(null); // Track current context
+  const [isTTSEnabled, setIsTTSEnabled] = useState(true); // TTS toggle
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false); // Audio playback state
+  const [ttsError, setTtsError] = useState<string | null>(null); // TTS error state
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Gamification integration
@@ -144,6 +148,121 @@ export default function ChatWindow() {
     } catch (error) {
       console.error('🧪 Manual switchToEmotion failed:', error);
     }
+  };
+
+  // TTS handling functions
+  const handleTTSGeneration = async (text: string) => {
+    if (!isTTSEnabled || isPlayingAudio) {
+      return;
+    }
+    
+    try {
+      setTtsError(null);
+      console.log('🔊 Generating TTS for:', text.substring(0, 50) + '...');
+      
+      // Determine voice profile based on current emotion and context
+      const voiceProfile = getVoiceProfileForContext(currentEmotion, context?.currentContext || 'general');
+      const emotionContext = getEmotionContextFromMessage(text);
+      
+      const result = await generateAndPlaySpeech(text, {
+        voiceProfile,
+        emotionContext,
+        userId: socket.id,
+        backendUrl: 'http://localhost:5010',
+        onStart: () => {
+          setIsPlayingAudio(true);
+          console.log('🔊 TTS playback started');
+          // Switch avatar to speaking emotion
+          switchToEmotion('happy');
+        },
+        onEnd: () => {
+          setIsPlayingAudio(false);
+          console.log('🔊 TTS playback ended');
+          // Return avatar to appropriate emotion after speaking
+          setTimeout(() => {
+            updateAvatarEmotion(text, 'ai');
+          }, 1000);
+        },
+        onError: (error) => {
+          setIsPlayingAudio(false);
+          setTtsError(error);
+          console.error('🔊 TTS error:', error);
+        }
+      });
+      
+      if (!result.success) {
+        console.warn('🔊 TTS generation failed:', result.error);
+        setTtsError(result.error || 'TTS generation failed');
+      }
+      
+    } catch (error) {
+      console.error('🔊 TTS handling error:', error);
+      setIsPlayingAudio(false);
+      setTtsError(error instanceof Error ? error.message : String(error));
+    }
+  };
+  
+  // Helper function to determine voice profile based on emotion and context
+  const getVoiceProfileForContext = (emotion: string, chatContext: string) => {
+    const profiles = {
+      'academic': {
+        'happy': 'supportive_female',
+        'neutral': 'supportive_female', 
+        'sad': 'compassionate_female',
+        'angry': 'calming_male',
+        'surprised': 'supportive_female',
+        'default': 'supportive_female'
+      },
+      'family': {
+        'happy': 'compassionate_female',
+        'neutral': 'compassionate_female',
+        'sad': 'compassionate_female', 
+        'angry': 'calming_male',
+        'surprised': 'supportive_female',
+        'default': 'compassionate_female'
+      },
+      'general': {
+        'happy': 'compassionate_female',
+        'neutral': 'compassionate_female',
+        'sad': 'compassionate_female',
+        'angry': 'calming_male', 
+        'surprised': 'supportive_female',
+        'default': 'compassionate_female'
+      }
+    };
+    
+    const contextProfiles = profiles[chatContext as keyof typeof profiles] || profiles.general;
+    return contextProfiles[emotion as keyof typeof contextProfiles] || contextProfiles.default;
+  };
+  
+  // Helper function to determine emotion context from message
+  const getEmotionContextFromMessage = (text: string): string => {
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText.includes('calm') || lowerText.includes('peaceful') || lowerText.includes('breathe')) {
+      return 'calming';
+    } else if (lowerText.includes('support') || lowerText.includes('understand') || lowerText.includes('here for you')) {
+      return 'supportive';
+    } else if (lowerText.includes('sorry') || lowerText.includes('difficult') || lowerText.includes('healing')) {
+      return 'compassionate';
+    }
+    
+    return 'supportive'; // Default
+  };
+  
+  // Stop TTS playback
+  const stopTTS = () => {
+    audioManager.stopAudio();
+    setIsPlayingAudio(false);
+  };
+  
+  // Toggle TTS on/off
+  const toggleTTS = () => {
+    if (isPlayingAudio) {
+      stopTTS();
+    }
+    setIsTTSEnabled(!isTTSEnabled);
+    setTtsError(null);
   };
 
   // Enhanced auto-switch avatar emotions based on conversation
@@ -289,6 +408,11 @@ export default function ChatWindow() {
       
       // Update avatar emotion based on message - no AI emotions for regular messages
       updateAvatarEmotion(msg.text, msg.type as 'user' | 'ai');
+      
+      // Generate TTS for AI messages
+      if (msg.type === 'ai' && isTTSEnabled && msg.text) {
+        handleTTSGeneration(msg.text);
+      }
     });
 
     socket.on('chat:system', (msg: ChatMessage) => {
@@ -680,6 +804,46 @@ export default function ChatWindow() {
               >
                 Send
               </button>
+            </div>
+            
+            {/* TTS Controls */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <button
+                  type="button"
+                  onClick={toggleTTS}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
+                    isTTSEnabled 
+                      ? 'bg-green-500/20 border border-green-400/50 text-green-300 hover:bg-green-500/30' 
+                      : 'bg-gray-500/20 border border-gray-400/50 text-gray-300 hover:bg-gray-500/30'
+                  }`}
+                >
+                  🔊 Voice {isTTSEnabled ? 'ON' : 'OFF'}
+                </button>
+                
+                {isPlayingAudio && (
+                  <button
+                    type="button"
+                    onClick={stopTTS}
+                    className="px-3 py-2 rounded-lg bg-red-500/20 border border-red-400/50 text-red-300 hover:bg-red-500/30 text-xs font-medium transition-all duration-300"
+                  >
+                    ⏹️ Stop Audio
+                  </button>
+                )}
+                
+                {isPlayingAudio && (
+                  <div className="flex items-center space-x-2 text-xs text-green-300">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span>Playing audio...</span>
+                  </div>
+                )}
+              </div>
+              
+              {ttsError && (
+                <div className="text-xs text-red-300 bg-red-500/10 border border-red-400/30 rounded-lg px-2 py-1">
+                  ⚠️ {ttsError}
+                </div>
+              )}
             </div>
             
             {/* Quick Response Suggestions */}

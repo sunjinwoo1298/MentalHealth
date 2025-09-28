@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Murf TTS Test</title>
+    <script>
+        async function testTTS() {
+            console.log('Testing Murf TTS...');
+            
+            try {
+                const response = await fetch('http://localhost:5010/generate_speech', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: "Hello! This is a test of the Murf TTS integration.",
+                        voice_profile: "compassionate_female",
+                        emotion_context: "supportive",
+                        userId: "test-user"
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('TTS Result:', result);
+                
+                if (result.success && result.audio_url) {
+                    // Create audio element and play
+                    const audio = new Audio(result.audio_url);
+                    audio.volume = 0.8;
+                    
+                    audio.addEventListener('loadstart', () => console.log('Audio loading...'));
+                    audio.addEventListener('canplay', () => console.log('Audio can play'));
+                    audio.addEventListener('playing', () => console.log('Audio playing'));
+                    audio.addEventListener('ended', () => console.log('Audio ended'));
+                    audio.addEventListener('error', (e) => console.error('Audio error:', e));
+                    
+                    document.getElementById('status').innerText = 'Playing audio...';
+                    await audio.play();
+                    document.getElementById('status').innerText = 'Audio playing successfully!';
+                } else {
+                    document.getElementById('status').innerText = 'TTS failed: ' + (result.error || 'Unknown error');
+                }
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                document.getElementById('status').innerText = 'Test failed: ' + error.message;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Murf TTS Integration Test</h1>
+    <button onclick="testTTS()">Test TTS</button>
+    <div id="status">Ready to test</div>
+</body>
+</html>

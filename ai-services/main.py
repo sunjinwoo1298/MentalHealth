@@ -19,7 +19,34 @@ from context_prompts import get_context_prompt, get_available_contexts
 import requests
 import time
 
-load_dotenv()
+# Load environment variables from multiple possible locations
+load_dotenv()  # Load from current directory
+load_dotenv(dotenv_path='../.env')  # Load from parent directory (global .env)
+
+# Debug: Print environment variable status
+print("=== Environment Variable Debug ===")
+print(f"Current working directory: {os.getcwd()}")
+print(f"GEMINI_API_KEY configured: {bool(os.environ.get('GEMINI_API_KEY'))}")
+print(f"MURF_API_KEY configured: {bool(os.environ.get('MURF_API_KEY'))}")
+if os.environ.get('MURF_API_KEY'):
+    # Only show first 10 characters for security
+    murf_key = os.environ.get('MURF_API_KEY', '')
+    print(f"MURF_API_KEY value (first 10 chars): {murf_key[:10]}...")
+else:
+    print("MURF_API_KEY: Not found!")
+print("==================================")
+
+# Import TTS service after environment variables are loaded
+try:
+    from murf_tts_service import MurfTTSService
+    MURF_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Murf TTS not available - {e}")
+    print("Please install: pip install murf==2.1.0")
+    MurfTTSService = None
+    MURF_AVAILABLE = False
+
+# Initialize environment
 
 # Initialize environment
 os.environ["GOOGLE_API_KEY"] = os.environ.get("GEMINI_API_KEY")
@@ -43,6 +70,18 @@ try:
 except Exception as e:
     print(f"Warning: Could not initialize embedding model: {e}")
     embedding_model = None
+
+# Initialize Murf TTS service
+if MURF_AVAILABLE:
+    try:
+        murf_tts_service = MurfTTSService()
+        print("Murf TTS service initialized successfully")
+    except Exception as e:
+        print(f"Warning: Could not initialize Murf TTS service: {e}")
+        murf_tts_service = None
+else:
+    print("Murf TTS service not available - please install murf package")
+    murf_tts_service = None
 
 # Global conversation history per user (simplified approach)
 user_conversations = {}
@@ -873,6 +912,134 @@ def clear_memory():
             
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/generate_speech", methods=["POST"])
+def generate_speech():
+    """Generate speech using Murf AI TTS service"""
+    try:
+        # Check if TTS service is available
+        if not murf_tts_service or not murf_tts_service.client:
+            error_msg = "Murf AI TTS service not available - API key not configured"
+            print(f"❌ TTS Error: {error_msg}")
+            return jsonify({
+                "success": False,
+                "audio_data": None,
+                "audio_filename": None,
+                "audio_url": None,
+                "duration_seconds": 0,
+                "voice_profile": "compassionate_female",
+                "emotion_context": "supportive",
+                "provider": "murf_ai",
+                "error": error_msg,
+                "fallback_message": "TTS service requires Murf API key configuration.",
+                "userId": "anonymous",
+                "timestamp": time.time()
+            }), 200
+        
+        data = request.get_json()
+        print("Received TTS request:", data)
+        
+        text = data.get("text", "")
+        voice_profile = data.get("voice_profile", "compassionate_female")
+        emotion_context = data.get("emotion_context")  # Optional, will auto-detect if not provided
+        user_id = data.get("userId", "anonymous")
+        
+        if not text:
+            return jsonify({"error": "Text is required for speech generation"}), 400
+        
+        # Limit text length to prevent long processing times
+        if len(text) > 1000:
+            text = text[:1000] + "..."
+        
+        print(f"Generating speech for user {user_id}: '{text[:50]}...' with voice profile: {voice_profile}")
+        
+        # Generate speech using Murf AI service
+        result = murf_tts_service.generate_speech(
+            text=text,
+            voice_id="en-US-natalie"  # Default voice
+        )
+        
+        # Add user ID and timestamp
+        result['userId'] = user_id
+        result['timestamp'] = time.time()
+        result['text'] = text  # Include original text for reference
+        
+        # Add fields expected by frontend
+        if result.get('success'):
+            result['duration_seconds'] = result.get('audio_length', 0)
+            result['voice_profile'] = voice_profile
+            result['emotion_context'] = emotion_context or 'supportive'
+            result['provider'] = 'murf_ai'
+        
+        # Log the result (without audio data for brevity)
+        log_result = {k: v for k, v in result.items() if k != 'audio_data'}
+        print(f"TTS result for user {user_id}:", log_result)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"Error in generate_speech endpoint: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        # Return fallback response
+        return jsonify({
+            "success": False,
+            "audio_data": None,
+            "audio_filename": None,
+            "audio_url": None,
+            "duration_seconds": 0,
+            "voice_profile": voice_profile if 'voice_profile' in locals() else 'compassionate_female',
+            "emotion_context": "supportive",
+            "provider": "murf_ai",
+            "error": str(e),
+            "fallback_message": "TTS service temporarily unavailable. Text response available.",
+            "userId": user_id if 'user_id' in locals() else "anonymous",
+            "timestamp": time.time()
+        }), 200  # Return 200 to avoid breaking frontend
+
+@app.route("/tts_status", methods=["GET"])
+def tts_status():
+    """Check TTS service status"""
+    try:
+        # Check if Murf TTS service is available
+        if not murf_tts_service:
+            return jsonify({
+                "status": "error",
+                "api_key_configured": False,
+                "available_voices": [],
+                "service": "Murf AI TTS",
+                "error": "TTS service not initialized",
+                "timestamp": time.time()
+            })
+        
+        # Check if API key is configured (client will be None if no API key)
+        api_key_configured = murf_tts_service.client is not None
+        
+        # Basic voice list (Murf supports many voices)
+        voices = [
+            {"id": "en-US-natalie", "name": "Natalie", "language": "en-US", "gender": "female"},
+            {"id": "en-US-davis", "name": "Davis", "language": "en-US", "gender": "male"},
+            {"id": "en-US-jenny", "name": "Jenny", "language": "en-US", "gender": "female"}
+        ]
+        
+        return jsonify({
+            "status": "healthy" if api_key_configured else "limited",
+            "api_key_configured": api_key_configured,
+            "available_voices": voices if api_key_configured else [],
+            "service": "Murf AI TTS",
+            "timestamp": time.time()
+        })
+        
+    except Exception as e:
+        print(f"Error in tts_status endpoint: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "api_key_configured": False,
+            "error": str(e),
+            "service": "Murf AI TTS",
+            "timestamp": time.time()
+        }), 500
 
 if __name__ == "__main__":
     print("Starting MindCare AI Service with Intelligent Proactive Chat...")

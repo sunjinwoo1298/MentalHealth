@@ -7,12 +7,14 @@ import {
   ANIMATION_CONFIG,
   applyEmotionIntensity
 } from '../config';
+import type { VrmLipSync } from '../core';
 
 /**
  * Enhanced ExpressionManager with smooth transitions and intensity support
  */
 export class ExpressionManager {
   private vrm: VRM | null = null;
+  private lipSync: VrmLipSync | null = null;
   private transitionState: ExpressionTransitionState = {
     isTransitioning: false,
     fromExpression: {},
@@ -23,10 +25,30 @@ export class ExpressionManager {
   };
   
   private previousExpressionValues: Record<string, number> = {};
+  
+  // Expressions that should not be affected by emotion transitions (reserved for lip sync)
+  private static readonly PROTECTED_EXPRESSIONS = ['aa'];
 
   public setVRM(vrm: VRM): void {
     this.vrm = vrm;
     this.initializeExpressionValues();
+    
+    // Pass VRM to lip sync if available
+    if (this.lipSync) {
+      this.lipSync.setVRM(vrm);
+    }
+  }
+
+  /**
+   * Set the lip sync instance for coordination
+   */
+  public setLipSync(lipSync: VrmLipSync): void {
+    this.lipSync = lipSync;
+    
+    // Pass VRM to lip sync if already available
+    if (this.vrm) {
+      this.lipSync.setVRM(this.vrm);
+    }
   }
 
   private initializeExpressionValues(): void {
@@ -84,8 +106,32 @@ export class ExpressionManager {
       }
 
       console.log(`Applied ${emotion} facial expression with intensity ${intensity}`);
+      
+      // Apply lip sync after emotion expressions if available
+      this.applyLipSyncIfActive();
     } catch (error) {
       console.error(`Error applying ${emotion} expression:`, error);
+    }
+  }
+
+  /**
+   * Apply lip sync if active - called after emotion expressions
+   */
+  private applyLipSyncIfActive(): void {
+    if (this.lipSync) {
+      this.lipSync.applyLipSync();
+    }
+  }
+
+  /**
+   * Update expressions and lip sync - call this in the main render loop
+   */
+  public update(): void {
+    // Always update lip sync regardless of transition state
+    // since 'aa' is now protected from emotion transitions
+    if (this.lipSync) {
+      this.lipSync.updateLipSync();
+      this.lipSync.applyLipSync();
     }
   }
 
@@ -143,6 +189,9 @@ export class ExpressionManager {
       // Apply interpolated values
       this.applyExpressionValues(currentExpressions);
 
+      // Apply lip sync after expression interpolation
+      this.applyLipSyncIfActive();
+
       // Continue animation or complete
       if (rawProgress < 1) {
         this.transitionState.animationFrameId = requestAnimationFrame(animateExpression);
@@ -150,6 +199,9 @@ export class ExpressionManager {
         this.transitionState.isTransitioning = false;
         this.transitionState.animationFrameId = null;
         console.log(`Expression transition to ${targetEmotion} completed smoothly`);
+        
+        // Ensure lip sync is applied after transition completes
+        this.applyLipSyncIfActive();
       }
     };
 
@@ -176,6 +228,11 @@ export class ExpressionManager {
     const currentValues: Record<string, number> = {};
 
     for (const expressionName of COMMON_EXPRESSIONS) {
+      // Skip protected expressions when capturing current state for transitions
+      if (ExpressionManager.PROTECTED_EXPRESSIONS.includes(expressionName)) {
+        continue;
+      }
+      
       try {
         const value = expressionManager.getValue(expressionName);
         if (value !== null && value !== undefined) {
@@ -201,6 +258,12 @@ export class ExpressionManager {
     ]);
 
     for (const expressionName of allExpressions) {
+      // Skip protected expressions (reserved for lip sync)
+      if (ExpressionManager.PROTECTED_EXPRESSIONS.includes(expressionName)) {
+        console.log(`Skipping protected expression '${expressionName}' during transition`);
+        continue;
+      }
+      
       const fromValue = fromExpressions[expressionName] || 0;
       const toValue = toExpressions[expressionName] || 0;
       const difference = toValue - fromValue;
@@ -217,6 +280,11 @@ export class ExpressionManager {
     const expressionManager = this.vrm.expressionManager;
 
     for (const [expressionName, value] of Object.entries(expressions)) {
+      // Skip protected expressions during transitions
+      if (ExpressionManager.PROTECTED_EXPRESSIONS.includes(expressionName)) {
+        continue;
+      }
+      
       try {
         expressionManager.setValue(expressionName, value);
         this.previousExpressionValues[expressionName] = value;
@@ -232,6 +300,11 @@ export class ExpressionManager {
     const expressionManager = this.vrm.expressionManager;
 
     for (const expressionName of COMMON_EXPRESSIONS) {
+      // Don't reset protected expressions (lip sync controlled)
+      if (ExpressionManager.PROTECTED_EXPRESSIONS.includes(expressionName)) {
+        continue;
+      }
+      
       try {
         expressionManager.setValue(expressionName, 0);
         this.previousExpressionValues[expressionName] = 0;
@@ -244,5 +317,8 @@ export class ExpressionManager {
   public dispose(): void {
     this.stopExpressionTransition();
     this.previousExpressionValues = {};
+    
+    // Clean up lip sync reference
+    this.lipSync = null;
   }
 }

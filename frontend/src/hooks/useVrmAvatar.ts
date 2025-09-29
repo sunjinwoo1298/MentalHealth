@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { VRM } from '@pixiv/three-vrm'
 import type { EmotionType } from '../vrm/config'
-import { VrmRenderer, VrmLoader, VrmAnimationLoader } from '../vrm/core'
+import { VrmRenderer, VrmLoader, VrmAnimationLoader, VrmLipSync } from '../vrm/core'
 import { PoseManager, ExpressionManager, TransitionManager } from '../vrm/transitions'
 
 interface UseVrmAvatarReturn {
@@ -11,6 +11,11 @@ interface UseVrmAvatarReturn {
   isTransitioning: boolean
   switchToEmotion: (emotion: EmotionType) => Promise<void>
   getTransitionStatus: () => any
+  // Lip sync methods
+  setupLipSync: (audioElement: HTMLAudioElement) => Promise<boolean>
+  startLipSync: () => void
+  stopLipSync: () => void
+  isLipSyncActive: () => boolean
 }
 
 /**
@@ -30,6 +35,7 @@ export const useVrmAvatar = (): UseVrmAvatarReturn => {
   const expressionManagerRef = useRef<ExpressionManager | null>(null)
   const transitionManagerRef = useRef<TransitionManager | null>(null)
   const vrmRef = useRef<VRM | null>(null)
+  const lipSyncRef = useRef<VrmLipSync | null>(null)
 
   // Animation loop reference
   const animationIdRef = useRef<number | null>(null)
@@ -82,6 +88,35 @@ export const useVrmAvatar = (): UseVrmAvatarReturn => {
     return transitionManagerRef.current?.getDetailedStatus() || null
   }, [])
 
+  // Lip sync methods
+  const setupLipSync = useCallback(async (audioElement: HTMLAudioElement): Promise<boolean> => {
+    if (!lipSyncRef.current) {
+      console.warn('Lip sync not initialized yet')
+      return false
+    }
+    return await lipSyncRef.current.setupAudio(audioElement)
+  }, [])
+
+  const startLipSync = useCallback(() => {
+    if (!lipSyncRef.current) {
+      console.warn('Lip sync not initialized yet')
+      return
+    }
+    lipSyncRef.current.startLipSync()
+  }, [])
+
+  const stopLipSync = useCallback(() => {
+    if (!lipSyncRef.current) {
+      console.warn('Lip sync not initialized yet')
+      return
+    }
+    lipSyncRef.current.stopLipSync()
+  }, [])
+
+  const isLipSyncActive = useCallback((): boolean => {
+    return lipSyncRef.current?.isActiveAndSpeaking() || false
+  }, [])
+
   useEffect(() => {
     if (!canvasRef.current) return
 
@@ -108,9 +143,11 @@ export const useVrmAvatar = (): UseVrmAvatarReturn => {
         // Initialize transition system
         const poseManager = new PoseManager()
         const expressionManager = new ExpressionManager()
+        const lipSync = new VrmLipSync()
         
         poseManager.setVRM(vrm)
         expressionManager.setVRM(vrm)
+        lipSync.setVRM(vrm)
 
         const transitionManager = new TransitionManager(
           poseManager,
@@ -118,9 +155,13 @@ export const useVrmAvatar = (): UseVrmAvatarReturn => {
           animationLoader
         )
 
+        // Connect lip sync to expression manager
+        transitionManager.setLipSync(lipSync)
+
         poseManagerRef.current = poseManager
         expressionManagerRef.current = expressionManager
         transitionManagerRef.current = transitionManager
+        lipSyncRef.current = lipSync
 
         // Apply initial neutral pose
         const neutralAnimation = animationLoader.getPose('neutral')
@@ -140,6 +181,9 @@ export const useVrmAvatar = (): UseVrmAvatarReturn => {
 
           // Update pose manager
           poseManager.update(deltaTime)
+          
+          // Update expression manager (includes lip sync)
+          expressionManager.update()
 
           // Render scene
           renderer.render()
@@ -175,6 +219,7 @@ export const useVrmAvatar = (): UseVrmAvatarReturn => {
       transitionManagerRef.current?.dispose()
       poseManagerRef.current?.dispose()
       expressionManagerRef.current?.dispose()
+      lipSyncRef.current?.dispose()
       animationLoaderRef.current?.dispose()
       vrmLoaderRef.current?.dispose()
       rendererRef.current?.dispose()
@@ -194,6 +239,11 @@ export const useVrmAvatar = (): UseVrmAvatarReturn => {
     isLoading,
     isTransitioning,
     switchToEmotion,
-    getTransitionStatus
+    getTransitionStatus,
+    // Lip sync methods
+    setupLipSync,
+    startLipSync,
+    stopLipSync,
+    isLipSyncActive
   }
 }

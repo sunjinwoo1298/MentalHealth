@@ -2,25 +2,28 @@
 import { createContext,useState } from 'react'
 import { AuthProvider } from './contexts/AuthContext'
 import { GamificationProvider } from './contexts/GamificationContext'
+import ProtectedRoute from './components/auth/ProtectedRoute'
+import PublicRoute from './components/auth/PublicRoute'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
-import Dashboard from './components/Dashboard/EnterpriseGrade/EnterpriseDashboard'
-import ChatPage from './pages/ChatPage'
+import Index from './pages/Index'
+import Layout from './components/layout/Layout'
 import OnboardingFlow from './pages/OnboardingFlow'
 import ProfilePage from './pages/ProfilePage'
 import PrivacyPage from './pages/PrivacyPage'
 import SettingsPage from './pages/SettingsPage'
 import VrmAvatarPage from './pages/VrmAvatarPage'
 import GamificationPage from './pages/OptimizedGamificationPage'
-import MeditationPage from './pages/MeditationPage'
+import MeditationPage from './pages/NewMeditationPage'
 import JournalPage from './pages/JournalPage'
 import MoodPage from './pages/MoodPage'
 import CheckInPage from './pages/CheckInPage'
 import TestGamificationPage from './pages/TestGamificationPage'
-import './App.css'
-import './styles/animations.css'
+// import './App.css'
+import './global.css'
+// import './styles/animations.css'
 
 type MentalHealthContextType = {
   currentContext: string;
@@ -39,23 +42,31 @@ function App() {
       <GamificationProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/onboarding" element={<OnboardingFlow />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/chat" element={<ChatPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/vrm-avatar" element={<VrmAvatarPage />} />
-            <Route path="/gamification" element={<GamificationPage />} />
-            <Route path="/meditation" element={<MeditationPage />} />
-            <Route path="/journal" element={<JournalPage />} />
-            <Route path="/mood" element={<MoodPage />} />
-            <Route path="/checkin" element={<CheckInPage />} />
-            <Route path="/test-gamification" element={<TestGamificationPage />} />
+            {/* Public routes - accessible without authentication */}
+            <Route path="/" element={<ProtectedRoute requireAuth={false}><HomePage /></ProtectedRoute>} />
+            <Route path="/privacy" element={<ProtectedRoute requireAuth={false}><PrivacyPage /></ProtectedRoute>} />
+            
+            {/* Auth routes - only accessible when NOT logged in */}
+            <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+            <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+            
+            {/* Protected routes - require authentication */}
+            <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<Index />} />
+              <Route path="/gamification" element={<GamificationPage />} />
+              <Route path="/meditation" element={<MeditationPage />} />
+              <Route path="/journal" element={<JournalPage />} />
+              <Route path="/mood" element={<MoodPage />} />
+              <Route path="/checkin" element={<CheckInPage />} />
+              <Route path="/test-gamification" element={<TestGamificationPage />} />
+            </Route>
+            
+            {/* Other protected routes outside layout */}
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><VrmAvatarPage /></ProtectedRoute>} />
+            <Route path="/onboarding" element={<ProtectedRoute><OnboardingFlow /></ProtectedRoute>} />
           </Routes>
         </Router>
       </GamificationProvider>

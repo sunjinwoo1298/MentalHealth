@@ -1,46 +1,25 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import {
-  Container,
-  Typography,
-  Box,
-  Avatar,
-  Button,
-  TextField,
-  FormControl,
-  Select,
-  MenuItem,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  Switch,
-  Divider,
-  Chip,
-  Alert,
-  Skeleton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  Fade,
-  Slide,
-  Zoom
-} from '@mui/material'
-import {
-  Edit as EditIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon,
-  Notifications as NotificationsIcon,
-  Person as PersonIcon,
-  Psychology as PsychologyIcon,
-  ArrowBack as ArrowBackIcon,
-  Camera as CameraIcon,
-  StarBorder as StarIcon,
-  TrendingUp as TrendingUpIcon
-} from '@mui/icons-material'
-import Navigation from '../components/Navigation/Navigation'
+import { Button } from "../components/ui/button"
+import { useConfetti } from "../hooks/useConfetti"
+import { 
+  ArrowLeft, 
+  Edit, 
+  Save, 
+  X, 
+  Settings,
+  MapPin,
+  Calendar,
+  Heart,
+  Mail,
+  Globe,
+  Camera,
+  Star,
+  Award,
+  User,
+  Brain
+} from "lucide-react"
 
 interface UserProfile {
   id: string
@@ -68,52 +47,36 @@ interface UserProfile {
   }
 }
 
-const AVATAR_OPTIONS = [
-  { id: 'friendly', name: 'Friendly', emoji: '😊', color: '#4CAF50' },
-  { id: 'calm', name: 'Calm', emoji: '😌', color: '#2196F3' },
-  { id: 'wise', name: 'Wise', emoji: '🧙‍♀️', color: '#9C27B0' },
-  { id: 'cheerful', name: 'Cheerful', emoji: '😄', color: '#FF9800' },
-  { id: 'supportive', name: 'Supportive', emoji: '🤗', color: '#FF5722' },
-  { id: 'peaceful', name: 'Peaceful', emoji: '🕊️', color: '#607D8B' },
-  { id: 'energetic', name: 'Energetic', emoji: '⚡', color: '#FFEB3B' },
-  { id: 'mindful', name: 'Mindful', emoji: '🧘‍♀️', color: '#795548' }
+// Wellness stats from user data
+const WELLNESS_BADGES = [
+  { id: 1, name: "Mindful Beginner", icon: Star, color: "text-yellow-500" },
+  { id: 2, name: "Daily Tracker", icon: Heart, color: "text-pink-500" },
+  { id: 3, name: "Self Care Pro", icon: Award, color: "text-purple-500" },
+  { id: 4, name: "Community Member", icon: User, color: "text-cyan-500" }
 ]
 
-const COMMUNICATION_STYLES = [
-  'supportive',
-  'direct',
-  'gentle',
-  'encouraging',
-  'analytical'
-]
-
-const TOPIC_OPTIONS = [
-  'anxiety', 'depression', 'stress', 'relationships', 'work',
-  'family', 'sleep', 'selfesteem', 'trauma', 'mindfulness'
-]
+const COMMUNICATION_STYLES = ['supportive', 'direct', 'casual', 'formal']
 
 export default function ProfilePage() {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const fireConfetti = useConfetti()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false)
 
   // Form data for editing
   const [formData, setFormData] = useState({
     username: '',
-    communicationStyle: '',
-    preferredTopics: [] as string[],
-    notificationPreferences: {
-      dailyCheckins: false,
-      moodReminders: false,
-      progressUpdates: false
-    },
-    avatarSelection: ''
+    bio: '',
+    location: '',
+    website: '',
+    twitter: '',
+    instagram: '',
+    communicationStyle: ''
   })
 
   useEffect(() => {
@@ -143,14 +106,12 @@ export default function ProfilePage() {
       // Initialize form data
       setFormData({
         username: result.data.username || '',
-        communicationStyle: result.data.profile.communicationStyle || '',
-        preferredTopics: result.data.profile.preferredTopics || [],
-        notificationPreferences: result.data.profile.notificationPreferences || {
-          dailyCheckins: false,
-          moodReminders: false,
-          progressUpdates: false
-        },
-        avatarSelection: result.data.profile.avatarSelection || ''
+        bio: result.data.bio || '',
+        location: result.data.location || '',
+        website: result.data.website || '',
+        twitter: result.data.twitter || '',
+        instagram: result.data.instagram || '',
+        communicationStyle: result.data.profile.communicationStyle || ''
       })
     } catch (error) {
       console.error('Error fetching profile:', error)
@@ -164,7 +125,7 @@ export default function ProfilePage() {
     try {
       setSaving(true)
       setError('')
-
+      
       const response = await fetch('/api/users/profile', {
         method: 'PUT',
         headers: {
@@ -178,9 +139,13 @@ export default function ProfilePage() {
         throw new Error('Failed to update profile')
       }
 
-      setSuccess('Profile updated successfully!')
+      const result = await response.json()
+      setProfile(result.data)
       setEditing(false)
-      await fetchProfile() // Refresh data
+      setSuccess('Profile updated successfully!')
+      fireConfetti()
+      
+      setTimeout(() => setSuccess(''), 3000)
     } catch (error) {
       console.error('Error updating profile:', error)
       setError('Failed to update profile')
@@ -192,979 +157,289 @@ export default function ProfilePage() {
   const handleCancel = () => {
     setEditing(false)
     setError('')
-    // Reset form data to original values
     if (profile) {
       setFormData({
         username: profile.username || '',
-        communicationStyle: profile.profile.communicationStyle || '',
-        preferredTopics: profile.profile.preferredTopics || [],
-        notificationPreferences: profile.profile.notificationPreferences || {
-          dailyCheckins: false,
-          moodReminders: false,
-          progressUpdates: false
-        },
-        avatarSelection: profile.profile.avatarSelection || ''
+        bio: formData.bio || '',
+        location: formData.location || '',
+        website: formData.website || '',
+        twitter: formData.twitter || '',
+        instagram: formData.instagram || '',
+        communicationStyle: profile.profile.communicationStyle || ''
       })
     }
   }
 
-  const handleTopicToggle = (topic: string) => {
-    setFormData(prev => ({
-      ...prev,
-      preferredTopics: prev.preferredTopics.includes(topic)
-        ? prev.preferredTopics.filter(t => t !== topic)
-        : [...prev.preferredTopics, topic]
-    }))
-  }
-
-  const getSelectedAvatar = () => {
-    const avatarId = editing ? formData.avatarSelection : profile?.profile.avatarSelection
-    return AVATAR_OPTIONS.find(a => a.id === avatarId) || AVATAR_OPTIONS[0]
-  }
-
-  const handleLogout = async () => {
-    await logout()
-    navigate('/')
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 relative">
-        {/* Background Effects */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mix-blend-soft-light filter blur-2xl"></div>
-          <div className="absolute bottom-20 left-20 w-64 h-64 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full mix-blend-soft-light filter blur-2xl"></div>
-        </div>
-        
-        <Navigation 
-          isAuthenticated={true}
-          user={user || undefined}
-          onLogout={handleLogout}
-        />
-        
-        <div className="relative z-10 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
-          <Container maxWidth="md">
-            <div className="space-y-6">
-              <Skeleton 
-                variant="rectangular" 
-                height={280} 
-                sx={{ 
-                  mb: 3, 
-                  borderRadius: 4,
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)'
-                }} 
-                className="animate-pulse"
-              />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Skeleton 
-                  variant="rectangular" 
-                  height={320} 
-                  sx={{ 
-                    borderRadius: 4,
-                    bgcolor: 'rgba(255, 255, 255, 0.1)'
-                  }} 
-                />
-                <Skeleton 
-                  variant="rectangular" 
-                  height={320} 
-                  sx={{ 
-                    borderRadius: 4,
-                    bgcolor: 'rgba(255, 255, 255, 0.1)'
-                  }} 
-                />
-              </div>
-              <Skeleton 
-                variant="rectangular" 
-                height={250} 
-                sx={{ 
-                  borderRadius: 4,
-                  bgcolor: 'rgba(255, 255, 255, 0.1)'
-                }} 
-              />
-            </div>
-          </Container>
-        </div>
+      <div className="min-h-screen bg-vibrant-mesh flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-coral-500"></div>
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 relative">
-        <Navigation 
-          isAuthenticated={true}
-          user={user || undefined}
-          onLogout={handleLogout}
-        />
-        <div className="relative z-10 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
-          <Container maxWidth="md">
-            <Alert 
-              severity="error" 
-              sx={{ 
-                bgcolor: 'rgba(239, 68, 68, 0.1)',
-                color: 'white',
-                '& .MuiAlert-icon': { color: '#ef4444' },
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(239, 68, 68, 0.2)'
-              }}
-            >
-              Failed to load profile data. Please try again.
-            </Alert>
-          </Container>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 flex items-center justify-center">
+        <div className="text-center">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-lavender-600 to-violet-600 bg-clip-text text-transparent mb-4 flex items-center">
+            <User className="mr-3 text-lavender-600" size={24} />
+            Personal Information
+          </h2>
+          <Button onClick={() => navigate('/dashboard')} className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
+            Go Back
+          </Button>
         </div>
       </div>
     )
   }
 
-  const selectedAvatar = getSelectedAvatar()
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 relative">
-      {/* Animated Background Effects */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mix-blend-soft-light filter blur-2xl animate-pulse"></div>
-        <div className="absolute bottom-20 left-20 w-64 h-64 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full mix-blend-soft-light filter blur-2xl animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mix-blend-soft-light filter blur-3xl opacity-30"></div>
-      </div>
-      
-      <Navigation 
-        isAuthenticated={true}
-        user={user || undefined}
-        onLogout={handleLogout}
-      />
-      
-      <div className="relative z-10 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
-        <Container maxWidth="md">
-          {/* Back Navigation */}
-          <Fade in timeout={800}>
-            <Box sx={{ mb: 4 }}>
-              <Button
-                startIcon={<ArrowBackIcon />}
-                onClick={() => navigate('/dashboard')}
-                sx={{
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  '&:hover': {
-                    color: 'white',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    transform: 'translateX(-4px)'
-                  },
-                  transition: 'all 0.3s ease',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '12px',
-                  px: 2,
-                  py: 1
-                }}
-              >
-                Back to Dashboard
-              </Button>
-            </Box>
-          </Fade>
-
-          {/* Profile Header Card */}
-          <Slide in direction="up" timeout={1000}>
-            <div className="mb-8">
-              <div className="bg-gradient-to-br from-pink-500/20 to-purple-600/20 backdrop-blur-md rounded-3xl p-8 border border-pink-400/30 shadow-2xl hover:shadow-pink-500/10 transition-all duration-500">
-                <div className="text-center">
-                  {/* Avatar Section */}
-                  <div className="relative mb-6 group">
-                    <Zoom in timeout={1200}>
-                      <Avatar
-                        sx={{
-                          bgcolor: selectedAvatar.color,
-                          width: 120,
-                          height: 120,
-                          fontSize: '3.5rem',
-                          margin: '0 auto',
-                          cursor: editing ? 'pointer' : 'default',
-                          boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-                          border: '4px solid rgba(255, 255, 255, 0.2)',
-                          transition: 'all 0.3s ease',
-                          '&:hover': editing ? {
-                            transform: 'scale(1.05)',
-                            boxShadow: '0 25px 50px rgba(0,0,0,0.4)'
-                          } : {}
-                        }}
-                        onClick={() => editing && setAvatarDialogOpen(true)}
-                      >
-                        {selectedAvatar.emoji}
-                      </Avatar>
-                    </Zoom>
-                    
-                    {editing && (
-                      <Zoom in timeout={1500}>
-                        <IconButton
-                          onClick={() => setAvatarDialogOpen(true)}
-                          sx={{
-                            position: 'absolute',
-                            bottom: 0,
-                            right: '50%',
-                            transform: 'translateX(50%)',
-                            bgcolor: 'rgba(255, 255, 255, 0.9)',
-                            color: selectedAvatar.color,
-                            '&:hover': {
-                              bgcolor: 'white',
-                              transform: 'translateX(50%) scale(1.1)'
-                            },
-                            transition: 'all 0.3s ease',
-                            boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
-                          }}
-                        >
-                          <CameraIcon />
-                        </IconButton>
-                      </Zoom>
-                    )}
-                  </div>
-                  
-                  {/* Name Section */}
-                  {editing ? (
-                    <Fade in timeout={1000}>
-                      <TextField
-                        value={formData.username}
-                        onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                        label="Username"
-                        variant="outlined"
-                        fullWidth
-                        sx={{ 
-                          mb: 3, 
-                          maxWidth: 350,
-                          '& .MuiOutlinedInput-root': {
-                            color: 'white',
-                            '& fieldset': {
-                              borderColor: 'rgba(255, 255, 255, 0.3)',
-                            },
-                            '&:hover fieldset': {
-                              borderColor: 'rgba(255, 255, 255, 0.5)',
-                            },
-                            '&.Mui-focused fieldset': {
-                              borderColor: '#ec4899',
-                            },
-                          },
-                          '& .MuiInputLabel-root': {
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            '&.Mui-focused': {
-                              color: '#ec4899',
-                            }
-                          }
-                        }}
-                      />
-                    </Fade>
-                  ) : (
-                    <Typography 
-                      variant="h3" 
-                      gutterBottom
-                      sx={{
-                        color: 'white',
-                        fontWeight: 700,
-                        mb: 2,
-                        background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        textShadow: '0 4px 8px rgba(0,0,0,0.3)'
-                      }}
-                    >
-                      {profile.username || 'Anonymous User'}
-                    </Typography>
-                  )}
-                  
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      color: 'rgba(255, 255, 255, 0.8)', 
-                      mb: 2,
-                      fontWeight: 400
-                    }}
-                  >
-                    {profile.email}
-                  </Typography>
-                  
-                  <Zoom in timeout={1200}>
-                    <Chip 
-                      icon={profile.isVerified ? <StarIcon sx={{ color: 'inherit !important' }} /> : undefined}
-                      label={profile.isVerified ? '✨ Verified Member' : '⏳ Pending Verification'} 
-                      sx={{
-                        mb: 4,
-                        bgcolor: profile.isVerified ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)',
-                        color: profile.isVerified ? '#22c55e' : '#f59e0b',
-                        border: `1px solid ${profile.isVerified ? 'rgba(34, 197, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-                        fontWeight: 600,
-                        fontSize: '0.9rem',
-                        padding: '8px 16px',
-                        backdropFilter: 'blur(10px)'
-                      }}
-                    />
-                  </Zoom>
-                  
-                  {/* Action Buttons */}
-                  <Box sx={{ mt: 4 }}>
-                    {!editing ? (
-                      <Zoom in timeout={1400}>
-                        <Button
-                          variant="contained"
-                          startIcon={<EditIcon />}
-                          onClick={() => setEditing(true)}
-                          sx={{
-                            background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
-                            color: 'white',
-                            py: 1.5,
-                            px: 4,
-                            borderRadius: '16px',
-                            fontWeight: 600,
-                            fontSize: '1rem',
-                            textTransform: 'none',
-                            boxShadow: '0 8px 32px rgba(236, 72, 153, 0.3)',
-                            '&:hover': {
-                              background: 'linear-gradient(135deg, #db2777, #7c3aed)',
-                              transform: 'translateY(-2px)',
-                              boxShadow: '0 12px 40px rgba(236, 72, 153, 0.4)'
-                            },
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          Edit Profile
-                        </Button>
-                      </Zoom>
-                    ) : (
-                      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                        <Button
-                          variant="contained"
-                          startIcon={<SaveIcon />}
-                          onClick={handleSave}
-                          disabled={saving}
-                          sx={{
-                            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-                            color: 'white',
-                            py: 1.5,
-                            px: 4,
-                            borderRadius: '16px',
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            '&:hover': {
-                              background: 'linear-gradient(135deg, #16a34a, #15803d)',
-                              transform: 'translateY(-2px)'
-                            },
-                            '&:disabled': {
-                              opacity: 0.6
-                            },
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {saving ? 'Saving...' : 'Save Changes'}
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          startIcon={<CancelIcon />}
-                          onClick={handleCancel}
-                          disabled={saving}
-                          sx={{
-                            borderColor: 'rgba(255, 255, 255, 0.3)',
-                            color: 'white',
-                            py: 1.5,
-                            px: 4,
-                            borderRadius: '16px',
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            backdropFilter: 'blur(10px)',
-                            '&:hover': {
-                              borderColor: 'rgba(255, 255, 255, 0.5)',
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              transform: 'translateY(-2px)'
-                            },
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </Box>
-                    )}
-                  </Box>
-                </div>
-              </div>
-            </div>
-          </Slide>
-
-          {/* Error/Success Messages */}
-          {error && (
-            <Fade in timeout={600}>
-              <Alert 
-                severity="error" 
-                sx={{ 
-                  mb: 4,
-                  bgcolor: 'rgba(239, 68, 68, 0.1)',
-                  color: 'white',
-                  '& .MuiAlert-icon': { color: '#ef4444' },
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  borderRadius: '16px'
-                }} 
-                onClose={() => setError('')}
-              >
-                {error}
-              </Alert>
-            </Fade>
-          )}
-          {success && (
-            <Fade in timeout={600}>
-              <Alert 
-                severity="success" 
-                sx={{ 
-                  mb: 4,
-                  bgcolor: 'rgba(34, 197, 94, 0.1)',
-                  color: 'white',
-                  '& .MuiAlert-icon': { color: '#22c55e' },
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(34, 197, 94, 0.2)',
-                  borderRadius: '16px'
-                }} 
-                onClose={() => setSuccess('')}
-              >
-                {success}
-              </Alert>
-            </Fade>
-          )}
-
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            
-            {/* Personal Preferences Card */}
-            <Slide in direction="left" timeout={1200}>
-              <div className="bg-gradient-to-br from-teal-500/20 to-cyan-600/20 backdrop-blur-md rounded-3xl p-6 border border-teal-400/30 shadow-xl hover:shadow-teal-500/10 transition-all duration-500 hover:scale-[1.02]">
-                <Typography 
-                  variant="h5" 
-                  gutterBottom 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 2,
-                    color: 'white',
-                    fontWeight: 700,
-                    mb: 3
-                  }}
-                >
-                  <PersonIcon sx={{ color: '#14b8a6' }} />
-                  Personal Preferences
-                </Typography>
-                <Divider sx={{ mb: 3, bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
-                
-                {/* Communication Style */}
-                <Box sx={{ mb: 4 }}>
-                  <Typography 
-                    variant="subtitle1" 
-                    gutterBottom
-                    sx={{ 
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontWeight: 600,
-                      mb: 2
-                    }}
-                  >
-                    Communication Style
-                  </Typography>
-                  {editing ? (
-                    <FormControl fullWidth>
-                      <Select
-                        value={formData.communicationStyle}
-                        onChange={(e) => setFormData(prev => ({ ...prev, communicationStyle: e.target.value }))}
-                        sx={{
-                          color: 'white',
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: 'rgba(255, 255, 255, 0.3)',
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: 'rgba(255, 255, 255, 0.5)',
-                          },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#14b8a6',
-                          },
-                          '& .MuiSvgIcon-root': {
-                            color: 'white',
-                          },
-                          backdropFilter: 'blur(10px)',
-                          bgcolor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '12px'
-                        }}
-                        MenuProps={{
-                          PaperProps: {
-                            sx: {
-                              bgcolor: 'rgba(15, 23, 42, 0.95)',
-                              backdropFilter: 'blur(20px)',
-                              border: '1px solid rgba(255, 255, 255, 0.1)',
-                              '& .MuiMenuItem-root': {
-                                color: 'white',
-                                '&:hover': {
-                                  bgcolor: 'rgba(20, 184, 166, 0.1)'
-                                }
-                              }
-                            }
-                          }
-                        }}
-                      >
-                        {COMMUNICATION_STYLES.map(style => (
-                          <MenuItem key={style} value={style}>
-                            {style.charAt(0).toUpperCase() + style.slice(1)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  ) : (
-                    <Chip
-                      label={(profile.profile.communicationStyle?.charAt(0).toUpperCase() || '') + 
-                             (profile.profile.communicationStyle?.slice(1) || '') || 'Not set'}
-                      sx={{
-                        bgcolor: 'rgba(20, 184, 166, 0.2)',
-                        color: '#14b8a6',
-                        border: '1px solid rgba(20, 184, 166, 0.3)',
-                        fontWeight: 600
-                      }}
-                    />
-                  )}
-                </Box>
-
-                {/* Preferred Topics */}
-                <Box>
-                  <Typography 
-                    variant="subtitle1" 
-                    gutterBottom
-                    sx={{ 
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontWeight: 600,
-                      mb: 2
-                    }}
-                  >
-                    Preferred Topics
-                  </Typography>
-                  {editing ? (
-                    <FormGroup>
-                      <div className="grid grid-cols-2 gap-2">
-                        {TOPIC_OPTIONS.map(topic => (
-                          <FormControlLabel
-                            key={topic}
-                            control={
-                              <Checkbox
-                                checked={formData.preferredTopics.includes(topic)}
-                                onChange={() => handleTopicToggle(topic)}
-                                sx={{
-                                  color: 'rgba(255, 255, 255, 0.6)',
-                                  '&.Mui-checked': {
-                                    color: '#14b8a6',
-                                  },
-                                }}
-                              />
-                            }
-                            label={
-                              <Typography sx={{ 
-                                color: 'rgba(255, 255, 255, 0.8)',
-                                fontSize: '0.9rem'
-                              }}>
-                                {topic.charAt(0).toUpperCase() + topic.slice(1)}
-                              </Typography>
-                            }
-                          />
-                        ))}
-                      </div>
-                    </FormGroup>
-                  ) : (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {profile.profile.preferredTopics.length > 0 ? (
-                        profile.profile.preferredTopics.map(topic => (
-                          <Chip 
-                            key={topic} 
-                            label={topic}
-                            sx={{
-                              bgcolor: 'rgba(20, 184, 166, 0.15)',
-                              color: '#14b8a6',
-                              border: '1px solid rgba(20, 184, 166, 0.2)',
-                              fontSize: '0.85rem'
-                            }}
-                          />
-                        ))
-                      ) : (
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            fontStyle: 'italic'
-                          }}
-                        >
-                          No topics selected
-                        </Typography>
-                      )}
-                    </Box>
-                  )}
-                </Box>
-              </div>
-            </Slide>
-
-            {/* Notification Settings Card */}
-            <Slide in direction="right" timeout={1200}>
-              <div className="bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-md rounded-3xl p-6 border border-purple-400/30 shadow-xl hover:shadow-purple-500/10 transition-all duration-500 hover:scale-[1.02]">
-                <Typography 
-                  variant="h5" 
-                  gutterBottom 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 2,
-                    color: 'white',
-                    fontWeight: 700,
-                    mb: 3
-                  }}
-                >
-                  <NotificationsIcon sx={{ color: '#a855f7' }} />
-                  Notifications
-                </Typography>
-                <Divider sx={{ mb: 3, bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
-                
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={editing ? formData.notificationPreferences.dailyCheckins : profile.profile.notificationPreferences.dailyCheckins}
-                        onChange={(e) => editing && setFormData(prev => ({
-                          ...prev,
-                          notificationPreferences: {
-                            ...prev.notificationPreferences,
-                            dailyCheckins: e.target.checked
-                          }
-                        }))}
-                        disabled={!editing}
-                        sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': {
-                            color: '#a855f7',
-                          },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                            backgroundColor: '#a855f7',
-                          },
-                          '& .MuiSwitch-track': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                          }
-                        }}
-                      />
-                    }
-                    label={
-                      <Typography sx={{ 
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontWeight: 500
-                      }}>
-                        Daily Check-ins
-                      </Typography>
-                    }
-                    sx={{ mb: 2 }}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={editing ? formData.notificationPreferences.moodReminders : profile.profile.notificationPreferences.moodReminders}
-                        onChange={(e) => editing && setFormData(prev => ({
-                          ...prev,
-                          notificationPreferences: {
-                            ...prev.notificationPreferences,
-                            moodReminders: e.target.checked
-                          }
-                        }))}
-                        disabled={!editing}
-                        sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': {
-                            color: '#a855f7',
-                          },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                            backgroundColor: '#a855f7',
-                          },
-                          '& .MuiSwitch-track': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                          }
-                        }}
-                      />
-                    }
-                    label={
-                      <Typography sx={{ 
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontWeight: 500
-                      }}>
-                        Mood Reminders
-                      </Typography>
-                    }
-                    sx={{ mb: 2 }}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={editing ? formData.notificationPreferences.progressUpdates : profile.profile.notificationPreferences.progressUpdates}
-                        onChange={(e) => editing && setFormData(prev => ({
-                          ...prev,
-                          notificationPreferences: {
-                            ...prev.notificationPreferences,
-                            progressUpdates: e.target.checked
-                          }
-                        }))}
-                        disabled={!editing}
-                        sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': {
-                            color: '#a855f7',
-                          },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                            backgroundColor: '#a855f7',
-                          },
-                          '& .MuiSwitch-track': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                          }
-                        }}
-                      />
-                    }
-                    label={
-                      <Typography sx={{ 
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontWeight: 500
-                      }}>
-                        Progress Updates
-                      </Typography>
-                    }
-                  />
-                </FormGroup>
-              </div>
-            </Slide>
+    <div className="min-h-screen bg-vibrant-mesh">
+      {/* Header */}
+      <div className="relative bg-gradient-to-r from-coral-500 via-sunflower-500 to-turquoise-500 px-6 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Navigation */}
+          <div className="flex items-center justify-between mb-8">
+            <Button
+              onClick={() => navigate('/dashboard')}
+              variant="ghost"
+              className="text-white hover:bg-white/20 flex items-center gap-2 rounded-xl"
+            >
+              <ArrowLeft className="size-4" />
+              Back to Dashboard
+            </Button>
           </div>
 
-          {/* Mental Health Summary Card */}
-          <Slide in direction="up" timeout={1400}>
-            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-md rounded-3xl p-8 border border-slate-600/30 shadow-2xl hover:shadow-slate-500/10 transition-all duration-500">
-              <Typography 
-                variant="h5" 
-                gutterBottom 
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 2,
-                  color: 'white',
-                  fontWeight: 700,
-                  mb: 4
-                }}
-              >
-                <PsychologyIcon sx={{ color: '#06b6d4' }} />
-                Mental Health Profile
-              </Typography>
-              <Divider sx={{ mb: 4, bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
+          {/* Profile Header */}
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            {/* Profile Avatar */}
+            <div className="relative">
+              <div className="w-32 h-32 md:w-36 md:h-36 rounded-3xl bg-coral-gradient flex items-center justify-center text-5xl shadow-coral border-4 border-white/30 animate-float">
+                {profile.username ? profile.username.charAt(0).toUpperCase() : '�'}
+              </div>
+              {editing && (
+                <Button
+                  size="icon"
+                  className="absolute -bottom-2 -right-2 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white rounded-full w-10 h-10 shadow-lg"
+                >
+                  <Camera className="size-4" />
+                </Button>
+              )}
+            </div>
+
+            {/* Profile Info */}
+            <div className="flex-1 text-center md:text-left space-y-4">
+              {editing ? (
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                  className="text-3xl md:text-4xl font-bold bg-white/50 border-2 border-purple-300 focus:border-purple-500 outline-none text-gray-800 placeholder-gray-500 rounded-2xl px-4 py-2 w-full max-w-md"
+                  placeholder="Enter your name"
+                />
+              ) : (
+                <h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3 justify-center md:justify-start">
+                  {profile.username || 'Wellness Explorer'}
+                  {profile.isVerified && (
+                    <Star className="size-8 text-yellow-300 fill-yellow-300" />
+                  )}
+                </h1>
+              )}
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Initial Mood */}
-                <Zoom in timeout={1600}>
-                  <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-400/30">
-                    <Typography 
-                      variant="subtitle2" 
-                      gutterBottom
-                      sx={{ 
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        fontWeight: 600
-                      }}
-                    >
-                      Initial Mood
-                    </Typography>
-                    <Typography 
-                      variant="h3" 
-                      sx={{ 
-                        color: '#06b6d4',
-                        fontWeight: 700,
-                        mb: 1
-                      }}
-                    >
-                      {profile.profile.initialMoodScore || 'N/A'}
-                      {profile.profile.initialMoodScore && <span style={{ fontSize: '1rem' }}>/10</span>}
-                    </Typography>
-                    <TrendingUpIcon sx={{ color: '#06b6d4', fontSize: '1.5rem' }} />
-                  </div>
-                </Zoom>
+              <div className="flex items-center gap-2 justify-center md:justify-start">
+                <Mail className="size-4 text-white/80" />
+                <p className="text-white/90 font-medium">{profile.email}</p>
+              </div>
 
-                {/* Stress Level */}
-                <Zoom in timeout={1800}>
-                  <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-400/30">
-                    <Typography 
-                      variant="subtitle2" 
-                      gutterBottom
-                      sx={{ 
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        fontWeight: 600
-                      }}
-                    >
-                      Stress Level
-                    </Typography>
-                    <Typography 
-                      variant="h3" 
-                      sx={{ 
-                        color: '#f59e0b',
-                        fontWeight: 700,
-                        mb: 1
-                      }}
-                    >
-                      {profile.profile.stressLevel || 'N/A'}
-                      {profile.profile.stressLevel && <span style={{ fontSize: '1rem' }}>/10</span>}
-                    </Typography>
-                    <span style={{ fontSize: '1.5rem' }}>⚡</span>
-                  </div>
-                </Zoom>
+              {editing ? (
+                <textarea
+                  value={formData.bio}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                  className="w-full bg-white/50 border-2 border-purple-300 focus:border-purple-500 rounded-2xl p-4 text-gray-800 placeholder-gray-500 resize-none outline-none"
+                  rows={3}
+                  placeholder="Share something about your wellness journey..."
+                />
+              ) : (
+                <p className="text-lg text-white/90 max-w-md font-medium">
+                  {formData.bio || "On a journey to better mental health and wellness 🌟"}
+                </p>
+              )}
+            </div>
 
-                {/* Therapy Experience */}
-                <Zoom in timeout={2000}>
-                  <div className="sm:col-span-2 p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30">
-                    <Typography 
-                      variant="subtitle2" 
-                      gutterBottom
-                      sx={{ 
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        fontWeight: 600
-                      }}
-                    >
-                      Therapy Experience
-                    </Typography>
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        color: 'white',
-                        fontWeight: 500,
-                        textAlign: 'center'
-                      }}
-                    >
-                      {profile.profile.therapyExperience || 'Not specified'}
-                    </Typography>
-                  </div>
-                </Zoom>
-
-                {/* Primary Concerns */}
-                <div className="col-span-1 sm:col-span-2 lg:col-span-4">
-                  <Typography 
-                    variant="subtitle1" 
-                    gutterBottom
-                    sx={{ 
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontWeight: 600,
-                      mb: 2
-                    }}
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              {!editing ? (
+                <Button
+                  onClick={() => {
+                    setEditing(true)
+                    fireConfetti()
+                  }}
+                  className="bg-sunflower-gradient hover:bg-gradient-to-r hover:from-sunflower-600 hover:to-tangerine-600 text-white rounded-2xl px-8 py-3 font-bold shadow-sunflower animate-pulse"
+                >
+                  <Edit className="size-4 mr-2" />
+                  Edit Profile
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="bg-turquoise-gradient hover:bg-gradient-to-r hover:from-turquoise-600 hover:to-lavender-600 text-white rounded-2xl px-6 py-3 font-bold shadow-turquoise"
                   >
-                    Primary Concerns
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {profile.profile.primaryConcerns.length > 0 ? (
-                      profile.profile.primaryConcerns.map((concern, index) => (
-                        <Zoom in timeout={2200 + index * 100} key={index}>
-                          <Chip 
-                            label={concern} 
-                            sx={{
-                              bgcolor: 'rgba(139, 92, 246, 0.2)',
-                              color: '#8b5cf6',
-                              border: '1px solid rgba(139, 92, 246, 0.3)',
-                              fontWeight: 500,
-                              '&:hover': {
-                                bgcolor: 'rgba(139, 92, 246, 0.3)'
-                              }
-                            }}
-                          />
-                        </Zoom>
-                      ))
-                    ) : (
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontStyle: 'italic'
-                        }}
-                      >
-                        No concerns specified
-                      </Typography>
-                    )}
-                  </Box>
-                </div>
+                    <Save className="size-4 mr-2" />
+                    {saving ? 'Saving...' : 'Save'}
+                  </Button>
+                  <Button
+                    onClick={handleCancel}
+                    disabled={saving}
+                    className="bg-gradient-to-r from-violet-400 to-lavender-500 hover:from-violet-500 hover:to-lavender-600 text-white rounded-2xl px-6 py-3 font-bold shadow-violet"
+                  >
+                    <X className="size-4 mr-2" />
+                    Cancel
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Profile Info Card */}
+          <div className="bg-white/80 backdrop-blur border-2 border-coral-200 rounded-3xl p-8 shadow-coral">
+            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 bg-gradient-to-r from-coral-600 to-sunflower-600 bg-clip-text text-transparent">
+              <User className="size-6 text-coral-500" />
+              Profile Information
+            </h3>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <MapPin className="size-5 text-turquoise-500" />
+                {editing ? (
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                    className="flex-1 bg-gray-50 border-2 border-gray-200 focus:border-turquoise-400 outline-none rounded-xl px-4 py-2 text-gray-800"
+                    placeholder="Your location"
+                  />
+                ) : (
+                  <span className="text-gray-700 font-medium">{formData.location || 'Add your location'}</span>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Calendar className="size-5 text-coral-500" />
+                <span className="text-gray-700 font-medium">
+                  Joined {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Globe className="size-5 text-sunflower-500" />
+                {editing ? (
+                  <input
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                    className="flex-1 bg-gray-50 border-2 border-gray-200 focus:border-sunflower-400 outline-none rounded-xl px-4 py-2 text-gray-800"
+                    placeholder="Your website"
+                  />
+                ) : (
+                  <span className="text-gray-700 font-medium">{formData.website || 'Add your website'}</span>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Brain className="size-5 text-tangerine-500" />
+                {editing ? (
+                  <select
+                    value={formData.communicationStyle}
+                    onChange={(e) => setFormData(prev => ({ ...prev, communicationStyle: e.target.value }))}
+                    className="flex-1 bg-gray-50 border-2 border-gray-200 focus:border-tangerine-400 outline-none rounded-xl px-4 py-2 text-gray-800"
+                  >
+                    <option value="">Choose communication style</option>
+                    {COMMUNICATION_STYLES.map(style => (
+                      <option key={style} value={style}>
+                        {style.charAt(0).toUpperCase() + style.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="text-gray-700 font-medium">
+                    {formData.communicationStyle || 'Set communication style'}
+                  </span>
+                )}
               </div>
             </div>
-          </Slide>
+          </div>
 
-          {/* Avatar Selection Dialog */}
-          <Dialog 
-            open={avatarDialogOpen} 
-            onClose={() => setAvatarDialogOpen(false)} 
-            maxWidth="sm" 
-            fullWidth
-            PaperProps={{
-              sx: {
-                bgcolor: 'rgba(15, 23, 42, 0.95)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '24px'
-              }
-            }}
-          >
-            <DialogTitle sx={{ color: 'white', fontWeight: 700, fontSize: '1.5rem' }}>
-              Choose Your Avatar
-            </DialogTitle>
-            <DialogContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4">
-                {AVATAR_OPTIONS.map((avatar) => (
-                  <Zoom in timeout={600} key={avatar.id}>
-                    <Box
-                      sx={{
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        p: 3,
-                        border: 2,
-                        borderColor: formData.avatarSelection === avatar.id ? '#ec4899' : 'transparent',
-                        borderRadius: 3,
-                        bgcolor: formData.avatarSelection === avatar.id 
-                          ? 'rgba(236, 72, 153, 0.1)' 
-                          : 'rgba(255, 255, 255, 0.05)',
-                        backdropFilter: 'blur(10px)',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          bgcolor: 'rgba(255, 255, 255, 0.1)',
-                          transform: 'scale(1.05)'
-                        }
-                      }}
-                      onClick={() => setFormData(prev => ({ ...prev, avatarSelection: avatar.id }))}
-                    >
-                      <Avatar
-                        sx={{
-                          bgcolor: avatar.color,
-                          width: 70,
-                          height: 70,
-                          fontSize: '2rem',
-                          margin: '0 auto 12px',
-                          boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-                        }}
-                      >
-                        {avatar.emoji}
-                      </Avatar>
-                      <Typography 
-                        variant="body2"
-                        sx={{ 
-                          color: 'white',
-                          fontWeight: 600
-                        }}
-                      >
-                        {avatar.name}
-                      </Typography>
-                    </Box>
-                  </Zoom>
-                ))}
+          {/* Wellness Stats Card */}
+          <div className="bg-white/80 backdrop-blur border-2 border-turquoise-200 rounded-3xl p-8 shadow-turquoise">
+            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 bg-gradient-to-r from-turquoise-600 to-violet-600 bg-clip-text text-transparent">
+              <Award className="size-6 text-turquoise-500" />
+              Your Wellness Journey
+            </h3>
+            
+            {/* Achievement Badges */}
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {WELLNESS_BADGES.map((badge) => (
+                <div key={badge.id} className="flex items-center gap-3 p-4 bg-gradient-to-r from-lavender-100 to-violet-100 rounded-2xl border-2 border-lavender-200 hover:shadow-lavender transition-all animate-pulse">
+                  <badge.icon className={`size-6 ${badge.color}`} />
+                  <div className="font-bold text-sm text-gray-700">{badge.name}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Wellness Stats */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-bold text-gray-700 mb-4">Current Stats</h4>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-turquoise-100 to-turquoise-200 rounded-xl shadow-turquoise">
+                <span className="font-medium text-gray-700">Current Streak</span>
+                <span className="font-bold text-turquoise-600">7 days</span>
               </div>
-            </DialogContent>
-            <DialogActions sx={{ p: 3 }}>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-sunflower-100 to-sunflower-200 rounded-xl shadow-sunflower">
+                <span className="font-medium text-gray-700">Check-ins</span>
+                <span className="font-bold text-tangerine-600">23</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-100 to-lavender-200 rounded-xl shadow-violet">
+                <span className="font-medium text-gray-700">Wellness Score</span>
+                <span className="font-bold text-violet-600">85%</span>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="mt-8 space-y-3">
+              <h4 className="text-lg font-bold text-gray-700 mb-4">Quick Actions</h4>
               <Button 
-                onClick={() => setAvatarDialogOpen(false)}
-                sx={{
-                  color: 'white',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '12px',
-                  px: 3,
-                  py: 1,
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.2)'
-                  }
-                }}
+                onClick={() => navigate('/dashboard')}
+                className="w-full bg-coral-gradient hover:bg-gradient-to-r hover:from-coral-600 hover:to-sunflower-600 text-white rounded-xl py-3 font-bold shadow-coral animate-vibrate-glow"
               >
-                Done
+                <Heart className="size-4 mr-3" />
+                Go to Dashboard
               </Button>
-            </DialogActions>
-          </Dialog>
-        </Container>
+              <Button className="w-full bg-turquoise-gradient hover:bg-gradient-to-r hover:from-turquoise-600 hover:to-violet-600 text-white rounded-xl py-3 font-bold shadow-turquoise" onClick={() => navigate('/settings')}>
+                <Settings className="size-4 mr-3" />
+                Settings
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Status Messages */}
+      {error && (
+        <div className="fixed bottom-4 right-4 bg-gradient-to-r from-coral-500 to-tangerine-600 text-white p-4 rounded-lg shadow-coral">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="fixed bottom-4 right-4 bg-turquoise-gradient text-white p-4 rounded-lg shadow-turquoise animate-pulse">
+          {success}
+        </div>
+      )}
     </div>
   )
 }

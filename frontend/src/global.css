@@ -1,0 +1,515 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts ex  .border-azure\/50 {
+    border-color: hsl(var(--joy-azure) / 0.3);cts the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    /* Light neutral base background */
+    --background: 0 0% 98%;
+    --foreground: 220 48% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 48% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 48% 12%;
+
+    /* Primary coral color */
+    --primary: 0 75% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 220 48% 12%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 205 18% 44%;
+
+    --accent: 280 65% 75%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 350 80% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 88%;
+    --input: 0 0% 90%;
+    --ring: 0 75% 70%;
+
+    --radius: 0.9rem;
+
+    /* Vibrant Dashboard Color Palette */
+    /* Coral (#FF6B6B) */
+    --coral: 0 75% 70%;
+    --coral-light: 0 75% 85%;
+    --coral-dark: 0 75% 55%;
+    
+    /* Sunflower Yellow (#FFD93D) */
+    --sunflower: 48 100% 62%;
+    --sunflower-light: 48 100% 80%;
+    --sunflower-dark: 48 100% 45%;
+    
+    /* Turquoise (#4ECDC4) */
+    --turquoise: 175 55% 55%;
+    --turquoise-light: 175 55% 75%;
+    --turquoise-dark: 175 55% 40%;
+    
+    /* Violet (#9B59B6) */
+    --violet: 280 50% 55%;
+    --violet-light: 280 50% 75%;
+    --violet-dark: 280 50% 40%;
+    
+    /* Tangerine (#FFA500) */
+    --tangerine: 39 100% 50%;
+    --tangerine-light: 39 100% 70%;
+    --tangerine-dark: 39 100% 35%;
+    
+    /* Lavender (#B39DDB) */
+    --lavender: 260 45% 75%;
+    --lavender-light: 260 45% 85%;
+    --lavender-dark: 260 45% 60%;
+
+    /* Legacy joy colors for backward compatibility */
+    --joy-pink: 330 95% 70%;
+    --joy-crimson: 345 85% 60%;
+    --joy-azure: 240 100% 60%;
+    --joy-magenta: 300 75% 65%;
+    --joy-golden: 50 100% 55%;
+    --joy-yellow: 48 100% 62%;
+
+    /* Sidebar tokens tuned to stronger look */
+    --sidebar-background: 220 14% 96%;
+    --sidebar-foreground: 220 8% 18%;
+    --sidebar-primary: 190 90% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 180 100% 92%;
+    --sidebar-accent-foreground: 220 6% 12%;
+    --sidebar-border: 210 12% 90%;
+    --sidebar-ring: 187 92% 50%;
+  }
+
+  .dark {
+    --background: 220 28% 8%;
+    --foreground: 205 40% 96%;
+
+    --card: 220 28% 8%;
+    --card-foreground: 205 40% 96%;
+
+    --popover: 220 28% 8%;
+    --popover-foreground: 205 40% 96%;
+
+    --primary: 190 85% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 185 40% 18%;
+    --secondary-foreground: 205 40% 96%;
+
+    --muted: 185 30% 18%;
+    --muted-foreground: 205 18% 70%;
+
+    --accent: 185 30% 18%;
+    --accent-foreground: 205 40% 96%;
+
+    --destructive: 350 70% 35%;
+    --destructive-foreground: 205 40% 96%;
+
+    --border: 185 28% 16%;
+    --input: 185 28% 16%;
+    --ring: 190 85% 40%;
+
+    --sidebar-background: 230 8% 10%;
+    --sidebar-foreground: 230 6% 95%;
+    --sidebar-primary: 190 85% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 6% 13%;
+    --sidebar-accent-foreground: 230 6% 95%;
+    --sidebar-border: 230 6% 13%;
+    --sidebar-ring: 187 92% 50%;
+
+    --joy-pink: 330 95% 62%;
+    --joy-crimson: 345 75% 55%;
+    --joy-azure: 240 90% 65%;
+    --joy-magenta: 300 70% 60%;
+    --joy-golden: 50 90% 60%;
+    --joy-yellow: 45 95% 52%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    transition: background-color 400ms ease, color 400ms ease;
+    background-image: radial-gradient( circle at 10% 10%, hsl(var(--joy-azure) / 0.18) 0%, transparent 50% ),
+      radial-gradient( circle at 90% -10%, hsl(var(--joy-pink) / 0.16) 0%, transparent 50% ),
+      radial-gradient( circle at -10% 90%, hsl(var(--joy-golden) / 0.14) 0%, transparent 50% ),
+      radial-gradient( circle at 50% 50%, hsl(var(--joy-magenta) / 0.12) 0%, transparent 50% );
+    background-attachment: fixed;
+    background-size: 200% 200%;
+    animation: bgShift 20s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+}
+
+@keyframes bgShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 rgba(0,0,0,0); transform: translateY(0) scale(1); }
+  50% { box-shadow: 0 18px 40px -20px rgba(32,150,140,0.28); transform: translateY(-2px) scale(1.02); }
+  100% { box-shadow: 0 0 0 rgba(0,0,0,0); transform: translateY(0) scale(1); }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.98); opacity: 0.95; }
+  60% { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes floatSoft {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes vibrateGlow {
+  0%, 100% { 
+    box-shadow: 0 4px 15px hsl(var(--coral) / 0.3); 
+    transform: scale(1); 
+  }
+  50% { 
+    box-shadow: 0 8px 25px hsl(var(--violet) / 0.4); 
+    transform: scale(1.02); 
+  }
+}
+
+@layer components {
+  .animate-pulse-glow { animation: pulseGlow 2.4s ease-in-out infinite; }
+  .animate-pop { animation: pop 300ms cubic-bezier(.2,.9,.2,1) both; }
+  .animate-float-soft { animation: floatSoft 6s ease-in-out infinite; }
+  .animate-gradient { animation: gradientShift 6s ease infinite; }
+  .animate-vibrate-glow { animation: vibrateGlow 3s ease-in-out infinite; }
+  
+  /* Custom shadow utilities */
+  .shadow-bubbly {
+    box-shadow: 0 8px 25px -8px rgba(0,0,0,0.15);
+  }
+  
+  .shadow-vibrant {
+    box-shadow: 0 10px 30px -10px hsl(var(--coral) / 0.3), 
+                0 4px 15px -5px hsl(var(--violet) / 0.2);
+  }
+  
+  .shadow-coral {
+    box-shadow: 0 8px 20px -8px hsl(var(--coral) / 0.4);
+  }
+  
+  .shadow-sunflower {
+    box-shadow: 0 8px 20px -8px hsl(var(--sunflower) / 0.4);
+  }
+  
+  .shadow-turquoise {
+    box-shadow: 0 8px 20px -8px hsl(var(--turquoise) / 0.4);
+  }
+  
+  .shadow-violet {
+    box-shadow: 0 8px 20px -8px hsl(var(--violet) / 0.4);
+  }
+  
+  /* Vibrant gradient utilities */
+  .bg-coral-gradient {
+    background: linear-gradient(135deg, hsl(var(--coral)), hsl(var(--coral-dark)));
+  }
+  
+  .bg-sunflower-gradient {
+    background: linear-gradient(135deg, hsl(var(--sunflower)), hsl(var(--tangerine)));
+  }
+  
+  .bg-turquoise-gradient {
+    background: linear-gradient(135deg, hsl(var(--turquoise)), hsl(var(--turquoise-dark)));
+  }
+  
+  .bg-violet-gradient {
+    background: linear-gradient(135deg, hsl(var(--violet)), hsl(var(--lavender)));
+  }
+  
+  .bg-rainbow-gradient {
+    background: linear-gradient(
+      135deg, 
+      hsl(var(--coral)) 0%, 
+      hsl(var(--sunflower)) 20%, 
+      hsl(var(--turquoise)) 40%, 
+      hsl(var(--violet)) 60%, 
+      hsl(var(--tangerine)) 80%, 
+      hsl(var(--lavender)) 100%
+    );
+    background-size: 300% 300%;
+  }
+  
+  .bg-vibrant-mesh {
+    background: 
+      radial-gradient(circle at 20% 80%, hsl(var(--coral) / 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(var(--sunflower) / 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, hsl(var(--turquoise) / 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 60% 60%, hsl(var(--violet) / 0.15) 0%, transparent 50%),
+      linear-gradient(135deg, hsl(var(--background)), hsl(var(--background)));
+  }
+  
+  /* Joy color utilities for legacy support */
+  .bg-joy-gradient {
+    background: linear-gradient(135deg, hsl(var(--turquoise)), hsl(var(--violet)));
+  }
+  
+  .border-crimson\/50 {
+    border-color: hsl(var(--joy-crimson) / 0.5);
+  }
+  
+  .border-sky\/30 {
+    border-color: hsl(var(--joy-sky) / 0.3);
+  }
+  
+  .border-joy-azure\/20 {
+    border-color: hsl(var(--joy-azure) / 0.2);
+  }
+  
+  .border-joy-magenta\/30 {
+    border-color: hsl(var(--joy-magenta) / 0.3);
+  }
+  
+  .border-joy-pink\/30 {
+    border-color: hsl(var(--joy-pink) / 0.3);
+  }
+
+  .border-golden\/50 {
+    border-color: hsl(var(--joy-golden) / 0.5);
+  }
+  
+  .bg-joy-mint\/40 {
+    background-color: hsl(var(--joy-mint) / 0.4);
+  }
+  
+  .bg-joy-mint\/20 {
+    background-color: hsl(var(--joy-mint) / 0.2);
+  }
+  
+  .bg-joy-sky\/20 {
+    background-color: hsl(var(--joy-sky) / 0.2);
+  }
+  
+  .text-joy-sky {
+    color: hsl(var(--joy-sky));
+  }
+}
+
+/* Playful custom cursor (SVG data URL) */
+:root {
+  --playful-cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 21l1-4 12-12 3 3L6 20l-4 1z' fill='%23005f56'/%3E%3Cpath d='M14 6l3 3' stroke='%23a7f3d0' stroke-width='1.5'/%3E%3Ccircle cx='18' cy='6' r='1.6' fill='%23a7f3d0'/%3E%3C/svg%3E") 6 18, auto;
+}
+
+html, body {
+  cursor: var(--playful-cursor);
+}
+
+/* Ensure interactive elements still show pointer/grab states */
+button, a, [role="button"], input, textarea {
+  cursor: var(--playful-cursor), pointer;
+}
+
+/* Draggable state handled in JS sets 'grabbing' - provide fallback */
+.grabbing, *[data-grabbing="true"] { cursor: grabbing !important; }
+
+/* ================================================= */
+/* MEDITATION COMPONENT ANIMATIONS */
+/* ================================================= */
+
+@keyframes float-gentle {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg) scale(1);
+    opacity: 0.6;
+  }
+  25% { 
+    transform: translateY(-8px) rotate(1deg) scale(1.02);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translateY(-12px) rotate(-0.5deg) scale(1.05);
+    opacity: 1;
+  }
+  75% { 
+    transform: translateY(-6px) rotate(0.8deg) scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+  50% { 
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slide-in-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Animation utility classes */
+.animate-float-gentle {
+  animation: float-gentle 8s ease-in-out infinite;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.8s ease-out;
+}
+
+.animate-slide-in-down {
+  animation: slide-in-down 0.6s ease-out;
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 3s ease infinite;
+  background-size: 200% 200%;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+  background-size: 200% 100%;
+}
+
+/* 3D Perspective utilities for cards */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-y-2 {
+  transform: rotateY(2deg);
+}
+
+.rotate-x-1 {
+  transform: rotateX(1deg);
+}
+
+/* Hover scale utilities */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
+.hover\:scale-110:hover {
+  transform: scale(1.1);
+}
+
+/* Custom glassmorphism effects */
+.backdrop-blur-xl {
+  backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-2xl {
+  backdrop-filter: blur(24px);
+}
+
+/* Motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-gentle,
+  .animate-pulse-gentle,
+  .animate-pulse-glow,
+  .animate-gradient-shift,
+  .animate-shimmer {
+    animation: none;
+  }
+  
+  .motion-reduce\:animate-none {
+    animation: none;
+  }
+}

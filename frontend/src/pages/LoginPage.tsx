@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 interface LoginForm {
@@ -10,6 +10,7 @@ interface LoginForm {
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { login, isLoading, error, isAuthenticated, clearError } = useAuth()
   
   const [formData, setFormData] = useState<LoginForm>({
@@ -21,9 +22,11 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard')
+      // Get the intended destination from location state
+      const from = (location.state as any)?.from?.pathname || '/dashboard'
+      navigate(from, { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate, location.state])
 
   // Clear errors when component unmounts or form changes
   useEffect(() => {

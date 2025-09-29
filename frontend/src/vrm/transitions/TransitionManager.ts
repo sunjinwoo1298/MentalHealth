@@ -13,6 +13,7 @@ import {
 import { VrmAnimationLoader } from '../core'
 import { PoseManager } from './PoseManager'
 import { ExpressionManager } from './ExpressionManager'
+import type { VrmLipSync } from '../core'
 
 /**
  * TransitionManager orchestrates the complete 3-step transition sequence
@@ -35,6 +36,13 @@ export class TransitionManager {
     this.poseManager = poseManager
     this.expressionManager = expressionManager
     this.animationLoader = animationLoader
+  }
+
+  /**
+   * Set the lip sync instance for the expression manager
+   */
+  public setLipSync(lipSync: VrmLipSync): void {
+    this.expressionManager.setLipSync(lipSync);
   }
 
   public async startTransition(fromEmotion: EmotionType, toEmotion: EmotionType): Promise<boolean> {

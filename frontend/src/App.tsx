@@ -56,13 +56,13 @@ function App() {
               <Route path="/dashboard" element={<Index />} />
               <Route path="/gamification" element={<GamificationPage />} />
               <Route path="/meditation" element={<MeditationPage />} />
-              <Route path="/journal" element={<JournalPage />} />
               <Route path="/mood" element={<MoodPage />} />
               <Route path="/checkin" element={<CheckInPage />} />
               <Route path="/test-gamification" element={<TestGamificationPage />} />
             </Route>
             
             {/* Other protected routes outside layout */}
+            <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><VrmAvatarPage /></ProtectedRoute>} />

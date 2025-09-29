@@ -70,6 +70,75 @@ class AudioManager {
   }
   
   /**
+   * Get the current audio element (if any)
+   */
+  getCurrentAudioElement(): HTMLAudioElement | null {
+    return this.currentAudio;
+  }
+
+  /**
+   * Setup audio element and return it, but don't wait for full playback
+   */
+  async setupAndPlayAudio(audioUrl: string, metadata: AudioMetadata): Promise<HTMLAudioElement> {
+    try {
+      // Stop current audio if playing
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      }
+      
+      console.log(`🔊 Setting up audio: ${audioUrl}`);
+      console.log(`📊 Audio metadata:`, metadata);
+      
+      // Create new audio element
+      const audio = new Audio(audioUrl);
+      this.currentAudio = audio;
+      
+      // Configure audio settings
+      audio.volume = 0.8;
+      audio.preload = 'auto';
+      
+      // Add event listeners for debugging
+      audio.addEventListener('loadstart', () => {
+        console.log('🔄 Audio loading started...');
+      });
+      
+      audio.addEventListener('canplay', () => {
+        console.log('✅ Audio can play');
+      });
+      
+      audio.addEventListener('canplaythrough', () => {
+        console.log('✅ Audio can play through');
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error('❌ Audio error:', e);
+        console.error('Audio error details:', {
+          error: audio.error,
+          src: audio.src,
+          readyState: audio.readyState,
+          networkState: audio.networkState
+        });
+      });
+      
+      audio.addEventListener('ended', () => {
+        console.log('🎵 Audio playback ended');
+        this.currentAudio = null;
+      });
+      
+      // Start loading and playing
+      await audio.play();
+      
+      return audio;
+      
+    } catch (error) {
+      console.error(`❌ Audio setup/play failed:`, error);
+      this.currentAudio = null;
+      throw error;
+    }
+  }
+
+  /**
    * Play audio with browser compatibility and auto-play handling
    */
   async playAudio(audioUrl: string, metadata: AudioMetadata): Promise<void> {
@@ -221,7 +290,7 @@ export async function generateAndPlaySpeech(
     emotionContext?: string;
     userId?: string;
     backendUrl?: string;
-    onStart?: () => void;
+    onStart?: (audioElement?: HTMLAudioElement) => void;
     onEnd?: () => void;
     onError?: (error: string) => void;
   } = {}
@@ -277,9 +346,37 @@ export async function generateAndPlaySpeech(
     
     // Handle both URL and base64 responses
     if (result.audio_url) {
-      // Direct URL from Murf API - use it directly
-      console.log('🎵 Using direct audio URL from Murf API');
-      audioUrl = result.audio_url;
+      // Direct URL from Murf API - proxy it through backend to avoid CORS
+      console.log('🎵 Proxying audio URL through backend to avoid CORS...');
+      
+      try {
+        // Use backend proxy to avoid CORS issues
+        const proxyResponse = await fetch('http://localhost:3001/api/audio/proxy-audio', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            originalUrl: result.audio_url,
+            fileName: metadata.fileName
+          }),
+        });
+
+        if (!proxyResponse.ok) {
+          throw new Error(`Audio proxy failed: ${proxyResponse.status}`);
+        }
+
+        // Create a blob URL from the proxied audio
+        const audioBlob = await proxyResponse.blob();
+        audioUrl = URL.createObjectURL(audioBlob);
+        
+        console.log('✅ Audio proxied successfully, using blob URL for playback');
+        
+      } catch (proxyError) {
+        console.warn('⚠️ Audio proxy failed, falling back to direct URL (may have CORS issues):', proxyError);
+        audioUrl = result.audio_url;
+      }
+      
     } else if (result.audio_data) {
       // Legacy base64 data - convert to blob URL
       console.log('🎵 Converting base64 audio data to blob URL');
@@ -288,21 +385,34 @@ export async function generateAndPlaySpeech(
       throw new Error('No audio data or URL provided');
     }
     
-    // Notify start
-    if (onStart) onStart();
+    // // Notify start
+    // if (onStart) onStart();
     
-    // Play audio
-    await audioManager.playAudio(audioUrl, metadata);
+    // // Play audio
+    // await audioManager.playAudio(audioUrl, metadata);
+
+    // Setup and start audio, get the audio element immediately
+    const audioElement = await audioManager.setupAndPlayAudio(audioUrl, metadata);
     
-    console.log('✅ Speech generation and playback completed successfully');
+    // Notify start with audio element (audio is now playing)
+    if (onStart) {
+      onStart(audioElement);
+    }
     
-    // Notify end
-    if (onEnd) onEnd();
-    
-    return {
-      success: true,
-      audioUrl
-    };
+    // Wait for audio to complete by listening to ended event
+    return new Promise<{ success: boolean; audioUrl: string }>((resolve) => {
+      audioElement.addEventListener('ended', () => {
+        console.log('✅ Speech generation and playback completed successfully');
+        if (onEnd) onEnd();
+        resolve({ success: true, audioUrl });
+      });
+      
+      audioElement.addEventListener('error', () => {
+        console.error('🔊 Audio playback error during playback');
+        if (onError) onError('Audio playback failed');
+        resolve({ success: false, audioUrl });
+      });
+    });
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

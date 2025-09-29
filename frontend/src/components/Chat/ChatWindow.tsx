@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import io from 'socket.io-client';
 import { useVrmAvatar } from '../../hooks/useVrmAvatar';
@@ -110,6 +111,7 @@ export default function ChatWindow() {
   const [isTTSEnabled, setIsTTSEnabled] = useState(true); // TTS toggle
   const [isPlayingAudio, setIsPlayingAudio] = useState(false); // Audio playback state
   const [ttsError, setTtsError] = useState<string | null>(null); // TTS error state
+  const [isLipSyncSetup, setIsLipSyncSetup] = useState(false); // Lip sync setup state
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Gamification integration
@@ -121,7 +123,11 @@ export default function ChatWindow() {
     currentEmotion,
     isLoading: vrmLoading,
     isTransitioning,
-    switchToEmotion
+    switchToEmotion,
+    setupLipSync,
+    startLipSync,
+    stopLipSync,
+    isLipSyncActive
   } = useVrmAvatar();
 
   // Enhanced avatar emotion system
@@ -172,15 +178,41 @@ export default function ChatWindow() {
         emotionContext,
         userId: socket.id,
         backendUrl: 'http://localhost:5010',
-        onStart: () => {
+        onStart: async (audioElement?: HTMLAudioElement) => {
           setIsPlayingAudio(true);
           console.log('🔊 TTS playback started');
+          
+          // Setup lip sync with the audio element
+          if (audioElement && !isLipSyncSetup) {
+            console.log('🎤 Setting up lip sync with audio element');
+            const success = await setupLipSync(audioElement);
+            if (success) {
+              setIsLipSyncSetup(true);
+              console.log('🎤 Lip sync setup completed');
+            } else {
+              console.warn('🎤 Lip sync setup failed');
+            }
+          }
+          
+          // Start lip sync if setup is ready
+          if (isLipSyncSetup || audioElement) {
+            console.log('🎤 Starting lip sync');
+            startLipSync();
+          }
+          
           // Switch avatar to speaking emotion
           switchToEmotion('happy');
         },
         onEnd: () => {
           setIsPlayingAudio(false);
           console.log('🔊 TTS playback ended');
+          
+          // Stop lip sync
+          if (isLipSyncSetup) {
+            console.log('🎤 Stopping lip sync');
+            stopLipSync();
+          }
+          
           // Return avatar to appropriate emotion after speaking
           setTimeout(() => {
             updateAvatarEmotion(text, 'ai');
@@ -189,6 +221,12 @@ export default function ChatWindow() {
         onError: (error) => {
           setIsPlayingAudio(false);
           setTtsError(error);
+          
+          // Stop lip sync on error
+          if (isLipSyncSetup) {
+            stopLipSync();
+          }
+          
           console.error('🔊 TTS error:', error);
         }
       });
@@ -202,6 +240,11 @@ export default function ChatWindow() {
       console.error('🔊 TTS handling error:', error);
       setIsPlayingAudio(false);
       setTtsError(error instanceof Error ? error.message : String(error));
+      
+      // Stop lip sync on error
+      if (isLipSyncSetup) {
+        stopLipSync();
+      }
     }
   };
   
@@ -257,6 +300,11 @@ export default function ChatWindow() {
   const stopTTS = () => {
     audioManager.stopAudio();
     setIsPlayingAudio(false);
+    
+    // Stop lip sync if active
+    if (isLipSyncSetup) {
+      stopLipSync();
+    }
   };
   
   // Toggle TTS on/off
@@ -869,6 +917,22 @@ export default function ChatWindow() {
                   🔊 Voice {isTTSEnabled ? 'ON' : 'OFF'}
                 </button>
                 
+                {/* Lip Sync Status Indicator */}
+                <div className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
+                  isLipSyncSetup && isLipSyncActive()
+                    ? 'bg-blue-500/20 border border-blue-400/50 text-blue-300'
+                    : isLipSyncSetup
+                    ? 'bg-yellow-500/20 border border-yellow-400/50 text-yellow-300'
+                    : 'bg-gray-500/20 border border-gray-400/50 text-gray-300'
+                }`}>
+                  {isLipSyncSetup && isLipSyncActive() 
+                    ? '🎤 Lip Sync Active' 
+                    : isLipSyncSetup 
+                    ? '🎤 Lip Sync Ready'
+                    : '🎤 Lip Sync Off'
+                  }
+                </div>
+                
                 {isPlayingAudio && (
                   <button
                     type="button"
@@ -882,7 +946,7 @@ export default function ChatWindow() {
                 {isPlayingAudio && (
                   <div className="flex items-center space-x-2 text-xs text-green-300">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span>Playing audio...</span>
+                    <span>Playing with lip sync...</span>
                   </div>
                 )}
               </div>

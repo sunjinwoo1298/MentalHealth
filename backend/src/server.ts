@@ -18,6 +18,7 @@ import chatRoutes from './routes/chat';
 import wellnessRoutes from './routes/wellness';
 import interventionRoutes from './routes/interventions';
 import gamificationRoutes from './routes/gamification';
+const audioProxyRoutes = require('./routes/audioProxy');
 
 // Import middleware
 import { authMiddleware } from './middleware/auth';
@@ -122,6 +123,7 @@ app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/wellness', authMiddleware, wellnessRoutes);
 app.use('/api/interventions', authMiddleware, interventionRoutes);
 app.use('/api/gamification', gamificationRoutes);
+app.use('/api/audio', audioProxyRoutes);
 
 // Socket.IO connection handling
 const socketService = new SocketService(io);

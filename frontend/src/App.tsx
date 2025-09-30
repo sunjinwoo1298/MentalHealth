@@ -79,7 +79,6 @@ function App() {
     rel="noopener noreferrer"
     className="hover:underline"
   >
-    Edit tools icons created by Yudhi Restu - Flaticon
   </a>
 </footer>
 

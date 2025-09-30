@@ -90,33 +90,170 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-hero-animated">
+    <div 
+      className="min-h-screen relative overflow-hidden"
+      style={{
+        background: 'linear-gradient(-45deg, rgba(233, 30, 99, 0.1), rgba(33, 150, 243, 0.1), rgba(76, 175, 80, 0.1), rgba(233, 30, 99, 0.05))',
+        backgroundSize: '400% 400%',
+        animation: 'gradientShift 20s ease infinite'
+      }}
+    >
+      {/* Keyframe animations style tag */}
+      <style>{`
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatGentle {
+          0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+          25% { transform: translateY(-15px) translateX(10px) rotate(2deg); }
+          50% { transform: translateY(-8px) translateX(-5px) rotate(-1deg); }
+          75% { transform: translateY(5px) translateX(8px) rotate(1deg); }
+        }
+        @keyframes slideInFromBottom {
+          from { opacity: 0; transform: translateY(60px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes iconGentlePulse {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 2px 4px rgba(149, 117, 205, 0.2)); }
+          50% { transform: scale(1.05); filter: drop-shadow(0 4px 8px rgba(149, 117, 205, 0.3)); }
+        }
+        .homepage-hero-title {
+          opacity: 0;
+          transform: translateY(30px);
+          animation: fadeInUp 800ms ease-out 300ms forwards;
+        }
+        .homepage-hero-subtitle {
+          opacity: 0;
+          transform: translateY(30px);
+          animation: fadeInUp 800ms ease-out 500ms forwards;
+        }
+        .homepage-hero-cta {
+          opacity: 0;
+          transform: translateY(30px);
+          animation: fadeInUp 800ms ease-out 700ms forwards;
+        }
+        .homepage-audience-card {
+          background: #FFFFFF;
+          border-radius: 1rem;
+          padding: 2rem;
+          box-shadow: 0 4px 16px rgba(34, 44, 58, 0.08);
+          border: 1px solid rgba(34, 44, 58, 0.05);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+          min-height: 280px;
+          width: 100%;
+          max-width: 350px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          opacity: 0;
+          transform: translateY(60px);
+        }
+        .homepage-audience-card.animate-slide-in {
+          animation: slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .homepage-audience-card:hover {
+          transform: translateY(-8px) scale(1.035);
+          box-shadow: 0 20px 40px rgba(34, 44, 58, 0.15);
+        }
+        .homepage-audience-card-icon {
+          font-size: 4rem;
+          margin-bottom: 1.5rem;
+          display: block;
+          line-height: 1;
+          background: linear-gradient(135deg, rgba(149, 117, 205, 0.8) 0%, rgba(233, 30, 99, 0.8) 35%, rgba(33, 150, 243, 0.8) 70%, rgba(76, 175, 80, 0.8) 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          filter: drop-shadow(0 2px 4px rgba(149, 117, 205, 0.2));
+          animation: iconGentlePulse 4s ease-in-out infinite;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+        }
+        .homepage-audience-card-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #111827;
+          margin-bottom: 0.5rem;
+          letter-spacing: -0.01em;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .homepage-audience-card-ages {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #FFFFFF;
+          background: linear-gradient(135deg, rgba(149, 117, 205, 0.9) 0%, rgba(233, 30, 99, 0.9) 50%, rgba(33, 150, 243, 0.9) 100%);
+          padding: 0.5rem 1.2rem;
+          border-radius: 2rem;
+          margin-bottom: 1.5rem;
+          display: inline-block;
+          box-shadow: 0 2px 8px rgba(149, 117, 205, 0.3);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+        }
+      `}</style>
+      
       {/* Skip to main content link for screen readers */}
       <a 
         href="#main-content" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 btn-gradient px-4 py-2 rounded z-50 focus-ring"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 px-4 py-2 rounded z-50"
+        style={{
+          background: 'linear-gradient(135deg, #E91E63 0%, #2196F3 50%, #4CAF50 100%)',
+          color: 'white',
+          textDecoration: 'none'
+        }}
       >
         Skip to main content
       </a>
 
-      {/* Accessibility Toolbar */}
-      <div className="bg-neutral-white py-2 px-4 border-b border-border-light shadow-soft" role="banner">
+      {/* Accessibility Toolbar
+      <div 
+        className="py-2 px-4 border-b shadow-sm" 
+        role="banner"
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderBottomColor: '#E0E0E0',
+          boxShadow: '0 2px 8px rgba(33, 33, 33, 0.08)'
+        }}
+      >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4 text-sm">
-            <span className="text-accessibility font-medium">Accessibility Features Available</span>
+            <span className="font-medium" style={{ color: '#757575' }}>Accessibility Features Available</span>
             <button 
-              className="text-primary-magenta hover:text-primary-magenta-dark underline focus-ring rounded px-2 py-1 font-medium transition-colors"
+              className="underline rounded px-2 py-1 font-medium transition-colors"
+              style={{ 
+                color: '#E91E63',
+                border: 'none',
+                background: 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                const target = e.target as HTMLElement;
+                target.style.color = '#C2185B';
+              }}
+              onMouseLeave={(e) => {
+                const target = e.target as HTMLElement;
+                target.style.color = '#E91E63';
+              }}
               onClick={() => document.body.classList.toggle('dyslexia-friendly')}
               aria-label="Toggle dyslexia-friendly font"
             >
               Dyslexia Font
             </button>
           </div>
-          <div className="flex items-center space-x-4 text-sm text-text-secondary">
-            <span className="font-medium">Crisis Hotline: <a href="tel:1860-2662-345" className="text-error font-bold hover:underline focus-ring rounded px-1">1860-2662-345</a></span>
+          <div className="flex items-center space-x-4 text-sm" style={{ color: '#757575' }}>
+            <span className="font-medium">Crisis Hotline: <a href="tel:1860-2662-345" className="font-bold hover:underline rounded px-1" style={{ color: '#F44336' }}>1860-2662-345</a></span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Navigation */}
       <Navigation 
@@ -140,53 +277,162 @@ export default function HomePage() {
           }}
         >
           {/* Very light overlay for maximum background brightness */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/15 via-black/10 to-black/15" aria-hidden="true"></div>
+          <div 
+            className="absolute inset-0" 
+            aria-hidden="true"
+            style={{
+              background: 'linear-gradient(to bottom right, rgba(0,0,0,0.15), rgba(0,0,0,0.1), rgba(0,0,0,0.15))'
+            }}
+          ></div>
           
           {/* Animated particles effect */}
           <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white rounded-full animate-ping animation-delay-1000 opacity-60"></div>
-            <div className="absolute top-3/4 left-3/4 w-1 h-1 bg-purple-300 rounded-full animate-ping animation-delay-2000 opacity-40"></div>
-            <div className="absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-blue-300 rounded-full animate-ping animation-delay-3000 opacity-50"></div>
-            <div className="absolute top-1/6 right-1/4 w-2 h-2 bg-pink-300 rounded-full animate-ping animation-delay-4000 opacity-30"></div>
+            <div 
+              className="absolute w-2 h-2 bg-white rounded-full animate-ping opacity-60"
+              style={{ 
+                top: '25%', 
+                left: '25%',
+                animationDelay: '1000ms'
+              }}
+            ></div>
+            <div 
+              className="absolute w-1 h-1 rounded-full animate-ping opacity-40"
+              style={{ 
+                top: '75%', 
+                left: '75%',
+                backgroundColor: '#D8B4FE',
+                animationDelay: '2000ms'
+              }}
+            ></div>
+            <div 
+              className="absolute w-1.5 h-1.5 rounded-full animate-ping opacity-50"
+              style={{ 
+                top: '50%', 
+                left: '16.666667%',
+                backgroundColor: '#93C5FD',
+                animationDelay: '3000ms'
+              }}
+            ></div>
+            <div 
+              className="absolute w-2 h-2 rounded-full animate-ping opacity-30"
+              style={{ 
+                top: '16.666667%', 
+                right: '25%',
+                backgroundColor: '#F9A8D4',
+                animationDelay: '4000ms'
+              }}
+            ></div>
           </div>
           
-          {/* Floating Shapes for Visual Interest - Enhanced */}
-          <div className="hero-floating-shape hero-floating-shape-1 opacity-30 bg-gradient-to-br from-purple-500/20 to-pink-500/20" aria-hidden="true"></div>
-          <div className="hero-floating-shape hero-floating-shape-2 opacity-30 bg-gradient-to-br from-blue-500/20 to-cyan-500/20" aria-hidden="true"></div>
-          <div className="hero-floating-shape hero-floating-shape-3 opacity-30 bg-gradient-to-br from-green-500/20 to-emerald-500/20" aria-hidden="true"></div>
+          {/* Floating Shapes for Visual Interest */}
+          <div 
+            className="absolute rounded-full opacity-30 pointer-events-none"
+            aria-hidden="true"
+            style={{
+              width: '120px',
+              height: '120px',
+              background: 'linear-gradient(135deg, #E91E63, #2196F3)',
+              top: '15%',
+              right: '10%',
+              animation: 'floatGentle 25s ease-in-out infinite',
+              zIndex: 1
+            }}
+          ></div>
+          <div 
+            className="absolute rounded-full opacity-30 pointer-events-none"
+            aria-hidden="true"
+            style={{
+              width: '80px',
+              height: '80px',
+              background: 'linear-gradient(135deg, #2196F3, #4CAF50)',
+              top: '60%',
+              left: '5%',
+              animation: 'floatGentle 30s ease-in-out infinite reverse',
+              zIndex: 1
+            }}
+          ></div>
+          <div 
+            className="absolute rounded-full opacity-30 pointer-events-none"
+            aria-hidden="true"
+            style={{
+              width: '60px',
+              height: '60px',
+              background: 'linear-gradient(135deg, #4CAF50, #E91E63)',
+              top: '30%',
+              left: '15%',
+              animation: 'floatGentle 35s ease-in-out infinite',
+              zIndex: 1
+            }}
+          ></div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-            <div className="grid lg:grid-cols-2 gap-16 items-center hero-content">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
               {/* Enhanced Content Section */}
-              <div>
-                {/* Trust Badge */}
-                {/* <div className="hero-trust-badge inline-flex items-center bg-white/95 backdrop-blur-md rounded-full px-6 py-3 mb-8 border border-white/10 shadow-2xl hover:shadow-white/10 hover:scale-105 transition-all duration-100">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse shadow-lg shadow-green-400/50"></span>
-                  <span className="text-sm font-black text-black-9000 tracking-wide">Trusted by 10,000+ young people across India</span>
-                </div> */}
-
+              <div style={{ position: 'relative', zIndex: 10 }}>
                 {/* Empathetic Headlines */}
-                <h1 id="hero-heading" className="hero-title text-3xl lg:text-5xl font-black text-white leading-tight mb-8 drop-shadow-2xl">
-                  <span className="bg-white/30 text-black font-black px-3 py-3 rounded-2xl  inline-block mb-4 transform hover:scale-105 transition-all duration-300 border-2 border-gray-800">
+                <h1 
+                  id="hero-heading" 
+                  className="homepage-hero-title text-3xl lg:text-5xl font-black text-white leading-tight mb-8"
+                  style={{ textShadow: '0 4px 8px rgba(0,0,0,0.3)' }}
+                >
+                  <span 
+                    className="inline-block mb-4 transform transition-all duration-300 px-3 py-3 rounded-2xl font-black"
+                    style={{
+                      background: 'rgba(255,255,255,0.3)',
+                      color: 'black',
+                      border: '2px solid #374151'
+                    }}
+                    onMouseEnter={(e) => {
+                      const target = e.target as HTMLElement;
+                      target.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      const target = e.target as HTMLElement;
+                      target.style.transform = 'scale(1)';
+                    }}
+                  >
                     You're Not Alone. We Help You Heal.
                   </span>
-                  <br />
-                  {/* <span className="bg-white/30 text-black font-black text-4xl lg:text-6xl drop-shadow-2xl px-4 py-2 rounded-2xl border-2 border-gray-800 shadow-2xl backdrop-blur-sm">
-                    We Understand.
-                  </span> */}
                 </h1>
                 
                 {/* Supportive Subheading */}
-                <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 border border-gray-200 shadow-2xl">
-                  <p className="hero-subtitle text-lg lg:text-xl text-black font-black leading-relaxed max-w-2xl">
+                <div 
+                  className="homepage-hero-subtitle rounded-2xl p-6 mb-8 border shadow-2xl"
+                  style={{
+                    background: 'rgba(255,255,255,0.95)',
+                    backdropFilter: 'blur(16px)',
+                    borderColor: '#D1D5DB'
+                  }}
+                >
+                  <p className="text-lg lg:text-xl text-black font-black leading-relaxed max-w-2xl">
                     Mental health support that honors your culture, respects your family values, and understands the unique pressures you face as a young person in India.
                   </p>
                 </div>
 
                 {/* Emotional Connection Point */}
-                <div className="hero-subtitle bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 border-l-4 border-l-purple-600 shadow-2xl hover-lift transform hover:scale-[1.02] transition-all duration-300">
+                <div 
+                  className="homepage-hero-subtitle rounded-2xl p-6 mb-8 shadow-2xl transform transition-all duration-300"
+                  style={{
+                    background: 'rgba(255,255,255,0.95)',
+                    backdropFilter: 'blur(16px)',
+                    borderLeft: '4px solid #7C3AED'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1.02)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                  }}
+                >
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
+                    <div 
+                      className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg flex-shrink-0"
+                      style={{
+                        background: 'linear-gradient(to bottom right, #8B5CF6, #EC4899)'
+                      }}
+                    >
                       <span className="text-white text-xl">💬</span>
                     </div>
                     <div>
@@ -199,19 +445,62 @@ export default function HomePage() {
                 </div>
 
                 {/* Enhanced CTA Section */}
-                <div className="hero-cta flex flex-col sm:flex-row gap-6 mb-8">
-                  <button className="group relative bg-gradient-to-r from-purple-700 via-pink-700 to-blue-700 text-white px-10 py-5 rounded-2xl font-black text-base transition-all duration-300 hover-lift shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 overflow-hidden border-2 border-white/30">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <span className="relative z-10 flex items-center justify-center drop-shadow-lg">
+                <div className="homepage-hero-cta flex flex-col sm:flex-row gap-6 mb-8">
+                  <button 
+                    className="group relative text-white px-10 py-5 rounded-2xl font-black text-base transition-all duration-300 shadow-2xl transform overflow-hidden border-2"
+                    style={{
+                      background: 'linear-gradient(to right, #7C3AED, #EC4899, #2563EB)',
+                      borderColor: 'rgba(255,255,255,0.3)'
+                    }}
+                    onMouseEnter={(e) => {
+                      const target = e.target as HTMLElement;
+                      target.style.transform = 'scale(1.05)';
+                      target.style.boxShadow = '0 25px 50px -12px rgba(139, 92, 246, 0.5)';
+                    }}
+                    onMouseLeave={(e) => {
+                      const target = e.target as HTMLElement;
+                      target.style.transform = 'scale(1)';
+                      target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+                    }}
+                  >
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{
+                        background: 'linear-gradient(to right, #2563EB, #7C3AED, #EC4899)'
+                      }}
+                    ></div>
+                    <span 
+                      className="relative z-10 flex items-center justify-center"
+                      style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+                    >
                       <span className="mr-2 text-2xl">🌟</span>
                       Start Your Healing Journey
                       <span className="ml-2 text-2xl">🌟</span>
                     </span>
                   </button>
-                  <button className="group bg-white/98 text-black border-3 border-gray-800 px-10 py-5 rounded-2xl font-black text-base transition-all duration-300 hover-scale shadow-2xl hover:bg-white hover:shadow-xl transform hover:scale-105">
+                  <button 
+                    className="group px-10 py-5 rounded-2xl font-black text-base transition-all duration-300 shadow-2xl transform border-3"
+                    style={{
+                      background: 'rgba(255,255,255,0.98)',
+                      color: 'black',
+                      borderColor: '#374151',
+                      borderWidth: '3px'
+                    }}
+                    onMouseEnter={(e) => {
+                      const target = e.target as HTMLElement;
+                      target.style.transform = 'scale(1.05)';
+                      target.style.background = '#FFFFFF';
+                      target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+                    }}
+                    onMouseLeave={(e) => {
+                      const target = e.target as HTMLElement;
+                      target.style.transform = 'scale(1)';
+                      target.style.background = 'rgba(255,255,255,0.98)';
+                    }}
+                  >
                     <span className="flex items-center justify-center">
                       Learn How We Help
-                      <svg className="w-6 h-6 ml-2 group-hover:translate-x-2 transition-transform font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                      <svg className="w-6 h-6 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                       </svg>
                     </span>
@@ -219,21 +508,21 @@ export default function HomePage() {
                 </div>
 
                 {/* Safety & Privacy Assurance */}
-                <div className="flex items-center space-x-6 text-sm text-text-secondary">
+                <div className="flex items-center space-x-6 text-sm">
                   <div className="flex items-center">
-                    <svg className="w-4 h-4 mr-2 text-tertiary-green" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" style={{ color: '#4CAF50' }}>
                       <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                     </svg>
                     <span className="text-black font-semibold">100% Confidential</span>
                   </div>
                   <div className="flex items-center">
-                    <svg className="w-4 h-4 mr-2 text-secondary-blue" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" style={{ color: '#2196F3' }}>
                       <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     <span className="text-black font-semibold">Licensed Therapists</span>
                   </div>
                   <div className="flex items-center">
-                    <svg className="w-4 h-4 mr-2 text-primary-magenta" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" style={{ color: '#E91E63' }}>
                       <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span className="text-black font-semibold">Available 24/7</span>
@@ -242,36 +531,93 @@ export default function HomePage() {
               </div>
 
               {/* Inspirational Quote Section - Enhanced with stunning visuals */}
-              <div className={`relative transform transition-all duration-1200 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'} flex items-center justify-center min-h-96`}>
+              <div 
+                className={`relative transform transition-all duration-1200 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'} flex items-center justify-center min-h-96`}
+              >
                 {/* Floating orbs background */}
                 <div className="absolute inset-0 overflow-hidden">
-                  <div className="absolute top-1/4 left-1/4 w-20 h-20 bg-purple-400/30 rounded-full blur-xl animate-pulse animation-delay-1000"></div>
-                  <div className="absolute bottom-1/3 right-1/3 w-16 h-16 bg-pink-400/30 rounded-full blur-xl animate-pulse animation-delay-2000"></div>
-                  <div className="absolute top-2/3 left-1/2 w-24 h-24 bg-blue-400/20 rounded-full blur-xl animate-pulse animation-delay-3000"></div>
+                  <div 
+                    className="absolute w-20 h-20 rounded-full blur-xl animate-pulse"
+                    style={{
+                      top: '25%',
+                      left: '25%',
+                      backgroundColor: 'rgba(168, 85, 247, 0.3)',
+                      animationDelay: '1000ms'
+                    }}
+                  ></div>
+                  <div 
+                    className="absolute w-16 h-16 rounded-full blur-xl animate-pulse"
+                    style={{
+                      bottom: '33.333333%',
+                      right: '33.333333%',
+                      backgroundColor: 'rgba(251, 113, 133, 0.3)',
+                      animationDelay: '2000ms'
+                    }}
+                  ></div>
+                  <div 
+                    className="absolute w-24 h-24 rounded-full blur-xl animate-pulse"
+                    style={{
+                      top: '66.666667%',
+                      left: '50%',
+                      backgroundColor: 'rgba(96, 165, 250, 0.2)',
+                      animationDelay: '3000ms'
+                    }}
+                  ></div>
                 </div>
                 
                 {/* Enhanced Inspirational Quote Card */}
                 <div 
-                  className="relative bg-white/98 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border-2 border-gray-800 inspiration-quote max-w-lg transform hover:scale-105 transition-all duration-300 hover:shadow-purple-500/30"
+                  className="relative max-w-lg transform transition-all duration-300 rounded-3xl p-8 shadow-2xl border-2"
                   role="region"
                   aria-label="Daily inspiration"
                   aria-live="polite"
+                  style={{
+                    background: 'rgba(255,255,255,0.98)',
+                    backdropFilter: 'blur(24px)',
+                    borderColor: '#374151'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1.05)';
+                    target.style.boxShadow = '0 25px 50px -12px rgba(168, 85, 247, 0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                    target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+                  }}
                 >
                   {/* Glowing border effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-3xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+                  <div 
+                    className="absolute inset-0 rounded-3xl blur opacity-20 transition-opacity duration-300"
+                    style={{
+                      background: 'linear-gradient(to right, #8B5CF6, #EC4899, #3B82F6)'
+                    }}
+                  ></div>
                   
                   <div className="relative text-center">
                     {/* Quote icon */}
                     <div className="mb-4">
-                      <span className="text-4xl drop-shadow-lg">✨</span>
+                      <span 
+                        className="text-4xl"
+                        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+                      >✨</span>
                     </div>
                     
-                    <p className="text-lg font-black text-black leading-relaxed mb-6 inspiration-text transition-opacity duration-500">
+                    <p 
+                      className="text-lg font-black text-black leading-relaxed mb-6 transition-opacity duration-500"
+                    >
                       "{inspirationalQuotes[currentQuoteIndex]}"
                     </p>
                     
                     {/* Enhanced separator */}
-                    <div className="w-20 h-1 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 rounded-full mx-auto mb-4 shadow-lg shadow-purple-500/50"></div>
+                    <div 
+                      className="w-20 h-1 rounded-full mx-auto mb-4"
+                      style={{
+                        background: 'linear-gradient(to right, #A78BFA, #F472B6, #60A5FA)',
+                        boxShadow: '0 4px 6px -1px rgba(168, 85, 247, 0.5)'
+                      }}
+                    ></div>
                     
                     {/* Progress indicators */}
                     <div className="flex justify-center mt-4 space-x-3">
@@ -280,9 +626,13 @@ export default function HomePage() {
                           key={index}
                           className={`w-3 h-3 rounded-full transition-all duration-500 ${
                             index === currentQuoteIndex 
-                              ? 'bg-purple-600 shadow-lg shadow-purple-600/50 scale-125' 
-                              : 'bg-gray-400 hover:bg-gray-600'
+                              ? 'scale-125' 
+                              : 'hover:bg-gray-600'
                           }`}
+                          style={{
+                            backgroundColor: index === currentQuoteIndex ? '#7C3AED' : '#9CA3AF',
+                            boxShadow: index === currentQuoteIndex ? '0 4px 6px -1px rgba(124, 58, 237, 0.5)' : 'none'
+                          }}
                           aria-hidden="true"
                         />
                       ))}
@@ -291,138 +641,174 @@ export default function HomePage() {
                 </div>
 
                 {/* Enhanced Cultural Elements with interactive effects */}
-                <div className="absolute top-1/2 -left-12 text-6xl opacity-40 animate-pulse drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer" aria-hidden="true">🪷</div>
-                <div className="absolute bottom-1/4 -right-12 text-5xl opacity-45 animate-pulse animation-delay-2000 drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer" aria-hidden="true">🕉️</div>
-                <div className="absolute top-1/4 -right-8 text-4xl opacity-35 animate-pulse animation-delay-3000 drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer" aria-hidden="true">☮️</div>
+                <div 
+                  className="absolute text-6xl opacity-40 animate-pulse transition-transform cursor-pointer"
+                  aria-hidden="true"
+                  style={{
+                    top: '50%',
+                    left: '-48px',
+                    textShadow: '0 8px 16px rgba(0,0,0,0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                  }}
+                >🪷</div>
+                <div 
+                  className="absolute text-5xl opacity-45 animate-pulse transition-transform cursor-pointer"
+                  aria-hidden="true"
+                  style={{
+                    bottom: '25%',
+                    right: '-48px',
+                    animationDelay: '2000ms',
+                    textShadow: '0 8px 16px rgba(0,0,0,0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                  }}
+                >🕉️</div>
+                <div 
+                  className="absolute text-4xl opacity-35 animate-pulse transition-transform cursor-pointer"
+                  aria-hidden="true"
+                  style={{
+                    top: '25%',
+                    right: '-32px',
+                    animationDelay: '3000ms',
+                    textShadow: '0 8px 16px rgba(0,0,0,0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                  }}
+                >☮️</div>
                 
                 {/* Additional floating elements for visual richness */}
-                <div className="absolute top-3/4 -left-8 text-3xl opacity-25 animate-bounce animation-delay-4000 hover:scale-125 transition-transform cursor-pointer" aria-hidden="true">🌸</div>
-                <div className="absolute bottom-1/2 right-0 text-4xl opacity-30 animate-pulse animation-delay-5000 hover:scale-110 transition-transform cursor-pointer" aria-hidden="true">✨</div>
+                <div 
+                  className="absolute text-3xl opacity-25 animate-bounce transition-transform cursor-pointer"
+                  aria-hidden="true"
+                  style={{
+                    top: '75%',
+                    left: '-32px',
+                    animationDelay: '4000ms'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1.25)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                  }}
+                >🌸</div>
+                <div 
+                  className="absolute text-4xl opacity-30 animate-pulse transition-transform cursor-pointer"
+                  aria-hidden="true"
+                  style={{
+                    bottom: '50%',
+                    right: '0px',
+                    animationDelay: '5000ms'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                  }}
+                >✨</div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Who We Serve Section */}
-      {/* Who We Serve Section */}
-      <section 
-        className="who-we-serve-section" 
-        id="who-we-serve"
-        role="region" 
-        aria-labelledby="who-we-serve-heading"
-      >
-        <div className="who-we-serve-decorative-blob" aria-hidden="true"></div>
-        <div className="who-we-serve-decorative-blob-2" aria-hidden="true"></div>
-        <div className="who-we-serve-floating-circle-1" aria-hidden="true"></div>
-        <div className="who-we-serve-floating-circle-2" aria-hidden="true"></div>
-        <div className="who-we-serve-floating-blob-1" aria-hidden="true"></div>
-        <div className="who-we-serve-floating-blob-2" aria-hidden="true"></div>
-        <div className="container">
-          <h2 id="who-we-serve-heading" className="who-we-serve-heading">
-            Tailored Support for Every Stage
-          </h2>
-          <p className="who-we-serve-subheading">
-            Our platform adapts to the unique needs and challenges at every stage of youth development, 
-            providing age-appropriate resources and culturally relevant support.
-          </p>
-          
-          <div className="audience-cards-grid relative z-10">
-            <div 
-              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
-              style={{animationDelay: audienceCardsVisible ? '0ms' : ''}}
-              role="article"
-              aria-labelledby="children-title"
-              tabIndex={0}
-            >
-              <span className="audience-card-icon" aria-hidden="true">🌱</span>
-              <h3 id="children-title" className="audience-card-title">Children</h3>
-              <span className="audience-card-ages">Ages 8-12</span>
-              <p className="audience-card-description">
-                Building emotional awareness through interactive stories, simple coping strategies, 
-                and safe expression tools designed for developing minds.
-              </p>
-            </div>
-            
-            <div 
-              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
-              style={{animationDelay: audienceCardsVisible ? '150ms' : ''}}
-              role="article"
-              aria-labelledby="teens-title"
-              tabIndex={0}
-            >
-              <span className="audience-card-icon" aria-hidden="true">🌸</span>
-              <h3 id="teens-title" className="audience-card-title">Teens</h3>
-              <span className="audience-card-ages">Ages 13-17</span>
-              <p className="audience-card-description">
-                Navigating identity, relationships, and academic pressure with peer support, 
-                stress management tools, and confidential guidance.
-              </p>
-            </div>
-            
-            <div 
-              className={`audience-card ${audienceCardsVisible ? 'animate-slide-in' : ''}`}
-              style={{animationDelay: audienceCardsVisible ? '300ms' : ''}}
-              role="article"
-              aria-labelledby="young-adults-title"
-              tabIndex={0}
-            >
-              <span className="audience-card-icon" aria-hidden="true">🌳</span>
-              <h3 id="young-adults-title" className="audience-card-title">Young Adults</h3>
-              <span className="audience-card-ages">Ages 18-25</span>
-              <p className="audience-card-description">
-                Transitioning to independence with career guidance, relationship counseling, 
-                and mental health resources for life's major decisions.
-              </p>
-            </div>
-          </div>
-          
-          {/* Main CTA Button */}
-          <div className="text-center mt-12 relative z-10">
-            <button
-              className="who-we-serve-cta-button"
-              onClick={() => navigate('/resources')}
-              aria-label="Explore mental health resources tailored to your needs"
-            >
-              <span className="cta-button-text">Explore Resources</span>
-              <span className="cta-button-icon" aria-hidden="true">→</span>
-            </button>
-            <p className="cta-button-subtitle">
-              Discover personalized support for your mental wellness journey
-            </p>
-          </div>
-        </div>
-      </section>        {/* Enhanced Services Section */}
-        <section id="services" className="py-20 lg:py-32 bg-neutral-50 relative overflow-hidden" role="region" aria-labelledby="services-heading">
+        
+        {/* Enhanced Services Section */}
+        <section 
+          id="services" 
+          className="py-20 lg:py-32 relative overflow-hidden" 
+          role="region" 
+          aria-labelledby="services-heading"
+          style={{
+            backgroundColor: '#F9FAFB'
+          }}
+        >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5" aria-hidden="true">
-            <div className="absolute inset-0 bg-pattern-dots"></div>
+            <div 
+              style={{
+                backgroundImage: 'radial-gradient(circle, #6B7280 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }}
+              className="absolute inset-0"
+            ></div>
           </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Enhanced Header */}
             <div className="text-center mb-20">
-              <div className="inline-flex items-center bg-neutral-white/90 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-border-light shadow-soft">
-                <span className="w-2 h-2 bg-tertiary-green rounded-full mr-3 animate-pulse"></span>
-                <span className="text-sm font-medium text-text-primary">Evidence-based • Culturally Informed • Accessible</span>
+              <div 
+                className="inline-flex items-center rounded-full px-6 py-3 mb-6 border"
+                style={{
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(8px)',
+                  borderColor: '#E5E7EB',
+                  boxShadow: '0 2px 8px rgba(33, 33, 33, 0.08)'
+                }}
+              >
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></span>
+                <span className="text-sm font-medium" style={{ color: '#111827' }}>Evidence-based • Culturally Informed • Accessible</span>
               </div>
               
-              <h2 id="services-heading" className="text-4xl lg:text-5xl font-bold text-text-primary mb-6">
+              <h2 
+                id="services-heading" 
+                className="text-4xl lg:text-5xl font-bold mb-6"
+                style={{ color: '#111827' }}
+              >
                 Comprehensive Care,{' '}
-                <span className="bg-clip-text text-transparent bg-gradient-hero">
+                <span 
+                  style={{
+                    background: 'linear-gradient(135deg, #E91E63 0%, #2196F3 50%, #4CAF50 100%)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}
+                >
                   Your Way
                 </span>
               </h2>
-              <p className="text-lg lg:text-xl text-text-body max-w-4xl mx-auto leading-relaxed">
+              <p 
+                className="text-lg lg:text-xl max-w-4xl mx-auto leading-relaxed"
+                style={{ color: '#374151' }}
+              >
                 From individual therapy to family support, we offer a full spectrum of mental health services designed specifically for the Indian youth experience.
               </p>
             </div>
             
             {/* Enhanced Service Cards - Horizontal Scrolling with Accessibility */}
             <div 
-              className="features-section horizontal-scroll-container mb-20"
+              className="mb-20 overflow-hidden"
               role="region"
               aria-labelledby="services-heading"
               aria-describedby="services-description"
+              style={{
+                mask: 'linear-gradient(90deg, transparent, white 20%, white 80%, transparent)',
+                WebkitMask: 'linear-gradient(90deg, transparent, white 20%, white 80%, transparent)'
+              }}
             >
               <div 
                 id="services-description" 
@@ -431,7 +817,19 @@ export default function HomePage() {
                 Horizontally scrollable service cards. Use arrow keys or swipe to navigate between services.
               </div>
               
-              <div className="horizontal-scroll-track">
+              <div 
+                className="flex gap-6 animate-scroll"
+                style={{
+                  width: 'fit-content',
+                  animation: 'scroll 30s linear infinite'
+                }}
+              >
+                <style>{`
+                  @keyframes scroll {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(calc(-100% / 3)); }
+                  }
+                `}</style>
                 {/* Create multiple copies for seamless infinite scroll */}
                 {[...Array(3)].map((_, arrayIndex) => 
                   [
@@ -480,10 +878,27 @@ export default function HomePage() {
                   ].map((service, serviceIndex) => (
                     <article 
                       key={`${arrayIndex}-${serviceIndex}-${service.title}`} 
-                      className="service-card-horizontal group"
+                      className="group relative rounded-2xl p-6 transition-all duration-300"
                       role="article"
                       aria-labelledby={`service-title-${arrayIndex}-${serviceIndex}`}
                       tabIndex={arrayIndex === 0 ? 0 : -1}
+                      style={{
+                        minWidth: '320px',
+                        maxWidth: '320px',
+                        background: '#FFFFFF',
+                        border: '1px solid #E5E7EB',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                      onMouseEnter={(e) => {
+                        const target = e.currentTarget as HTMLElement;
+                        target.style.transform = 'translateY(-4px)';
+                        target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.currentTarget as HTMLElement;
+                        target.style.transform = 'translateY(0)';
+                        target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
@@ -496,20 +911,26 @@ export default function HomePage() {
                       {/* Popular Badge */}
                       {service.popular && (
                         <div 
-                          className="absolute top-4 right-4 bg-gradient-to-r from-accent-orange to-primary-magenta text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10"
+                          className="absolute top-4 right-4 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10"
                           role="img"
                           aria-label="Most popular service"
+                          style={{
+                            background: 'linear-gradient(to right, #F59E0B, #E91E63)'
+                          }}
                         >
                           Most Popular
                         </div>
                       )}
                       
-                      <div className="service-card-content">
+                      <div>
                         {/* Icon with Animation */}
                         <div 
-                          className="w-16 h-16 bg-gradient-to-br from-primary-magenta/20 to-tertiary-green/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+                          className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
                           role="img"
                           aria-label={`${service.title} service icon`}
+                          style={{
+                            background: 'linear-gradient(to bottom right, rgba(233, 30, 99, 0.2), rgba(76, 175, 80, 0.2))'
+                          }}
                         >
                           <span className="text-4xl">{service.icon}</span>
                         </div>
@@ -517,11 +938,25 @@ export default function HomePage() {
                         {/* Content */}
                         <h3 
                           id={`service-title-${arrayIndex}-${serviceIndex}`}
-                          className="service-card-content h3 text-text-primary mb-4 group-hover:text-primary-magenta transition-colors"
+                          className="text-xl font-bold mb-4 group-hover:transition-colors transition-colors duration-300"
+                          style={{ 
+                            color: '#111827'
+                          }}
+                          onMouseEnter={(e) => {
+                            const target = e.target as HTMLElement;
+                            target.style.color = '#E91E63';
+                          }}
+                          onMouseLeave={(e) => {
+                            const target = e.target as HTMLElement;
+                            target.style.color = '#111827';
+                          }}
                         >
                           {service.title}
                         </h3>
-                        <p className="service-card-content p text-text-body leading-relaxed mb-6">
+                        <p 
+                          className="leading-relaxed mb-6"
+                          style={{ color: '#374151' }}
+                        >
                           {service.description}
                         </p>
                         
@@ -534,14 +969,16 @@ export default function HomePage() {
                           {service.features.map((feature, idx) => (
                             <li 
                               key={`${arrayIndex}-${serviceIndex}-${idx}`} 
-                              className="flex items-center text-sm text-text-muted"
+                              className="flex items-center text-sm"
                               role="listitem"
+                              style={{ color: '#6B7280' }}
                             >
                               <svg 
-                                className="w-4 h-4 mr-2 text-tertiary-green flex-shrink-0" 
+                                className="w-4 h-4 mr-2 flex-shrink-0" 
                                 fill="currentColor" 
                                 viewBox="0 0 20 20"
                                 aria-hidden="true"
+                                style={{ color: '#4CAF50' }}
                               >
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
@@ -552,8 +989,23 @@ export default function HomePage() {
                         
                         {/* CTA Button */}
                         <button 
-                          className="w-full btn-gradient py-3 rounded-xl font-semibold transition-all duration-300 hover-lift focus-ring"
+                          className="w-full py-3 rounded-xl font-semibold transition-all duration-300"
                           aria-label={`Learn more about ${service.title}`}
+                          style={{
+                            background: 'linear-gradient(135deg, #E91E63 0%, #2196F3 50%, #4CAF50 100%)',
+                            color: 'white',
+                            border: 'none'
+                          }}
+                          onMouseEnter={(e) => {
+                            const target = e.target as HTMLElement;
+                            target.style.transform = 'translateY(-2px)';
+                            target.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            const target = e.target as HTMLElement;
+                            target.style.transform = 'translateY(0)';
+                            target.style.boxShadow = 'none';
+                          }}
                           onClick={() => {
                             // Context-specific navigation for Academic Support and Family Therapy
                             if (service.title === 'Academic Support') {
@@ -576,12 +1028,25 @@ export default function HomePage() {
             </div>
 
             {/* Process Visualization Section */}
-            <div className="bg-neutral-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-border-light p-8 lg:p-12 mb-20">
+            <div 
+              className="rounded-3xl shadow-xl border p-8 lg:p-12 mb-20"
+              style={{
+                background: 'rgba(255,255,255,0.95)',
+                backdropFilter: 'blur(8px)',
+                borderColor: '#E5E7EB'
+              }}
+            >
               <div className="text-center mb-12">
-                <h3 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4">
+                <h3 
+                  className="text-3xl lg:text-4xl font-bold mb-4"
+                  style={{ color: '#111827' }}
+                >
                   Your Journey to Wellness
                 </h3>
-                <p className="text-lg text-text-body max-w-3xl mx-auto leading-relaxed">
+                <p 
+                  className="text-lg max-w-3xl mx-auto leading-relaxed"
+                  style={{ color: '#374151' }}
+                >
                   A simple, supportive process designed to make getting help as comfortable as possible
                 </p>
               </div>
@@ -725,28 +1190,77 @@ export default function HomePage() {
         </section>
 
         {/* Enhanced Testimonials Section */}
-        <section className="py-20 lg:py-32 bg-gradient-to-br from-primary-blue-50 via-white to-secondary-green-50 relative overflow-hidden" role="region" aria-labelledby="testimonials-heading">
+        <section 
+          className="py-20 lg:py-32 relative overflow-hidden" 
+          role="region" 
+          aria-labelledby="testimonials-heading"
+          style={{
+            background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.05), white, rgba(34, 197, 94, 0.05))'
+          }}
+        >
           {/* Background Elements */}
-          <div className="absolute inset-0 opacity-10" aria-hidden="true">
-            <div className="absolute top-20 left-10 w-40 h-40 bg-primary-blue rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 right-10 w-60 h-60 bg-secondary-green rounded-full blur-3xl"></div>
+          <div className="absolute inset-0" style={{ opacity: 0.1 }} aria-hidden="true">
+            <div 
+              className="absolute w-40 h-40 rounded-full"
+              style={{
+                top: '80px',
+                left: '40px',
+                background: '#3b82f6',
+                filter: 'blur(48px)'
+              }}
+            ></div>
+            <div 
+              className="absolute w-60 h-60 rounded-full"
+              style={{
+                bottom: '80px',
+                right: '40px',
+                background: '#22c55e',
+                filter: 'blur(48px)'
+              }}
+            ></div>
           </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="text-center mb-20">
-              <div className="inline-flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-primary-blue/20 shadow-soft">
-                <span className="text-yellow-500 mr-2">⭐⭐⭐⭐⭐</span>
-                <span className="text-sm font-medium text-text-primary">4.8/5 rating from 2,000+ reviews</span>
+              <div 
+                className="inline-flex items-center rounded-full px-6 py-3 mb-6 border shadow-soft"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(4px)',
+                  borderColor: 'rgba(59, 130, 246, 0.2)'
+                }}
+              >
+                <span style={{ color: '#eab308', marginRight: '8px' }}>⭐⭐⭐⭐⭐</span>
+                <span 
+                  className="text-sm font-medium"
+                  style={{ color: '#111827' }}
+                >
+                  4.8/5 rating from 2,000+ reviews
+                </span>
               </div>
               
-              <h2 id="testimonials-heading" className="text-4xl lg:text-6xl font-bold text-text-primary mb-6">
+              <h2 
+                id="testimonials-heading" 
+                className="text-4xl lg:text-6xl font-bold mb-6"
+                style={{ color: '#111827' }}
+              >
                 Real Stories,{' '}
-                <span className="bg-gradient-to-r from-primary-blue to-secondary-green bg-clip-text text-transparent">
+                <span 
+                  style={{
+                    background: 'linear-gradient(to right, #3b82f6, #22c55e)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent'
+                  }}
+                >
                   Real Healing
                 </span>
               </h2>
-              <p className="text-xl lg:text-2xl text-text-secondary max-w-4xl mx-auto leading-relaxed">
+              <p 
+                className="text-xl lg:text-2xl max-w-4xl mx-auto leading-relaxed"
+                style={{ color: '#6b7280' }}
+              >
                 Hear from young people across India who found their path to better mental health with our culturally sensitive support
               </p>
             </div>
@@ -803,38 +1317,91 @@ export default function HomePage() {
                   category: "Crisis Support"
                 }
               ].map((testimonial, index) => (
-                <article key={index} className="group relative bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-8 hover:scale-105 transition-all duration-500 overflow-hidden">
+                <article 
+                  key={index} 
+                  className="group relative rounded-2xl p-8 transition-all duration-500 overflow-hidden"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(4px)',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.5)'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                  }}
+                >
                   {/* Category Badge */}
-                  <div className="absolute top-4 right-4 bg-gradient-to-r from-primary-blue to-secondary-green text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <div 
+                    className="absolute text-white text-xs font-bold px-3 py-1 rounded-full"
+                    style={{
+                      top: '16px',
+                      right: '16px',
+                      background: 'linear-gradient(to right, #3b82f6, #22c55e)'
+                    }}
+                  >
                     {testimonial.category}
                   </div>
 
                   {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 via-transparent to-secondary-green/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.05), transparent, rgba(34, 197, 94, 0.05))'
+                    }}
+                  ></div>
 
                   <div className="relative">
                     {/* Quote */}
                     <div className="mb-6">
-                      <svg className="w-8 h-8 text-primary-blue/30 mb-4" fill="currentColor" viewBox="0 0 24 24">
+                      <svg 
+                        className="w-8 h-8 mb-4" 
+                        fill="currentColor" 
+                        viewBox="0 0 24 24"
+                        style={{ color: 'rgba(59, 130, 246, 0.3)' }}
+                      >
                         <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
                       </svg>
-                      <blockquote className="text-text-primary leading-relaxed text-lg italic">
+                      <blockquote 
+                        className="leading-relaxed text-lg italic"
+                        style={{ color: '#111827' }}
+                      >
                         "{testimonial.quote}"
                       </blockquote>
                     </div>
 
                     {/* Profile */}
-                    <footer className="border-t border-neutral-200 pt-6">
+                    <footer 
+                      className="border-t pt-6"
+                      style={{ borderColor: '#e5e7eb' }}
+                    >
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary-blue/20 to-secondary-green/20 rounded-full flex items-center justify-center text-2xl mr-4">
+                        <div 
+                          className="w-12 h-12 rounded-full flex items-center justify-center text-2xl mr-4"
+                          style={{
+                            background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(34, 197, 94, 0.2))'
+                          }}
+                        >
                           {testimonial.avatar}
                         </div>
                         <div>
                           <cite className="not-italic">
-                            <div className="font-bold text-text-primary">
+                            <div 
+                              className="font-bold"
+                              style={{ color: '#111827' }}
+                            >
                               {testimonial.name}, {testimonial.age}
                             </div>
-                            <div className="text-sm text-text-muted">{testimonial.location}</div>
+                            <div 
+                              className="text-sm"
+                              style={{ color: '#9ca3af' }}
+                            >
+                              {testimonial.location}
+                            </div>
                           </cite>
                         </div>
                       </div>
@@ -845,50 +1412,116 @@ export default function HomePage() {
             </div>
 
             {/* Trust Badges */}
-            <div className="trust-badges grid md:grid-cols-4 gap-8 mb-16">
+            <div className="grid md:grid-cols-4 gap-8 mb-16">
               {[
                 { icon: "🏆", title: "Award Winning", subtitle: "Top Mental Health Platform 2024" },
                 { icon: "🔒", title: "100% Confidential", subtitle: "HIPAA Compliant & Secure" },
                 { icon: "👨‍⚕️", title: "Licensed Professionals", subtitle: "Verified & Experienced Therapists" },
                 { icon: "🇮🇳", title: "Made for India", subtitle: "Cultural Context & Local Understanding" }
               ].map((badge, index) => (
-                <div key={index} className="text-center group scroll-reveal">
-                  <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg hover-scale smooth-transition border border-primary-blue/20">
+                <div key={index} className="text-center group">
+                  <div 
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg transition-all duration-300 border"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      backdropFilter: 'blur(4px)',
+                      borderColor: 'rgba(59, 130, 246, 0.2)'
+                    }}
+                    onMouseEnter={(e) => {
+                      const target = e.currentTarget as HTMLElement;
+                      target.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      const target = e.currentTarget as HTMLElement;
+                      target.style.transform = 'scale(1)';
+                    }}
+                  >
                     {badge.icon}
                   </div>
-                  <h3 className="font-bold text-text-primary mb-1">{badge.title}</h3>
-                  <p className="text-sm text-text-muted">{badge.subtitle}</p>
+                  <h3 
+                    className="font-bold mb-1"
+                    style={{ color: '#111827' }}
+                  >
+                    {badge.title}
+                  </h3>
+                  <p 
+                    className="text-sm"
+                    style={{ color: '#9ca3af' }}
+                  >
+                    {badge.subtitle}
+                  </p>
                 </div>
               ))}
             </div>
 
             {/* Cultural Sensitivity & Emergency Support */}
-            <div className="bg-gradient-to-br from-accent-teal-50 to-primary-blue-50 rounded-3xl p-8 lg:p-12 scroll-reveal">
+            <div 
+              className="rounded-3xl p-8 lg:p-12"
+              style={{
+                background: 'linear-gradient(to bottom right, rgba(20, 184, 166, 0.05), rgba(59, 130, 246, 0.05))'
+              }}
+            >
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 {/* Cultural Understanding */}
-                <div className="cultural-understanding">
-                  <h3 className="text-2xl lg:text-3xl font-bold text-text-primary mb-6">
+                <div>
+                  <h3 
+                    className="text-2xl lg:text-3xl font-bold mb-6"
+                    style={{ color: '#111827' }}
+                  >
                     Understanding Your Cultural Context
                   </h3>
-                  <div className="space-y-4 text-text-secondary">
+                  <div 
+                    className="space-y-4"
+                    style={{ color: '#6b7280' }}
+                  >
                     <div className="flex items-start">
-                      <span className="text-2xl mr-3 mt-1">🏠</span>
+                      <span 
+                        className="text-2xl mt-1"
+                        style={{ marginRight: '12px' }}
+                      >
+                        🏠
+                      </span>
                       <div>
-                        <h4 className="font-semibold text-text-primary">Family-Centered Approach</h4>
+                        <h4 
+                          className="font-semibold"
+                          style={{ color: '#111827' }}
+                        >
+                          Family-Centered Approach
+                        </h4>
                         <p>We understand the importance of family in Indian culture and work to build bridges, not walls.</p>
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <span className="text-2xl mr-3 mt-1">📚</span>
+                      <span 
+                        className="text-2xl mt-1"
+                        style={{ marginRight: '12px' }}
+                      >
+                        📚
+                      </span>
                       <div>
-                        <h4 className="font-semibold text-text-primary">Academic Pressure Support</h4>
+                        <h4 
+                          className="font-semibold"
+                          style={{ color: '#111827' }}
+                        >
+                          Academic Pressure Support
+                        </h4>
                         <p>Navigate competitive education systems and career expectations with healthy coping strategies.</p>
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <span className="text-2xl mr-3 mt-1">🕉️</span>
+                      <span 
+                        className="text-2xl mt-1"
+                        style={{ marginRight: '12px' }}
+                      >
+                        🕉️
+                      </span>
                       <div>
-                        <h4 className="font-semibold text-text-primary">Spiritual Integration</h4>
+                        <h4 
+                          className="font-semibold"
+                          style={{ color: '#111827' }}
+                        >
+                          Spiritual Integration
+                        </h4>
                         <p>Blend traditional Indian wellness practices with modern psychological approaches.</p>
                       </div>
                     </div>
@@ -896,27 +1529,77 @@ export default function HomePage() {
                 </div>
 
                 {/* Emergency Support */}
-                <div className="emergency-support bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/50">
+                <div 
+                  className="rounded-2xl p-8 shadow-xl border"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(4px)',
+                    borderColor: 'rgba(255, 255, 255, 0.5)'
+                  }}
+                >
                   <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-crisis-red/10 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4">
+                    <div 
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4"
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.1)'
+                      }}
+                    >
                       🆘
                     </div>
-                    <h3 className="text-xl font-bold text-text-primary mb-2">Need Immediate Support?</h3>
-                    <p className="text-text-muted">We're here for you 24/7, especially during crisis moments.</p>
+                    <h3 
+                      className="text-xl font-bold mb-2"
+                      style={{ color: '#111827' }}
+                    >
+                      Need Immediate Support?
+                    </h3>
+                    <p style={{ color: '#9ca3af' }}>
+                      We're here for you 24/7, especially during crisis moments.
+                    </p>
                   </div>
                   
                   <div className="space-y-4">
                     <a 
                       href="tel:1860-2662-345" 
-                      className="block w-full bg-crisis-red hover:bg-crisis-red-dark text-white text-center py-4 rounded-xl font-semibold transition-colors hover-lift button-press focus-ring"
+                      className="block w-full text-white text-center py-4 rounded-xl font-semibold transition-colors"
                       aria-label="Call crisis hotline at 1860-2662-345"
+                      style={{
+                        background: '#ef4444'
+                      }}
+                      onMouseEnter={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.style.background = '#dc2626';
+                        target.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.style.background = '#ef4444';
+                        target.style.transform = 'translateY(0)';
+                      }}
                     >
                       🚨 Crisis Hotline: 1860-2662-345
                     </a>
-                    <button className="w-full bg-primary-blue hover:bg-primary-blue-dark text-white py-3 rounded-xl font-medium transition-colors hover-scale button-press focus-ring">
+                    <button 
+                      className="w-full text-white py-3 rounded-xl font-medium transition-colors"
+                      style={{
+                        background: '#3b82f6'
+                      }}
+                      onMouseEnter={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.style.background = '#2563eb';
+                        target.style.transform = 'scale(1.02)';
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.style.background = '#3b82f6';
+                        target.style.transform = 'scale(1)';
+                      }}
+                    >
                       Chat with Crisis Counselor
                     </button>
-                    <p className="text-xs text-text-muted text-center">
+                    <p 
+                      className="text-xs text-center"
+                      style={{ color: '#9ca3af' }}
+                    >
                       Available in Hindi, English, and regional languages
                     </p>
                   </div>
@@ -925,22 +1608,94 @@ export default function HomePage() {
             </div>
 
             {/* Call to Action */}
-            <div className="final-cta-section text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 lg:p-12">
-              <h3 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4">
+            <div 
+              className="text-center rounded-3xl shadow-xl border p-8 lg:p-12"
+              style={{
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(4px)',
+                borderColor: 'rgba(255, 255, 255, 0.5)'
+              }}
+            >
+              <h3 
+                className="text-3xl lg:text-4xl font-bold mb-4"
+                style={{ color: '#111827' }}
+              >
                 Ready to Start Your Story?
               </h3>
-              <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
+              <p 
+                className="text-xl mb-8 max-w-2xl mx-auto"
+                style={{ color: '#6b7280' }}
+              >
                 Join thousands of young people who've found their path to better mental health with culturally sensitive, professional support.
               </p>
-              <div className="cta-buttons flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="group bg-gradient-to-r from-primary-blue to-primary-blue-dark text-white px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-blue focus:ring-opacity-50 shadow-xl relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button 
+                  className="group relative px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-xl overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+                    color: 'white'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.transform = 'scale(1.05)';
+                    target.style.background = 'linear-gradient(to right, #22c55e, #3b82f6)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.transform = 'scale(1)';
+                    target.style.background = 'linear-gradient(to right, #3b82f6, #2563eb)';
+                  }}
+                  onFocus={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.outline = '4px solid rgba(59, 130, 246, 0.5)';
+                  }}
+                  onBlur={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.outline = 'none';
+                  }}
+                >
                   <span className="relative z-10">Begin Your Healing Journey</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-secondary-green to-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{
+                      background: 'linear-gradient(to right, #22c55e, #3b82f6)'
+                    }}
+                  ></div>
                 </button>
-                <button className="group border-2 border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-blue focus:ring-opacity-30">
+                <button 
+                  className="group border-2 px-8 py-4 rounded-full font-bold text-lg transition-all duration-300"
+                  style={{
+                    borderColor: '#3b82f6',
+                    color: '#3b82f6'
+                  }}
+                  onMouseEnter={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.background = '#3b82f6';
+                    target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.background = 'transparent';
+                    target.style.color = '#3b82f6';
+                  }}
+                  onFocus={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.outline = '4px solid rgba(59, 130, 246, 0.3)';
+                  }}
+                  onBlur={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.outline = 'none';
+                  }}
+                >
                   <span className="flex items-center">
                     Schedule Free Consultation
-                    <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg 
+                      className="w-5 h-5 group-hover:translate-x-1 transition-transform" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                      style={{ marginLeft: '8px' }}
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </span>
@@ -952,42 +1707,83 @@ export default function HomePage() {
       </main>
 
       {/* Semantic Footer */}
-      <footer className="bg-text-primary text-white py-16" role="contentinfo">
+      <footer 
+        className="text-white py-16" 
+        role="contentinfo"
+        style={{ background: '#111827' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-primary-blue rounded-lg flex items-center justify-center">
+              <div className="flex items-center mb-4" style={{ gap: '12px' }}>
+                <div 
+                  className="w-10 h-10 rounded-lg flex items-center justify-center"
+                  style={{ background: '#3b82f6' }}
+                >
                   <span className="text-white font-bold text-lg">🧠</span>
                 </div>
                 <span className="text-2xl font-bold">MindCare</span>
               </div>
-              <p className="text-neutral-300">Mental health support for Indian youth.</p>
+              <p style={{ color: '#d1d5db' }}>Mental health support for Indian youth.</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2">
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {['Services', 'About', 'Contact'].map((link) => (
-                  <li key={link}>
-                    <Link to="/" className="text-neutral-300 hover:text-white transition-colors">{link}</Link>
+                  <li key={link} style={{ marginBottom: '8px' }}>
+                    <Link 
+                      to="/" 
+                      className="transition-colors"
+                      style={{ color: '#d1d5db' }}
+                      onMouseEnter={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.style.color = 'white';
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.style.color = '#d1d5db';
+                      }}
+                    >
+                      {link}
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2">
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {['Blog', 'Self-Help', 'Crisis Help'].map((link) => (
-                  <li key={link}>
-                    <Link to="/" className="text-neutral-300 hover:text-white transition-colors">{link}</Link>
+                  <li key={link} style={{ marginBottom: '8px' }}>
+                    <Link 
+                      to="/" 
+                      className="transition-colors"
+                      style={{ color: '#d1d5db' }}
+                      onMouseEnter={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.style.color = 'white';
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.style.color = '#d1d5db';
+                      }}
+                    >
+                      {link}
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Get Help</h3>
-              <p className="text-neutral-300">Crisis Hotline:</p>
-              <a href="tel:1860-2662-345" className="text-crisis-red font-semibold text-lg">1860-2662-345</a>
+              <p style={{ color: '#d1d5db' }}>Crisis Hotline:</p>
+              <a 
+                href="tel:1860-2662-345" 
+                className="font-semibold text-lg"
+                style={{ color: '#ef4444' }}
+              >
+                1860-2662-345
+              </a>
             </div>
           </div>
         </div>

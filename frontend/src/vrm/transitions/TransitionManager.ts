@@ -15,6 +15,12 @@ import { PoseManager } from './PoseManager'
 import { ExpressionManager } from './ExpressionManager'
 import type { VrmLipSync } from '../core'
 
+interface PoseQueueItem {
+  targetEmotion: EmotionType
+  priority: 'normal' | 'high' | 'immediate'
+  timestamp: number
+}
+
 /**
  * TransitionManager orchestrates the complete 3-step transition sequence
  */
@@ -27,6 +33,11 @@ export class TransitionManager {
   private pendingTargetEmotion: EmotionType | null = null
   private transitionStartTime: number = 0
   private transitionTimeout: NodeJS.Timeout | null = null
+
+  // Pose queue system
+  private poseQueue: PoseQueueItem[] = []
+  private currentPose: EmotionType = 'neutral'
+  private isProcessingQueue = false
 
   constructor(
     poseManager: PoseManager,
@@ -45,7 +56,116 @@ export class TransitionManager {
     this.expressionManager.setLipSync(lipSync);
   }
 
+  /**
+   * Initialize current pose
+   */
+  public setInitialPose(emotion: EmotionType): void {
+    this.currentPose = emotion
+    console.log(`Initial pose set to: ${emotion}`)
+  }
+
+  /**
+   * Add pose to queue with priority
+   */
+  public queuePose(targetEmotion: EmotionType, priority: 'normal' | 'high' | 'immediate' = 'normal'): void {
+    // Validate emotion before queuing
+    const validEmotions: EmotionType[] = ['neutral', 'happy', 'sad', 'angry', 'surprised']
+    if (!validEmotions.includes(targetEmotion)) {
+      console.warn(`Invalid emotion '${targetEmotion}' - skipping queue.`)
+      return
+    }
+
+    const queueItem: PoseQueueItem = {
+      targetEmotion,
+      priority,
+      timestamp: Date.now()
+    }
+
+    if (priority === 'immediate') {
+      // Clear queue and add immediately
+      this.poseQueue = [queueItem]
+      this.processQueue()
+    } else if (priority === 'high') {
+      // Insert at front of queue
+      this.poseQueue.unshift(queueItem)
+      this.processQueue()
+    } else {
+      // Add to end of queue
+      this.poseQueue.push(queueItem)
+      this.processQueue()
+    }
+  }
+
+  /**
+   * Process next item in queue
+   */
+  private async processQueue(): Promise<void> {
+    if (this.isProcessingQueue || this.poseQueue.length === 0) {
+      return
+    }
+
+    this.isProcessingQueue = true
+
+    while (this.poseQueue.length > 0) {
+      const nextPose = this.poseQueue.shift()!
+      
+      // Skip if already in target pose
+      if (nextPose.targetEmotion === this.currentPose) {
+        continue
+      }
+
+      console.log(`Processing queue: ${this.currentPose} → ${nextPose.targetEmotion}`)
+      
+      const success = await this.startTransition(this.currentPose, nextPose.targetEmotion)
+      
+      if (success) {
+        this.currentPose = nextPose.targetEmotion
+        console.log(`Queue transition completed: now in ${this.currentPose}`)
+      } else {
+        console.warn(`Queue transition failed: ${this.currentPose} → ${nextPose.targetEmotion}`)
+        // Still update current pose to prevent stuck state
+        this.currentPose = nextPose.targetEmotion
+      }
+
+      // Small delay between queue items
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
+    this.isProcessingQueue = false
+  }
+
+  /**
+   * Clear pose queue
+   */
+  public clearPoseQueue(): void {
+    this.poseQueue = []
+    console.log('Pose queue cleared')
+  }
+
+  /**
+   * Get queue status
+   */
+  public getQueueStatus(): {
+    queueLength: number
+    currentPose: EmotionType
+    nextPose: EmotionType | null
+    isProcessing: boolean
+  } {
+    return {
+      queueLength: this.poseQueue.length,
+      currentPose: this.currentPose,
+      nextPose: this.poseQueue[0]?.targetEmotion || null,
+      isProcessing: this.isProcessingQueue
+    }
+  }
+
   public async startTransition(fromEmotion: EmotionType, toEmotion: EmotionType): Promise<boolean> {
+    // Validate that fromEmotion matches our tracked current pose
+    if (fromEmotion !== this.currentPose) {
+      console.warn(`State mismatch: expected ${this.currentPose}, got ${fromEmotion}. Correcting...`)
+      fromEmotion = this.currentPose
+    }
+
     // Cancel any ongoing transition first
     this.cancelCurrentTransition()
 
@@ -153,10 +273,12 @@ export class TransitionManager {
       await this.poseManager.applyStaticPose(targetEmotion, poseAnimation)
     }
     
+    // Update current pose tracking
+    this.currentPose = targetEmotion
     this.transitionState = 'STATIC'
     this.pendingTargetEmotion = null
 
-    console.log(`Transition forcefully completed: now in ${targetEmotion} static pose`)
+    console.log(`Transition forcefully completed: now in ${this.currentPose} static pose`)
   }
 
   public getTransitionState(): TransitionStatus {
@@ -190,6 +312,8 @@ export class TransitionManager {
       await this.poseManager.applyStaticPose(targetEmotion, poseAnimation)
     }
     
+    // Update current pose tracking
+    this.currentPose = targetEmotion
     this.transitionState = 'STATIC'
     this.pendingTargetEmotion = null
 
@@ -199,7 +323,7 @@ export class TransitionManager {
       this.transitionTimeout = null
     }
 
-    console.log(`Transition sequence completed: now in ${targetEmotion} static pose`)
+    console.log(`Transition sequence completed: now in ${this.currentPose} static pose`)
   }
 
   private async fallbackToInstantSwitch(toEmotion: EmotionType): Promise<boolean> {
@@ -208,13 +332,19 @@ export class TransitionManager {
     
     const poseAnimation = this.animationLoader.getPose(toEmotion)
     if (poseAnimation) {
-      return await this.poseManager.applyStaticPose(toEmotion, poseAnimation)
+      const success = await this.poseManager.applyStaticPose(toEmotion, poseAnimation)
+      if (success) {
+        // Update current pose tracking on successful fallback
+        this.currentPose = toEmotion
+      }
+      return success
     }
     return false
   }
 
   public dispose(): void {
     this.cancelCurrentTransition()
+    this.clearPoseQueue()
     this.poseManager.dispose()
     this.expressionManager.dispose()
   }

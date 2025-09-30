@@ -201,7 +201,7 @@ export default function ChatWindow() {
           }
           
           // Switch avatar to speaking emotion
-          switchToEmotion('happy');
+          // switchToEmotion('happy');
         },
         onEnd: () => {
           setIsPlayingAudio(false);

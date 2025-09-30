@@ -74,9 +74,9 @@ export class VrmAnimationLoader {
             const vrmAnimation = vrmAnimations[0]
             this.loadedPoses.set(emotion, vrmAnimation)
             
-            console.log(`✓ Loaded ${emotion} static pose from ${filePath}`)
-            console.log(`  - Duration: ${vrmAnimation.duration}s`)
-            console.log(`  - Humanoid tracks: ${vrmAnimation.humanoidTracks.rotation.size} rotation, ${vrmAnimation.humanoidTracks.translation.size} translation`)
+            // console.log(`✓ Loaded ${emotion} static pose from ${filePath}`)
+            // console.log(`  - Duration: ${vrmAnimation.duration}s`)
+            // console.log(`  - Humanoid tracks: ${vrmAnimation.humanoidTracks.rotation.size} rotation, ${vrmAnimation.humanoidTracks.translation.size} translation`)
             
             resolve()
           } else {
@@ -87,7 +87,7 @@ export class VrmAnimationLoader {
         },
         (progress) => {
           const percentage = Math.floor((progress.loaded / progress.total) * 100)
-          console.log(`Loading ${emotion} static pose... ${percentage}%`)
+        //   console.log(`Loading ${emotion} static pose... ${percentage}%`)
         },
         (error) => {
           console.error(`Error loading ${emotion} static pose:`, error)
@@ -108,9 +108,9 @@ export class VrmAnimationLoader {
             const vrmAnimation = vrmAnimations[0]
             this.loadedTransitions.set(transitionKey, vrmAnimation)
             
-            console.log(`✓ Loaded transition ${transitionKey} from ${filePath}`)
-            console.log(`  - Duration: ${vrmAnimation.duration}s (expected ~1.67s for 40 frames)`)
-            console.log(`  - Humanoid tracks: ${vrmAnimation.humanoidTracks.rotation.size} rotation, ${vrmAnimation.humanoidTracks.translation.size} translation`)
+            // console.log(`✓ Loaded transition ${transitionKey} from ${filePath}`)
+            // console.log(`  - Duration: ${vrmAnimation.duration}s (expected ~1.67s for 40 frames)`)
+            // console.log(`  - Humanoid tracks: ${vrmAnimation.humanoidTracks.rotation.size} rotation, ${vrmAnimation.humanoidTracks.translation.size} translation`)
             
             resolve()
           } else {
@@ -121,7 +121,7 @@ export class VrmAnimationLoader {
         },
         (progress) => {
           const percentage = Math.floor((progress.loaded / progress.total) * 100)
-          console.log(`Loading transition ${transitionKey}... ${percentage}%`)
+        //   console.log(`Loading transition ${transitionKey}... ${percentage}%`)
         },
         (error) => {
           console.error(`Error loading transition ${transitionKey}:`, error)

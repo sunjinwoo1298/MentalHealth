@@ -48,6 +48,7 @@ export default function BackgroundMusic({
   defaultVolume = 0.3 
 }: BackgroundMusicProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
+  const failedSrcsRef = useRef<Set<string>>(new Set())
   const [isPlaying, setIsPlaying] = useState(autoPlay)
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
   const [volume, setVolume] = useState(defaultVolume)
@@ -72,6 +73,26 @@ export default function BackgroundMusic({
 
   const activeTracks = tracks.length > 0 ? tracks : defaultTracks
   const currentTrack = activeTracks[currentTrackIndex]
+
+  // Keep internal play state in sync when parent toggles autoPlay (e.g., on Start)
+  useEffect(() => {
+    setIsPlaying(Boolean(autoPlay))
+  }, [autoPlay])
+
+  // Reload audio ONLY when the actual track URL changes to avoid restart loops
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) {
+      return
+    }
+    // React will update the src attribute; just call load
+    audio.load()
+  }, [currentTrack?.src])
+
+  // Reset failed tracks when the provided track list identity changes
+  useEffect(() => {
+    failedSrcsRef.current.clear()
+  }, [tracks])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -142,6 +163,32 @@ export default function BackgroundMusic({
         src={currentTrack?.src}
         preload="metadata"
         aria-label={`Currently playing: ${currentTrack?.name}`}
+        onCanPlay={() => {
+          const audio = audioRef.current
+          if (!audio) {
+            return
+          }
+          if (isPlaying) {
+            // Ensure play resumes after source/load changes
+            audio.play().catch(() => setIsPlaying(false))
+          }
+        }}
+        onError={() => {
+          // If a track fails to load, attempt the next track once per unique src
+          const src = currentTrack?.src
+          if (src) {
+            failedSrcsRef.current.add(src)
+          }
+
+          const attemptedAll = failedSrcsRef.current.size >= activeTracks.length
+
+          if (!attemptedAll && activeTracks.length > 1) {
+            setCurrentTrackIndex((prev) => (prev + 1) % activeTracks.length)
+          } else {
+            // Stop playback after trying all available tracks
+            setIsPlaying(false)
+          }
+        }}
       />
 
       {/* Fixed controls at bottom */}

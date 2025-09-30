@@ -1,18 +1,44 @@
 import React, { useEffect, useRef } from "react";
 
-type Particle = { x: number; y: number; life: number; ttl: number; size: number; hue: number };
+type Particle = {
+  x: number;
+  y: number;
+  life: number;
+  ttl: number;
+  size: number;
+  rotation: number;
+};
 
 export default function SketchCursor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
   const lastRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const cursorEl = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) return; // don't add trail if reduced motion
+    const prefersReduced =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
 
+    // Hide system cursor
+    document.body.style.cursor = "none";
+
+    // Custom PNG cursor element
+    const cursor = document.createElement("img");
+    cursor.src = "./cursor.png"; // 👉 replace with your PNG path
+    cursor.style.position = "fixed";
+    cursor.style.width = "24px";
+    cursor.style.height = "24px";
+    cursor.style.pointerEvents = "none";
+    cursor.style.transform = "translate(-50%, -50%)";
+    cursor.style.zIndex = "10000";
+    document.body.appendChild(cursor);
+    cursorEl.current = cursor;
+
+    // Particle canvas
     const canvas = document.createElement("canvas");
     canvas.style.position = "fixed";
     canvas.style.left = "0";
@@ -26,8 +52,8 @@ export default function SketchCursor() {
     canvasRef.current = canvas;
 
     const ctx = canvas.getContext("2d");
-    let w = 0;
-    let h = 0;
+    let w = 0,
+      h = 0;
 
     function resize() {
       w = window.innerWidth;
@@ -39,56 +65,33 @@ export default function SketchCursor() {
       canvas.style.height = h + "px";
       if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-
     resize();
     window.addEventListener("resize", resize);
 
-    function getColorMix() {
-      // mix joy-mint and joy-sky for blue-green hues
-      try {
-        const cs = getComputedStyle(document.documentElement);
-        const mint = cs.getPropertyValue("--joy-mint").trim();
-        const sky = cs.getPropertyValue("--joy-sky").trim();
-        // fallback hues
-        const h1 = mint ? 165 : 190;
-        const h2 = sky ? 200 : 195;
-        return { h1, h2 };
-      } catch (e) {
-        return { h1: 165, h2: 200 };
-      }
-    }
-
-    const hues = getColorMix();
-
-    function spawnAt(x: number, y: number, click = false) {
+    function spawnAt(x: number, y: number, burst = false) {
       const now = performance.now();
       const last = lastRef.current;
       const dist = last ? Math.hypot(x - last.x, y - last.y) : 0;
       lastRef.current = { x, y, t: now };
-      const count = click ? 8 : Math.min(6, 1 + Math.floor(dist / 8));
+      const count = burst ? 12 : Math.min(6, 1 + Math.floor(dist / 6));
       for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const r = (Math.random() * (click ? 8 : 6)) + (dist > 12 ? 2 : 0);
-        const px = x + Math.cos(angle) * r + (Math.random() - 0.5) * 4;
-        const py = y + Math.sin(angle) * r + (Math.random() - 0.5) * 4;
         particlesRef.current.push({
-          x: px,
-          y: py,
+          x: x + (Math.random() - 0.5) * 12,
+          y: y + (Math.random() - 0.5) * 12,
           life: 0,
-          ttl: 700 + Math.random() * 900,
-          size: (click ? 6 : (2 + Math.random() * 4)),
-          hue: hues.h1 + Math.random() * (hues.h2 - hues.h1),
+          ttl: 600 + Math.random() * 600,
+          size: 2 + Math.random() * 4,
+          rotation: Math.random() * Math.PI * 2,
         });
       }
     }
 
-    let lastMove = 0;
     function onPointerMove(e: PointerEvent) {
-      // throttle
-      const now = performance.now();
-      if (now - lastMove < 16) return;
-      lastMove = now;
-      spawnAt(e.clientX, e.clientY, false);
+      if (cursorEl.current) {
+        cursorEl.current.style.left = `${e.clientX}px`;
+        cursorEl.current.style.top = `${e.clientY}px`;
+      }
+      spawnAt(e.clientX, e.clientY);
     }
 
     function onPointerDown(e: PointerEvent) {
@@ -102,29 +105,41 @@ export default function SketchCursor() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       ctx.clearRect(0, 0, w, h);
+
       const now = performance.now();
       const next: Particle[] = [];
-      // draw each particle as a sketched circle with slight line
+
+      // smooth hue cycling between red-orange-yellow
+      const hueBase = 30 + 30 * Math.sin(now / 1000); // oscillates 0–60
+
       for (const p of particlesRef.current) {
-        p.life += 16; // approximate frame delta for aging
+        p.life += 16;
         const t = p.life / p.ttl;
         if (t >= 1) continue;
+
         const alpha = 1 - t;
-        const size = p.size * (0.6 + 0.4 * (1 - t));
+        const size = p.size * (0.5 + 0.5 * (1 - t));
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.scale(1 + Math.sin(t * Math.PI * 2) * 0.2, 1);
+
+        // sparkle star
         ctx.beginPath();
-        // sketchy ring: draw few jittered arcs
-        for (let k = 0; k < 3; k++) {
-          const jitterX = (Math.random() - 0.5) * 0.6 * size;
-          const jitterY = (Math.random() - 0.5) * 0.6 * size;
-          ctx.moveTo(p.x + jitterX + size, p.y + jitterY);
-          ctx.arc(p.x + jitterX, p.y + jitterY, size, 0, Math.PI * 2);
+        for (let i = 0; i < 5; i++) {
+          const angle = (i * 2 * Math.PI) / 5;
+          const r = size * (i % 2 === 0 ? 1.8 : 0.6);
+          ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
         }
         ctx.closePath();
-        ctx.fillStyle = `hsla(${p.hue.toFixed(1)}, 80%, 55%, ${0.12 * alpha})`;
+
+        ctx.fillStyle = `hsla(${hueBase}, 100%, 60%, ${0.8 * alpha})`;
+        ctx.shadowColor = `hsla(${hueBase}, 100%, 70%, ${0.9 * alpha})`;
+        ctx.shadowBlur = 8;
         ctx.fill();
-        ctx.strokeStyle = `hsla(${p.hue.toFixed(1)}, 95%, 35%, ${0.6 * alpha})`;
-        ctx.lineWidth = Math.max(0.8, 1.2 * (1 - t));
-        ctx.stroke();
+        ctx.restore();
+
         next.push(p);
       }
       particlesRef.current = next;
@@ -139,6 +154,9 @@ export default function SketchCursor() {
       window.removeEventListener("pointerdown", onPointerDown);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      if (cursorEl.current && cursorEl.current.parentNode)
+        cursorEl.current.parentNode.removeChild(cursorEl.current);
+      document.body.style.cursor = ""; // reset default cursor
     };
   }, []);
 

@@ -33,7 +33,9 @@ export function Sidebar() {
       aria-label="Primary"
     >
       <div className="h-16 flex items-center gap-2 px-4 border-b">
-        <div className="size-9 rounded-xl bg-gradient-to-br from-red-500 via-yellow-500 to-purple-600 animate-shimmer bg-[length:200%_200%] shadow-bubbly motion-safe:animate-pulse-glow" aria-hidden />
+        <div className="size-9 rounded-xl bg-gradient-to-br from-red-500 via-yellow-500 to-purple-600 animate-shimmer bg-[length:200%_200%] shadow-bubbly motion-safe:animate-pulse-glow" aria-hidden >
+          <img src="./logo1.jpg" alt="BloomMind Logo" className="size-9 rounded-xl border-2 border-white"/>
+        </div>
         <div className="font-extrabold tracking-tight text-lg bg-gradient-to-r from-red-600 to-purple-600 bg-clip-text text-transparent motion-safe:animate-pop">BloomMind</div>
       </div>
 

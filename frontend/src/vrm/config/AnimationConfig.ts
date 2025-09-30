@@ -39,12 +39,12 @@ export const ANIMATION_CONFIG = {
   LIGHTING: {
     AMBIENT: {
       color: 0xffffff,
-      intensity: 0.6
+      intensity: 0.9
     },
     DIRECTIONAL: {
       color: 0xffffff,
       intensity: 0.8,
-      position: { x: 1, y: 1, z: 1 }
+      position: { x: 1, y: 1, z: 0 }
     }
   }
 } as const

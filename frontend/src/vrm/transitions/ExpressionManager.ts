@@ -24,6 +24,10 @@ export class ExpressionManager {
     duration: 0,
     animationFrameId: null
   };
+
+  // Blink system properties
+  private blinkTimeout: NodeJS.Timeout | null = null
+  private currentBlinkValue = 0.0
   
   private previousExpressionValues: Record<string, number> = {};
   
@@ -32,6 +36,7 @@ export class ExpressionManager {
 
   public setVRM(vrm: VRM): void {
     this.vrm = vrm;
+    this.startSimpleBlink() // Auto-start the 4-second blink loop
     this.initializeExpressionValues();
     
     // Pass VRM to lip sync if available
@@ -108,6 +113,9 @@ export class ExpressionManager {
 
       console.log(`Applied ${emotion} facial expression with intensity ${intensity}`);
       
+      // After applying emotion, reapply blink additively
+      this.vrm.expressionManager.setValue('blink', this.currentBlinkValue)
+
       // Apply lip sync after emotion expressions if available
       this.applyLipSyncIfActive();
     } catch (error) {
@@ -315,10 +323,53 @@ export class ExpressionManager {
     }
   }
 
+  // Blink system methods
+  public startSimpleBlink(): void {
+    this.scheduleBlink(0.0) // Start with eyes open
+  }
+
+  private scheduleBlink(currentValue: number): void {
+    this.blinkTimeout = setTimeout(() => {
+      if (currentValue === 0.0) {
+        // Close eyes (blink)
+        this.currentBlinkValue = 1.0
+        
+        // Apply blink
+        if (this.vrm?.expressionManager) {
+          this.vrm.expressionManager.setValue('blink', this.currentBlinkValue)
+        }
+        
+        // Schedule eyes to open after 0.2 seconds
+        this.scheduleBlink(1.0)
+      } else {
+        // Open eyes
+        this.currentBlinkValue = 0.0
+        
+        // Apply blink
+        if (this.vrm?.expressionManager) {
+          this.vrm.expressionManager.setValue('blink', this.currentBlinkValue)
+        }
+        
+        // Schedule next blink after 4 seconds
+        this.scheduleBlink(0.0)
+      }
+    }, currentValue === 0.0 ? 4000 : 80) // 4 seconds open, 0.2 seconds closed
+  }
+
+  public stopSimpleBlink(): void {
+    if (this.blinkTimeout) {
+      clearTimeout(this.blinkTimeout)
+      this.blinkTimeout = null
+    }
+    this.currentBlinkValue = 0.0
+  }
+
   public dispose(): void {
     this.stopExpressionTransition();
     this.previousExpressionValues = {};
     
+    this.stopSimpleBlink() // Stop blinking on cleanup
+
     // Clean up lip sync reference
     this.lipSync = null;
   }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Navigation from '../components/Navigation/Navigation';
+// import Navigation from '../components/Navigation/Navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { useGamification } from '../contexts/GamificationContext';
 import { gamificationAPI } from '../services/api';
@@ -72,12 +72,7 @@ const TestGamificationPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900">
-      <Navigation 
-        isAuthenticated={true}
-        user={user || undefined}
-        onLogout={handleLogout}
-      />
+   
       
       <main className="pt-16 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
@@ -162,7 +157,6 @@ const TestGamificationPage: React.FC = () => {
           </div>
         </div>
       </main>
-    </div>
   );
 };
 

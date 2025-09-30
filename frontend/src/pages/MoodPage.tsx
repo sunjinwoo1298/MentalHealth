@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Navigation from '../components/Navigation/Navigation';
+// import Navigation from '../components/Navigation/Navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { useGamification } from '../contexts/GamificationContext';
 
@@ -264,11 +264,11 @@ const MoodPage: React.FC = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-orange-300 to-red-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-150"></div>
       </div>
 
-      <Navigation 
+      {/* <Navigation 
         isAuthenticated={true}
         user={user || undefined}
         onLogout={handleLogout}
-      />
+      /> */}
 
       <main className="relative z-10 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">

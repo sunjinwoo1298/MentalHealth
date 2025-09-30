@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { gamificationAPI } from '../services/api';
-import Navigation from '../components/Navigation/Navigation';
-import GamificationDebug from '../components/Debug/GamificationDebug';
-import TestPoints from '../components/Gamification/TestPoints';
-import { useAuth } from '../contexts/AuthContext';
 import { useGamification } from '../contexts/GamificationContext';
 
 interface GamificationData {
@@ -25,16 +21,11 @@ interface GamificationData {
 }
 
 const OptimizedGamificationPage: React.FC = () => {
-  const { user, logout } = useAuth();
   const { pendingRewards, processPendingRewards } = useGamification();
   const [data, setData] = useState<GamificationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rewardNotification, setRewardNotification] = useState<string | null>(null);
-
-  const handleLogout = async () => {
-    await logout();
-  };
 
   // Process pending rewards when page opens
   useEffect(() => {
@@ -103,10 +94,13 @@ const OptimizedGamificationPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
-          <p className="text-purple-200">Loading your wellness journey...</p>
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin mx-auto mb-6"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl animate-pulse">🎮</div>
+          </div>
+          <p className="text-purple-700 text-lg font-medium animate-pulse">Loading your wellness journey...</p>
         </div>
       </div>
     );
@@ -114,16 +108,16 @@ const OptimizedGamificationPage: React.FC = () => {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Failed to Load Progress</h2>
-          <p className="text-purple-200 mb-4">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-sm rounded-3xl p-12 shadow-2xl border border-pink-200">
+          <div className="text-red-500 text-6xl mb-6 animate-bounce">⚠️</div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Failed to Load Progress</h2>
+          <p className="text-gray-600 mb-8 text-lg">{error}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg font-semibold"
           >
-            Retry
+            ✨ Retry
           </button>
         </div>
       </div>
@@ -133,114 +127,124 @@ const OptimizedGamificationPage: React.FC = () => {
   const { points, level, streaks, badges, challenges } = data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 relative">
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mix-blend-soft-light filter blur-2xl"></div>
-        <div className="absolute bottom-20 left-20 w-64 h-64 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full mix-blend-soft-light filter blur-2xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-orange-400 to-red-500 rounded-full mix-blend-soft-light filter blur-3xl"></div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-pink-300/30 to-purple-400/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-indigo-300/30 to-cyan-400/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-gradient-to-br from-orange-300/20 to-red-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
       
-      <Navigation 
-        isAuthenticated={true}
-        user={user || undefined}
-        onLogout={handleLogout}
-      />
+      {/* Add custom CSS for animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(2deg); }
+        }
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+          50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.6); }
+        }
+        .float-animation { animation: float 6s ease-in-out infinite; }
+        .glow-animation { animation: glow 3s ease-in-out infinite; }
+      `}</style>
       
-      <main className="relative z-10 pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 pt-8 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           
           {/* Reward Notification */}
           {rewardNotification && (
-            <div className="fixed top-20 right-4 bg-gradient-to-r from-emerald-500/90 to-teal-500/90 backdrop-blur-md rounded-lg px-6 py-4 border border-emerald-400/50 shadow-xl z-50 max-w-sm animate-pulse">
-              <p className="text-white text-sm font-medium">{rewardNotification}</p>
+            <div className="fixed top-20 right-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl px-6 py-4 shadow-2xl z-50 max-w-sm transform transition-all duration-500 animate-bounce border-2 border-white/50">
+              <p className="text-white text-sm font-semibold">{rewardNotification}</p>
             </div>
           )}
           
-          {/* Clean Header */}
-          <div className="text-left mb-8">
-            <div className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 backdrop-blur-md rounded-2xl px-8 py-6 border border-pink-400/30 mb-4 shadow-lg max-w-fit">
+          {/* Modern Header */}
+          <div className="text-center mb-12">
+            <div className="inline-block bg-white/90 backdrop-blur-sm rounded-3xl px-8 py-6 shadow-2xl border-2 border-pink-200 mb-6 transform hover:scale-105 transition-all duration-300 glow-animation">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full flex items-center justify-center text-xl shadow-md">
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg float-animation">
                   🎮
                 </div>
                 <div className="text-left">
-                  <p className="text-2xl font-bold text-purple-300 mb-1">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Wellness Journey
-                  </p>
-                  <h2 className="text-xl font-bold text-white">
+                  </h1>
+                  <p className="text-lg font-semibold text-gray-700">
                     Your Progress Dashboard
-                  </h2>
+                  </p>
                 </div>
               </div>
             </div>
             
-            <h1 className="text-3xl font-bold mb-2 text-white">
+            <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               Track Progress & Earn Rewards
-            </h1>
+            </h2>
             
-            <div className="flex gap-3 mb-6">
-              <div className="bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20 text-xs">
-                <span className="text-teal-300 font-medium">
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              <div className="bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg border border-teal-200 transform hover:scale-105 transition-all duration-300">
+                <span className="text-teal-600 font-semibold text-sm">
                   🕉️ Karma Points & Levels
                 </span>
               </div>
-              <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-md rounded-full px-4 py-2 border border-orange-400/30 text-xs">
-                <span className="text-orange-300 font-medium">
+              <div className="bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg border border-orange-200 transform hover:scale-105 transition-all duration-300">
+                <span className="text-orange-600 font-semibold text-sm">
                   🏆 Achievements & Challenges
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Main Action Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Main Stats Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             
             {/* Karma Points Section */}
-            <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-md rounded-2xl p-6 border border-orange-400/30 hover:border-orange-400/60 transition-all duration-300">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-orange-200 hover:border-orange-400 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-3xl group">
+              <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-1">🏆 Karma Points</h3>
-                  <p className="text-orange-200 text-sm">Track your spiritual earnings</p>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">🏆 Karma Points</h3>
+                  <p className="text-orange-600 font-medium">Track your spiritual earnings</p>
                 </div>
-                <div className="text-4xl">🕉️</div>
+                <div className="text-5xl group-hover:scale-110 transition-transform duration-300 float-animation">🕉️</div>
               </div>
-              <div className="text-white">
-                <p className="text-3xl font-bold text-orange-300 mb-2">
+              <div>
+                <p className="text-5xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent mb-3">
                   {points?.total_points || 0}
                 </p>
-                <p className="text-orange-200 text-sm">Total Karma Points Earned</p>
+                <p className="text-gray-700 font-semibold mb-2">Total Karma Points Earned</p>
                 {points?.weekly_points && (
-                  <p className="text-orange-300 text-xs mt-1">
-                    +{points.weekly_points} this week
-                  </p>
+                  <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-2xl p-3 border border-orange-200">
+                    <p className="text-orange-600 font-semibold text-sm">
+                      ✨ +{points.weekly_points} this week
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* Wellness Levels Section */}
-            <div className="bg-gradient-to-br from-indigo-500/20 to-blue-600/20 backdrop-blur-md rounded-2xl p-6 border border-indigo-400/30 hover:border-indigo-400/60 transition-all duration-300">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-indigo-200 hover:border-indigo-400 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-3xl group">
+              <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-1">📈 Wellness Levels</h3>
-                  <p className="text-indigo-200 text-sm">Your spiritual progression</p>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">📈 Wellness Levels</h3>
+                  <p className="text-indigo-600 font-medium">Your spiritual progression</p>
                 </div>
-                <div className="text-4xl">🌟</div>
+                <div className="text-5xl group-hover:scale-110 transition-transform duration-300 float-animation" style={{ animationDelay: '1s' }}>🌟</div>
               </div>
-              <div className="text-white">
-                <p className="text-3xl font-bold text-indigo-300 mb-2">
+              <div>
+                <p className="text-5xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent mb-3">
                   Level {level?.current_level || 1}
                 </p>
-                <p className="text-indigo-200 text-sm">Current Spiritual Level</p>
+                <p className="text-gray-700 font-semibold mb-4">Current Spiritual Level</p>
                 {level?.progress_to_next && (
-                  <div className="mt-3">
-                    <div className="w-full bg-indigo-900/30 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl p-4 border border-indigo-200">
+                    <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
                       <div 
-                        className="bg-indigo-400 h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-1000 ease-out"
                         style={{ width: `${(level.progress_to_next / level.points_needed) * 100}%` }}
                       ></div>
                     </div>
-                    <p className="text-indigo-300 text-xs mt-1">
+                    <p className="text-indigo-600 font-semibold text-sm">
                       {level.progress_to_next}/{level.points_needed} to next level
                     </p>
                   </div>
@@ -249,137 +253,150 @@ const OptimizedGamificationPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Secondary Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Secondary Stats Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
 
             {/* Daily Streaks Section */}
-            <div className="bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-md rounded-2xl p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-purple-200 hover:border-purple-400 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-3xl group">
+              <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-1">🔥 Daily Streaks</h3>
-                  <p className="text-purple-200 text-sm">Consistency in practice</p>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">🔥 Daily Streaks</h3>
+                  <p className="text-purple-600 font-medium">Consistency in practice</p>
                 </div>
-                <div className="text-4xl">🏅</div>
+                <div className="text-5xl group-hover:scale-110 transition-transform duration-300 float-animation" style={{ animationDelay: '2s' }}>🏅</div>
               </div>
-              <div className="text-white">
+              <div>
                 {streaks && streaks.length > 0 ? (
                   <div>
-                    <p className="text-3xl font-bold text-purple-300 mb-2">
+                    <p className="text-5xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-3">
                       {streaks[0]?.current_streak || 0}
                     </p>
-                    <p className="text-purple-200 text-sm">Days Active Streak</p>
-                    <p className="text-purple-300 text-xs mt-1">
-                      Best: {streaks[0]?.max_streak || 0} days
-                    </p>
+                    <p className="text-gray-700 font-semibold mb-2">Days Active Streak</p>
+                    <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-3 border border-purple-200">
+                      <p className="text-purple-600 font-semibold text-sm">
+                        🎯 Best: {streaks[0]?.max_streak || 0} days
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-3xl font-bold text-purple-300 mb-2">0</p>
-                    <p className="text-purple-200 text-sm">Start your first streak!</p>
+                    <p className="text-5xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-3">0</p>
+                    <p className="text-gray-700 font-semibold mb-2">Start your first streak!</p>
+                    <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-3 border border-purple-200">
+                      <p className="text-purple-600 font-semibold text-sm">Begin your wellness journey today</p>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Badges & Achievements Section */}
-            <div className="bg-gradient-to-br from-emerald-500/20 to-green-600/20 backdrop-blur-md rounded-2xl p-6 border border-emerald-400/30 hover:border-emerald-400/60 transition-all duration-300">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-emerald-200 hover:border-emerald-400 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-3xl group">
+              <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-1">🏆 Badges</h3>
-                  <p className="text-emerald-200 text-sm">Earned achievements</p>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">🏆 Badges</h3>
+                  <p className="text-emerald-600 font-medium">Earned achievements</p>
                 </div>
-                <div className="text-4xl">🎖️</div>
+                <div className="text-5xl group-hover:scale-110 transition-transform duration-300 float-animation" style={{ animationDelay: '3s' }}>🎖️</div>
               </div>
-              <div className="text-white">
-                <p className="text-3xl font-bold text-emerald-300 mb-2">
+              <div>
+                <p className="text-5xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent mb-3">
                   {badges?.length || 0}
                 </p>
-                <p className="text-emerald-200 text-sm">Badges Earned</p>
+                <p className="text-gray-700 font-semibold mb-4">Badges Earned</p>
                 {badges && badges.length > 0 && (
-                  <div className="flex space-x-1 mt-2">
-                    {badges.slice(0, 3).map((badge: any, index: number) => (
-                      <div key={index} className="text-lg">{badge.icon || '🏅'}</div>
-                    ))}
-                    {badges.length > 3 && (
-                      <span className="text-emerald-300 text-xs">+{badges.length - 3} more</span>
-                    )}
+                  <div className="bg-gradient-to-r from-emerald-100 to-teal-100 rounded-2xl p-4 border border-emerald-200">
+                    <div className="flex space-x-2 mb-2">
+                      {badges.slice(0, 4).map((badge: any, index: number) => (
+                        <div key={index} className="text-2xl animate-bounce" style={{ animationDelay: `${index * 0.2}s` }}>
+                          {badge.icon || '🏅'}
+                        </div>
+                      ))}
+                      {badges.length > 4 && (
+                        <span className="text-emerald-600 text-sm font-semibold">+{badges.length - 4} more</span>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Challenges Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="lg:col-span-2">
-              <div className="bg-gradient-to-br from-teal-500/20 to-cyan-600/20 backdrop-blur-md rounded-2xl p-6 border border-teal-400/30 hover:border-teal-400/60 transition-all duration-300">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1">🎯 Daily Challenges</h3>
-                    <p className="text-teal-200 text-sm">Yoga, meditation & wellness activities</p>
-                  </div>
-                  <div className="text-4xl">🧘‍♀️</div>
+          {/* Daily Challenges Section */}
+          <div className="mb-12">
+            <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-teal-200 hover:border-teal-400 transition-all duration-500">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-3xl font-bold text-gray-800 mb-2">🎯 Daily Challenges</h3>
+                  <p className="text-teal-600 font-medium text-lg">Yoga, meditation & wellness activities</p>
                 </div>
-                <div className="space-y-3">
-                  {challenges?.daily && challenges.daily.length > 0 ? (
-                    challenges.daily.slice(0, 3).map((challenge: any, index: number) => (
-                      <div key={index} className="bg-teal-900/20 rounded-lg p-3 border border-teal-500/30">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-white font-medium text-sm">{challenge.name || challenge.title}</p>
-                            <p className="text-teal-200 text-xs">{challenge.description}</p>
+                <div className="text-6xl float-animation" style={{ animationDelay: '1.5s' }}>🧘‍♀️</div>
+              </div>
+              <div className="space-y-4">
+                {challenges?.daily && challenges.daily.length > 0 ? (
+                  challenges.daily.slice(0, 3).map((challenge: any, index: number) => (
+                    <div key={index} className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-6 border-2 border-teal-100 hover:border-teal-300 transition-all duration-300 transform hover:scale-105">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h4 className="text-gray-800 font-bold text-lg mb-2">{challenge.name || challenge.title}</h4>
+                          <p className="text-teal-600 font-medium">{challenge.description}</p>
+                        </div>
+                        <div className="text-right ml-6">
+                          <div className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold text-sm mb-2">
+                            +{challenge.points} points
                           </div>
-                          <div className="text-right">
-                            <span className="text-teal-300 text-xs">+{challenge.points} points</span>
-                            {challenge.completed && (
-                              <div className="text-green-400 text-lg">✅</div>
-                            )}
-                          </div>
+                          {challenge.completed && (
+                            <div className="text-4xl animate-bounce">✅</div>
+                          )}
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="bg-teal-900/20 rounded-lg p-4 border border-teal-500/30 text-center">
-                      <p className="text-teal-200 text-sm">No daily challenges available</p>
                     </div>
-                  )}
-                </div>
+                  ))
+                ) : (
+                  <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-8 border-2 border-teal-100 text-center">
+                    <div className="text-4xl mb-4">🎯</div>
+                    <p className="text-teal-600 font-semibold text-lg">No daily challenges available</p>
+                    <p className="text-gray-600 mt-2">Check back later for new wellness activities!</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
           {/* Wellness Journey Insights */}
-          <div className="mb-8">
-            <h3 className="text-lg font-bold text-white mb-4 text-center">🇮🇳 Your Spiritual Progress</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 backdrop-blur-md rounded-xl p-6 border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300">
+          <div className="mb-12">
+            <h3 className="text-3xl font-bold text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-8">
+              🇮🇳 Your Spiritual Progress
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-pink-200 hover:border-pink-400 transition-all duration-500 transform hover:-translate-y-2 group">
                 <div className="text-center">
-                  <div className="text-4xl mb-3">🔥</div>
-                  <h4 className="text-white font-bold text-lg mb-2">Daily Consistency</h4>
-                  <p className="text-pink-200 text-sm mb-4">Build healthy habits through daily mindfulness practices rooted in ancient wisdom</p>
-                  <div className="bg-pink-500/10 rounded-lg p-2">
-                    <span className="text-pink-300 text-xs font-medium">नित्यं चैतन्यम् - Daily Awareness</span>
+                  <div className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300 float-animation">🔥</div>
+                  <h4 className="text-gray-800 font-bold text-xl mb-4">Daily Consistency</h4>
+                  <p className="text-gray-600 font-medium mb-6 leading-relaxed">Build healthy habits through daily mindfulness practices rooted in ancient wisdom</p>
+                  <div className="bg-gradient-to-r from-pink-100 to-rose-100 rounded-2xl p-4 border border-pink-200">
+                    <span className="text-pink-600 font-bold text-sm">नित्यं चैतन्यम् - Daily Awareness</span>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 backdrop-blur-md rounded-xl p-6 border border-teal-400/30 hover:border-teal-400/60 transition-all duration-300">
+              <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-teal-200 hover:border-teal-400 transition-all duration-500 transform hover:-translate-y-2 group">
                 <div className="text-center">
-                  <div className="text-4xl mb-3">🏆</div>
-                  <h4 className="text-white font-bold text-lg mb-2">Achievement Unlocks</h4>
-                  <p className="text-teal-200 text-sm mb-4">Earn karma badges and unlock spiritual milestones on your path to wellness</p>
-                  <div className="bg-teal-500/10 rounded-lg p-2">
-                    <span className="text-teal-300 text-xs font-medium">कर्म योग - Path of Action</span>
+                  <div className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300 float-animation" style={{ animationDelay: '1s' }}>🏆</div>
+                  <h4 className="text-gray-800 font-bold text-xl mb-4">Achievement Unlocks</h4>
+                  <p className="text-gray-600 font-medium mb-6 leading-relaxed">Earn karma badges and unlock spiritual milestones on your path to wellness</p>
+                  <div className="bg-gradient-to-r from-teal-100 to-cyan-100 rounded-2xl p-4 border border-teal-200">
+                    <span className="text-teal-600 font-bold text-sm">कर्म योग - Path of Action</span>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-md rounded-xl p-6 border border-orange-400/30 hover:border-orange-400/60 transition-all duration-300">
+              <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-orange-200 hover:border-orange-400 transition-all duration-500 transform hover:-translate-y-2 group">
                 <div className="text-center">
-                  <div className="text-4xl mb-3">🌸</div>
-                  <h4 className="text-white font-bold text-lg mb-2">Seva & Growth</h4>
-                  <p className="text-orange-200 text-sm mb-4">Inspire others and contribute to a supportive community through service</p>
-                  <div className="bg-orange-500/10 rounded-lg p-2">
-                    <span className="text-orange-300 text-xs font-medium">सेवा धर्म - Service as Duty</span>
+                  <div className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300 float-animation" style={{ animationDelay: '2s' }}>🌸</div>
+                  <h4 className="text-gray-800 font-bold text-xl mb-4">Seva & Growth</h4>
+                  <p className="text-gray-600 font-medium mb-6 leading-relaxed">Inspire others and contribute to a supportive community through service</p>
+                  <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-2xl p-4 border border-orange-200">
+                    <span className="text-orange-600 font-bold text-sm">सेवा धर्म - Service as Duty</span>
                   </div>
                 </div>
               </div>
@@ -388,30 +405,44 @@ const OptimizedGamificationPage: React.FC = () => {
 
           {/* Quick Actions */}
           <div className="text-center">
-            <h3 className="text-xl font-bold text-white mb-6">🚀 Start Your Practice</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link to="/meditation" className="bg-gradient-to-r from-pink-500/20 to-rose-500/20 backdrop-blur-md rounded-xl p-4 border border-pink-400/30 hover:border-pink-400/60 text-white font-medium transition-all duration-300 hover:scale-105 group block">
-                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🧘‍♀️</div>
-                <div className="text-pink-200">Meditation</div>
-                <div className="text-pink-300/70 text-xs mt-1">ध्यान साधना</div>
+            <h3 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-8">
+              🚀 Start Your Practice
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Link 
+                to="/meditation" 
+                className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-pink-200 hover:border-pink-400 text-gray-800 font-semibold transition-all duration-500 transform hover:-translate-y-3 hover:shadow-3xl group block"
+              >
+                <div className="text-5xl mb-4 group-hover:scale-125 transition-transform duration-300 float-animation">🧘‍♀️</div>
+                <div className="text-pink-600 font-bold text-lg mb-2">Meditation</div>
+                <div className="text-pink-400 text-sm font-medium">ध्यान साधना</div>
               </Link>
               
-              <Link to="/journal" className="bg-gradient-to-r from-teal-500/20 to-cyan-500/20 backdrop-blur-md rounded-xl p-4 border border-teal-400/30 hover:border-teal-400/60 text-white font-medium transition-all duration-300 hover:scale-105 group block">
-                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">📝</div>
-                <div className="text-teal-200">Journal Entry</div>
-                <div className="text-teal-300/70 text-xs mt-1">स्वाध्याय</div>
+              <Link 
+                to="/journal" 
+                className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-teal-200 hover:border-teal-400 text-gray-800 font-semibold transition-all duration-500 transform hover:-translate-y-3 hover:shadow-3xl group block"
+              >
+                <div className="text-5xl mb-4 group-hover:scale-125 transition-transform duration-300 float-animation" style={{ animationDelay: '0.5s' }}>📝</div>
+                <div className="text-teal-600 font-bold text-lg mb-2">Journal Entry</div>
+                <div className="text-teal-400 text-sm font-medium">स्वाध्याय</div>
               </Link>
               
-              <Link to="/mood" className="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-md rounded-xl p-4 border border-orange-400/30 hover:border-orange-400/60 text-white font-medium transition-all duration-300 hover:scale-105 group block">
-                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">📊</div>
-                <div className="text-orange-200">Mood Tracker</div>
-                <div className="text-orange-300/70 text-xs mt-1">अंतर्दर्शन</div>
+              <Link 
+                to="/mood" 
+                className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-orange-200 hover:border-orange-400 text-gray-800 font-semibold transition-all duration-500 transform hover:-translate-y-3 hover:shadow-3xl group block"
+              >
+                <div className="text-5xl mb-4 group-hover:scale-125 transition-transform duration-300 float-animation" style={{ animationDelay: '1s' }}>📊</div>
+                <div className="text-orange-600 font-bold text-lg mb-2">Mood Tracker</div>
+                <div className="text-orange-400 text-sm font-medium">अंतर्दर्शन</div>
               </Link>
               
-              <Link to="/checkin" className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-md rounded-xl p-4 border border-purple-400/30 hover:border-purple-400/60 text-white font-medium transition-all duration-300 hover:scale-105 group block">
-                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">✅</div>
-                <div className="text-purple-200">Daily Check-in</div>
-                <div className="text-purple-300/70 text-xs mt-1">दिनचर्या</div>
+              <Link 
+                to="/checkin" 
+                className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-purple-200 hover:border-purple-400 text-gray-800 font-semibold transition-all duration-500 transform hover:-translate-y-3 hover:shadow-3xl group block"
+              >
+                <div className="text-5xl mb-4 group-hover:scale-125 transition-transform duration-300 float-animation" style={{ animationDelay: '1.5s' }}>✅</div>
+                <div className="text-purple-600 font-bold text-lg mb-2">Daily Check-in</div>
+                <div className="text-purple-400 text-sm font-medium">दिनचर्या</div>
               </Link>
             </div>
           </div>

@@ -7,7 +7,7 @@ import BadgesWidget from '../components/Gamification/BadgesWidget';
 import ChallengesWidget from '../components/Gamification/ChallengesWidget';
 import TestPoints from '../components/Gamification/TestPoints';
 import GamificationDebug from '../components/Debug/GamificationDebug';
-import Navigation from '../components/Navigation/Navigation';
+// import Navigation from '../components/Navigation/Navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { useGamification } from '../contexts/GamificationContext';
 
@@ -87,11 +87,11 @@ const GamificationPage: React.FC = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-orange-400 to-red-500 rounded-full mix-blend-soft-light filter blur-3xl"></div>
       </div>
       
-      <Navigation 
+      {/* <Navigation 
         isAuthenticated={true}
         user={user || undefined}
         onLogout={handleLogout}
-      />
+      /> */}
       
       <main className="relative z-10 pt-16 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">

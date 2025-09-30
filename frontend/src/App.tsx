@@ -71,6 +71,18 @@ function App() {
         </Router>
       </GamificationProvider>
       </mentalHealthContext.Provider>
+      <footer className="text-center text-sm text-gray-500 mt-4">
+  <a
+    href="https://www.flaticon.com/free-icons/edit-tools"
+    title="edit tools icons"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="hover:underline"
+  >
+    Edit tools icons created by Yudhi Restu - Flaticon
+  </a>
+</footer>
+
     </AuthProvider>
   )
 }

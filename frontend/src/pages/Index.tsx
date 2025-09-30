@@ -49,7 +49,7 @@ export default function Index() {
       <section className="relative overflow-hidden rounded-3xl border bg-white/70 backdrop-blur p-6 md:p-10 shadow-bubbly">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-5">
-            <AvatarGemini name="Tarang" />
+            <AvatarGemini  />
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
               Your playful mental wellness space
             </h1>

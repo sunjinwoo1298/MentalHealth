@@ -112,6 +112,7 @@ export default function ChatWindow() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false); // Audio playback state
   const [ttsError, setTtsError] = useState<string | null>(null); // TTS error state
   const [isLipSyncSetup, setIsLipSyncSetup] = useState(false); // Lip sync setup state
+  const [isProcessingAudio, setIsProcessingAudio] = useState(false); // Audio processing state
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Gamification integration
@@ -160,13 +161,14 @@ export default function ChatWindow() {
   };
 
   // TTS handling functions
-  const handleTTSGeneration = async (text: string) => {
+  const handleTTSGeneration = async (text: string, messageId?: string) => {
     if (!isTTSEnabled || isPlayingAudio) {
       return;
     }
     
     try {
       setTtsError(null);
+      setIsProcessingAudio(true); // Show audio processing indicator
       console.log('🔊 Generating TTS for:', text.substring(0, 50) + '...');
       
       // Determine voice profile based on current emotion and context
@@ -179,8 +181,25 @@ export default function ChatWindow() {
         userId: socket.id,
         backendUrl: 'http://localhost:5010',
         onStart: async (audioElement?: HTMLAudioElement) => {
+          setIsProcessingAudio(false); // Hide audio processing indicator
           setIsPlayingAudio(true);
           console.log('🔊 TTS playback started');
+          
+          // Show AI message in UI when audio starts playing
+          if (messageId) {
+            const aiMessage: ChatMessage = {
+              id: messageId,
+              type: 'ai',
+              text: text,
+              timestamp: new Date().toISOString(),
+              context: context?.currentContext
+            };
+            setMessages((prev) => [...prev, aiMessage]);
+            setIsTyping(false);
+            
+            // Track message count for gamification
+            setMessageCount(prev => prev + 1);
+          }
           
           // Setup lip sync with the audio element
           if (audioElement && !isLipSyncSetup) {
@@ -219,6 +238,7 @@ export default function ChatWindow() {
           }, 1000);
         },
         onError: (error) => {
+          setIsProcessingAudio(false); // Hide audio processing indicator on error
           setIsPlayingAudio(false);
           setTtsError(error);
           
@@ -232,12 +252,14 @@ export default function ChatWindow() {
       });
       
       if (!result.success) {
+        setIsProcessingAudio(false); // Hide audio processing indicator on failure
         console.warn('🔊 TTS generation failed:', result.error);
         setTtsError(result.error || 'TTS generation failed');
       }
       
     } catch (error) {
       console.error('🔊 TTS handling error:', error);
+      setIsProcessingAudio(false); // Hide audio processing indicator on error
       setIsPlayingAudio(false);
       setTtsError(error instanceof Error ? error.message : String(error));
       
@@ -470,12 +492,16 @@ export default function ChatWindow() {
 
     socket.on('chat:message', (msg: ChatMessage) => {
       console.log('Received message:', msg);
-      setMessages((prev) => [...prev, msg]);
-      setIsTyping(false);
       
-      // Track message count for gamification
-      if (msg.type === 'user') {
-        setMessageCount(prev => prev + 1);
+      // For user messages or when TTS is disabled, show immediately
+      if (msg.type === 'user' || !isTTSEnabled) {
+        setMessages((prev) => [...prev, msg]);
+        setIsTyping(false);
+        
+        // Track message count for gamification
+        if (msg.type === 'user') {
+          setMessageCount(prev => prev + 1);
+        }
       }
       
       // Handle avatar emotion updates with enhanced backend integration
@@ -505,9 +531,12 @@ export default function ChatWindow() {
         updateAvatarEmotion(msg.text, msg.type as 'user' | 'ai', msg.emotional_context);
       }
       
-      // Generate TTS for AI messages
+      // Generate TTS for AI messages - message will be shown when audio starts
       if (msg.type === 'ai' && isTTSEnabled && msg.text) {
-        handleTTSGeneration(msg.text);
+        handleTTSGeneration(msg.text, msg.id);
+      } else if (msg.type === 'ai' && !isTTSEnabled) {
+        // If TTS is disabled, the message was already added above
+        setIsTyping(false);
       }
     });
 
@@ -866,6 +895,29 @@ export default function ChatWindow() {
                         <div className="w-2 h-2 bg-white rounded-full animate-bounce animation-delay-400"></div>
                       </div>
                       <span className="text-sm drop-shadow-sm">I'm thinking about your message...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {isProcessingAudio && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%]">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">🔊</span>
+                    </div>
+                    <span className="text-white/90 text-sm drop-shadow-lg">MindCare AI</span>
+                  </div>
+                  <div className="px-6 py-4 rounded-2xl bg-gradient-to-r from-orange-500/80 to-red-600/80 text-white shadow-xl backdrop-blur-md border border-orange-300/30">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse animation-delay-300"></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse animation-delay-600"></div>
+                      </div>
+                      <span className="text-sm drop-shadow-sm">Processing audio response...</span>
                     </div>
                   </div>
                 </div>

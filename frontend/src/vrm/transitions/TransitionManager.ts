@@ -163,7 +163,21 @@ export class TransitionManager {
     // Validate that fromEmotion matches our tracked current pose
     if (fromEmotion !== this.currentPose) {
       console.warn(`State mismatch: expected ${this.currentPose}, got ${fromEmotion}. Correcting...`)
+      
+      // Validate that currentPose is a valid emotion, fallback to neutral if not
+      const validEmotions: EmotionType[] = ['neutral', 'happy', 'sad', 'angry', 'surprised']
+      if (!validEmotions.includes(this.currentPose)) {
+        console.warn(`Current pose '${this.currentPose}' is invalid, falling back to neutral`)
+        this.currentPose = 'neutral'
+      }
+      
       fromEmotion = this.currentPose
+    }
+
+    // Skip transition if from and to emotions are the same
+    if (fromEmotion === toEmotion) {
+      console.log(`Skipping transition: already in ${toEmotion} emotion`)
+      return true
     }
 
     // Cancel any ongoing transition first

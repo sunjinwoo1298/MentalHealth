@@ -7,7 +7,7 @@ import BadgesWidget from '../components/Gamification/BadgesWidget';
 import ChallengesWidget from '../components/Gamification/ChallengesWidget';
 import TestPoints from '../components/Gamification/TestPoints';
 import GamificationDebug from '../components/Debug/GamificationDebug';
-// import Navigation from '../components/Navigation/Navigation';
+import Navigation from '../components/Navigation/Navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { useGamification } from '../contexts/GamificationContext';
 
@@ -87,11 +87,11 @@ const GamificationPage: React.FC = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-orange-400 to-red-500 rounded-full mix-blend-soft-light filter blur-3xl"></div>
       </div>
       
-      {/* <Navigation 
+      <Navigation 
         isAuthenticated={true}
         user={user || undefined}
         onLogout={handleLogout}
-      /> */}
+      />
       
       <main className="relative z-10 pt-16 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
@@ -141,6 +141,17 @@ const GamificationPage: React.FC = () => {
 
           {/* Debug Panel - Remove this in production */}
           <GamificationDebug />
+          
+          {/* Development Notice */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="bg-yellow-900/30 backdrop-blur-md rounded-xl p-4 mb-6 border border-yellow-400/30">
+              <h3 className="text-yellow-300 font-semibold mb-2">🔧 Development Mode Notice</h3>
+              <p className="text-yellow-200 text-sm">
+                You may see duplicate API calls in the browser console. This is normal in development due to React's StrictMode 
+                and multiple gamification widgets loading their data. In production, this will be optimized.
+              </p>
+            </div>
+          )}
           
           {/* Testing Instructions */}
           <div className="bg-blue-900/30 backdrop-blur-md rounded-xl p-4 mb-6 border border-blue-400/30">

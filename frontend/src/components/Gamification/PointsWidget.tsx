@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useGamificationDashboard } from '../../contexts/GamificationDashboardContext';
+import React, { useState, useEffect, useRef } from 'react';
+import { gamificationAPI } from '../../services/api';
+import { gamificationCache } from '../../services/gamificationCache';
 
 interface UserPoints {
   total_points: number;
@@ -22,20 +23,46 @@ interface PointsWidgetProps {
 }
 
 const PointsWidget: React.FC<PointsWidgetProps> = ({ className = '' }) => {
-  const { data, loading, error, refetch } = useGamificationDashboard();
+  const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
   
   const isDarkTheme = className?.includes('bg-transparent');
 
-  // Extract points data from dashboard context
-  const userPoints = data?.points || null;
-
   useEffect(() => {
-    if (data?.points) {
-      // If there's recent activity data in the dashboard response, use it
-      setRecentActivity(data.points.recent_activity || []);
+    // Prevent duplicate calls in StrictMode
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    
+    fetchPointsData();
+  }, []);
+
+  const fetchPointsData = async () => {
+    try {
+      setLoading(true);
+      
+      const data = await gamificationCache.get('points', async () => {
+        const response = await gamificationAPI.getPoints();
+        if (response.success) {
+          return {
+            points: response.data.points,
+            recent_activity: response.data.recent_activity || []
+          };
+        }
+        throw new Error('Failed to fetch points data');
+      });
+      
+      setUserPoints(data.points);
+      setRecentActivity(data.recent_activity);
+    } catch (err) {
+      console.error('Error fetching points data:', err);
+      setError('Failed to load points data');
+    } finally {
+      setLoading(false);
     }
-  }, [data]);
+  };
 
   const calculateLevelProgress = () => {
     if (!userPoints) return 0;
@@ -81,7 +108,7 @@ const PointsWidget: React.FC<PointsWidgetProps> = ({ className = '' }) => {
         <div className={`text-center ${isDarkTheme ? 'text-red-300' : 'text-red-600'}`}>
           <p>{error}</p>
           <button 
-            onClick={refetch}
+            onClick={fetchPointsData}
             className={`mt-2 px-4 py-2 rounded transition-colors ${isDarkTheme ? 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
           >
             Retry

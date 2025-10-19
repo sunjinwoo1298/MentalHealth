@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useGamificationDashboard } from '../../contexts/GamificationDashboardContext';
+import { gamificationAPI } from '../../services/api';
 
 interface WellnessLevel {
   id: string;

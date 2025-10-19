@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useGamificationDashboard } from '../../contexts/GamificationDashboardContext';
 import { gamificationAPI } from '../../services/api';
 
 interface ChallengeTemplate {
@@ -43,15 +42,41 @@ interface ChallengesWidgetProps {
 }
 
 const ChallengesWidget: React.FC<ChallengesWidgetProps> = ({ className = '' }) => {
-  const { data, loading, error } = useGamificationDashboard();
+  const [dailyChallenges, setDailyChallenges] = useState<UserChallenge[]>([]);
+  const [weeklyChallenges, setWeeklyChallenges] = useState<UserChallenge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [completingChallenge, setCompletingChallenge] = useState<string | null>(null);
   const [showCompleteModal, setShowCompleteModal] = useState<UserChallenge | null>(null);
   
   const isDarkTheme = className?.includes('bg-transparent');
 
-  // Extract challenges data from dashboard context
-  const dailyChallenges = data?.challenges?.daily || [];
-  const weeklyChallenges = data?.challenges?.weekly || [];
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
+
+  const fetchChallenges = async () => {
+    try {
+      setLoading(true);
+      const [dailyResponse, weeklyResponse] = await Promise.all([
+        gamificationAPI.getDailyChallenges(),
+        gamificationAPI.getWeeklyChallenges()
+      ]);
+      
+      if (dailyResponse.success) {
+        setDailyChallenges(dailyResponse.data);
+      }
+      
+      if (weeklyResponse.success) {
+        setWeeklyChallenges(weeklyResponse.data);
+      }
+    } catch (err) {
+      console.error('Error fetching challenges:', err);
+      setError('Failed to load challenges');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getCategoryIcon = (category: string) => {
     const iconMap: Record<string, string> = {

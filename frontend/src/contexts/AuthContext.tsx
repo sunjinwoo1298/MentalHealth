@@ -119,9 +119,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const checkAuthState = async () => {
     try {
       const token = localStorage.getItem('token')
-      if (!token) {
+      const storedUser = localStorage.getItem('user')
+      
+      if (!token || !storedUser) {
         dispatch({ type: 'SET_LOADING', payload: false })
         return
+      }
+
+      // For development: use stored user data if available
+      if (process.env.NODE_ENV === 'development' && storedUser) {
+        try {
+          const user = JSON.parse(storedUser)
+          dispatch({ type: 'AUTH_SUCCESS', payload: user })
+          return
+        } catch (e) {
+          console.error('Failed to parse stored user:', e)
+        }
       }
 
       // Verify token with backend

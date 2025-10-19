@@ -152,6 +152,22 @@ const LevelsWidget: React.FC<LevelsWidgetProps> = ({ className = '' }) => {
     );
   }
 
+  if (!levelData.level_info) {
+    return (
+      <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
+        <div className="text-center text-gray-500">
+          <p>Level information not found</p>
+          <button 
+            onClick={fetchLevelData}
+            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const colors = getLevelColor(levelData.level_info.level_color);
 
   return (

@@ -10,10 +10,37 @@ export interface JWTPayload {
 }
 
 export class AuthUtils {
-  private static jwtSecret = process.env.JWT_SECRET!;
-  private static jwtRefreshSecret = process.env.JWT_REFRESH_SECRET!;
   private static jwtExpiresIn = process.env.JWT_EXPIRES_IN || '1h';
   private static jwtRefreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+
+  private static get jwtSecret(): string {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'development') {
+        // Generate a temporary secret in development to avoid crashes.
+        const temp = crypto.randomBytes(32).toString('hex');
+        // eslint-disable-next-line no-console
+        console.warn('⚠️  JWT_SECRET is not set. Using a temporary development secret. Set JWT_SECRET in your environment for persistent tokens.');
+        return temp;
+      }
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
+    return secret;
+  }
+
+  private static get jwtRefreshSecret(): string {
+    const secret = process.env.JWT_REFRESH_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'development') {
+        const temp = crypto.randomBytes(32).toString('hex');
+        // eslint-disable-next-line no-console
+        console.warn('⚠️  JWT_REFRESH_SECRET is not set. Using a temporary development refresh secret. Set JWT_REFRESH_SECRET in your environment for persistent refresh tokens.');
+        return temp;
+      }
+      throw new Error('JWT_REFRESH_SECRET environment variable is not set');
+    }
+    return secret;
+  }
 
   // Hash password
   static async hashPassword(password: string): Promise<string> {

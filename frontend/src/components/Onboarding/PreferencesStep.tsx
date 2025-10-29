@@ -20,7 +20,8 @@ import {
   Chat,
   Psychology,
   Notifications,
-  Person
+  Person,
+  SupportAgent
 } from '@mui/icons-material'
 
 interface PreferencesStepProps {
@@ -84,9 +85,15 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
     progressUpdates: false
   })
   const [selectedAvatar, setSelectedAvatar] = useState(data.avatarSelection || 'friendly')
+  const [preferredTherapistGender, setPreferredTherapistGender] = useState<string>(data.preferredTherapistGender || 'any')
+  const [preferredTherapistLanguage, setPreferredTherapistLanguage] = useState<string>(data.preferredTherapistLanguage || 'en')
+  const [sessionPreference, setSessionPreference] = useState<string>(data.sessionPreference || 'online')
+  const [affordabilityMin, setAffordabilityMin] = useState<number>(data.affordabilityRange?.min || 0)
+  const [affordabilityMax, setAffordabilityMax] = useState<number>(data.affordabilityRange?.max || 0)
+  const [availabilityNotes, setAvailabilityNotes] = useState<string>(data.availabilityNotes || '')
 
   const handleCommunicationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value
+    const { value } = event.target
     setCommunicationStyle(value)
     onUpdate({ communicationStyle: value })
   }
@@ -109,6 +116,12 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
     setSelectedAvatar(avatarId)
     onUpdate({ avatarSelection: avatarId })
   }
+
+  const handleTherapistGenderChange = (val: string) => { setPreferredTherapistGender(val); onUpdate({ preferredTherapistGender: val }) }
+  const handleTherapistLanguageChange = (e: React.ChangeEvent<HTMLInputElement>) => { setPreferredTherapistLanguage(e.target.value); onUpdate({ preferredTherapistLanguage: e.target.value }) }
+  const handleSessionPreferenceChange = (val: string) => { setSessionPreference(val); onUpdate({ sessionPreference: val }) }
+  const handleAffordabilityChange = () => { onUpdate({ affordabilityRange: { min: affordabilityMin, max: affordabilityMax } }) }
+  const handleAvailabilityNotesChange = (e: React.ChangeEvent<HTMLInputElement>) => { setAvailabilityNotes(e.target.value); onUpdate({ availabilityNotes: e.target.value }) }
 
   const canProceed = communicationStyle !== ''
 
@@ -176,6 +189,53 @@ export default function PreferencesStep({ data, onUpdate, onNext, onPrev }: Pref
               </div>
             </RadioGroup>
           </FormControl>
+        </Paper>
+
+        {/* Therapist Preferences */}
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50">
+          <Typography variant="h6" className="font-semibold text-white mb-4 flex items-center">
+            <SupportAgent className="mr-2 text-teal-400" />
+            Therapist preferences
+          </Typography>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Typography variant="body2" className="text-gray-300 mb-1">Preferred therapist gender</Typography>
+              <select value={preferredTherapistGender} onChange={(e) => handleTherapistGenderChange(e.target.value)} className="w-full p-2 rounded-md bg-slate-600 text-white">
+                <option value="any">Any</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="nonbinary">Non-binary</option>
+              </select>
+            </div>
+
+            <div>
+              <Typography variant="body2" className="text-gray-300 mb-1">Preferred language</Typography>
+              <input value={preferredTherapistLanguage} onChange={handleTherapistLanguageChange} className="w-full p-2 rounded-md bg-slate-600 text-white" />
+            </div>
+
+            <div>
+              <Typography variant="body2" className="text-gray-300 mb-1">Session preference</Typography>
+              <div className="flex gap-2">
+                <button className={`px-3 py-2 rounded ${sessionPreference === 'online' ? 'bg-pink-500 text-white' : 'bg-slate-600 text-white/80'}`} onClick={() => handleSessionPreferenceChange('online')}>Online</button>
+                <button className={`px-3 py-2 rounded ${sessionPreference === 'in_person' ? 'bg-pink-500 text-white' : 'bg-slate-600 text-white/80'}`} onClick={() => handleSessionPreferenceChange('in_person')}>In-person</button>
+                <button className={`px-3 py-2 rounded ${sessionPreference === 'hybrid' ? 'bg-pink-500 text-white' : 'bg-slate-600 text-white/80'}`} onClick={() => handleSessionPreferenceChange('hybrid')}>Hybrid</button>
+              </div>
+            </div>
+
+            <div>
+              <Typography variant="body2" className="text-gray-300 mb-1">Affordability range (INR)</Typography>
+              <div className="flex gap-2">
+                <input type="number" value={affordabilityMin} onChange={(e) => { setAffordabilityMin(parseInt(e.target.value || '0')); }} onBlur={handleAffordabilityChange} className="w-1/2 p-2 rounded-md bg-slate-600 text-white" placeholder="min" />
+                <input type="number" value={affordabilityMax} onChange={(e) => { setAffordabilityMax(parseInt(e.target.value || '0')); }} onBlur={handleAffordabilityChange} className="w-1/2 p-2 rounded-md bg-slate-600 text-white" placeholder="max" />
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <Typography variant="body2" className="text-gray-300 mb-1">Availability notes</Typography>
+              <input value={availabilityNotes} onChange={handleAvailabilityNotesChange} className="w-full p-2 rounded-md bg-slate-600 text-white" placeholder="Best times/days for sessions" />
+            </div>
+          </div>
         </Paper>
 
         {/* Avatar Selection */}

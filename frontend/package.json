@@ -29,6 +29,7 @@
     "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.5",
     "@eslint/js": "^9.33.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",

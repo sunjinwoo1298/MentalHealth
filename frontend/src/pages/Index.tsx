@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { ArrowRight, CheckCircle2, Gift, MessageCircle, Target, LineChart, BadgeCheck } from "lucide-react";
+import TherapistFinderCard from "@/components/dashboard/TherapistFinderCard";
 import { useConfetti } from "../hooks/useConfetti";
 import { AvatarGemini } from "../components/AvatarGemini";
 import { NavLink } from "react-router-dom";
@@ -97,6 +98,7 @@ export default function Index() {
 
       {/* Quick access */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        <TherapistFinderCard />
         <Card className="rounded-2xl bg-white/80 border-crimson/50 hover:shadow-bubbly transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-700">

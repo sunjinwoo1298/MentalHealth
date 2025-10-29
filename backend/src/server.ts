@@ -1,7 +1,35 @@
 import dotenv from 'dotenv';
+import path from 'path';
 
-// Load environment variables FIRST
-dotenv.config();
+// Load environment variables FIRST. Try multiple likely .env locations so dev scripts
+// started from different working directories still pick up the repo root .env.
+// Avoid using __dirname to remain compatible with ts-node and different run contexts.
+const envCandidates = [
+  path.resolve(process.cwd(), '.env'),               // current working directory
+  path.resolve(process.cwd(), '..', '.env'),         // parent (repo root if started from backend)
+  path.resolve(process.cwd(), 'backend', '.env'),    // backend/.env when started from repo root
+  path.resolve(process.cwd(), '..', 'backend', '.env') // backend/.env when started from a sibling folder
+];
+
+let loaded = false;
+for (const p of envCandidates) {
+  try {
+    const res = dotenv.config({ path: p });
+    if (res && res.parsed) {
+      // eslint-disable-next-line no-console
+      console.info(`Loaded environment from ${p}`);
+      loaded = true;
+      break;
+    }
+  } catch (err) {
+    // ignore and try next
+  }
+}
+
+if (!loaded) {
+  // Fallback to default behavior (search process.cwd())
+  dotenv.config();
+}
 
 import express from 'express';
 import cors from 'cors';
@@ -18,7 +46,7 @@ import chatRoutes from './routes/chat';
 import wellnessRoutes from './routes/wellness';
 import interventionRoutes from './routes/interventions';
 import gamificationRoutes from './routes/gamification';
-const audioProxyRoutes = require('./routes/audioProxy');
+import audioProxyRoutes from './routes/audioProxy';
 
 // Import middleware
 import { authMiddleware } from './middleware/auth';
@@ -196,12 +224,25 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-const PORT = process.env.BACKEND_PORT || 3001;
+// Export app, httpServer and startServer for testing
+export { app, httpServer };
 
-httpServer.listen(PORT, () => {
-  logger.info(`Mental Health AI Platform API Server running on port ${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  logger.info(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
-});
+// Function to start the server
+export const startServer = (port: number = parseInt(process.env.BACKEND_PORT || '3001')) => {
+  return new Promise((resolve) => {
+    const server = httpServer.listen(port, () => {
+      logger.info(`Mental Health AI Platform API Server running on port ${port}`);
+      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      logger.info(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+      resolve(server);
+    });
+  });
+};
+
+// Only start the server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = parseInt(process.env.BACKEND_PORT || '3001');
+  startServer(PORT);
+}
 
 export default app;

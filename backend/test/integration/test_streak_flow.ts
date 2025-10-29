@@ -1,41 +1,52 @@
+import { describe, it, beforeAll, afterAll } from '@jest/globals';
 import { GameService } from '../../src/services/gamification';
-import { db } from '../../src/services/database';
+import { DatabaseService } from '../../src/services/database';
+import { createTestUser } from '../helpers/auth';
 
-async function run() {
-  const userId = '373c0839-3657-48a6-862a-d105f18d767c';
-  const activityType = 'breathing_exercise';
+describe('Streak Flow Integration Tests', () => {
+  let db: DatabaseService;
+  let testUserId: string;
 
-  // Clear existing data
-  await db.query('DELETE FROM user_streak_achievements WHERE user_id = $1', [userId]);
-  await db.query('DELETE FROM user_streaks WHERE user_id = $1 AND activity_type = $2', [userId, activityType]);
-  await db.query('DELETE FROM daily_activities WHERE user_id = $1 AND activity_type = $2', [userId, activityType]);
+  beforeAll(async () => {
+    db = DatabaseService.getInstance();
+    const testUser = await createTestUser();
+    testUserId = testUser.id;
+  });
 
-  const dates = ['2025-09-18', '2025-09-19', '2025-09-20'];
+  it('should track activity streaks correctly', async () => {
+    const activityType = 'breathing_exercise';
+    const dates = ['2025-09-18', '2025-09-19', '2025-09-20'];
 
-  for (const d of dates) {
-    console.log('Recording activity for', d);
-    // Call the recordDailyActivity directly (it expects activityDate via new Date().toISOString but we'll pass metadata)
-    // Temporarily monkeypatch Date.toISOString? Instead, insert daily_activities row and call updateStreak directly
-    await db.query(`
-      INSERT INTO daily_activities (user_id, activity_type, activity_date, activity_count, cultural_context)
-      VALUES ($1, $2, $3::date, 1, $4)
-      ON CONFLICT (user_id, activity_type, activity_date)
-      DO UPDATE SET activity_count = daily_activities.activity_count + 1, cultural_context = $4
-    `, [userId, activityType, d, JSON.stringify({ test: true, date: d })]);
+    // Clear existing data
+    await db.query('DELETE FROM user_streak_achievements WHERE user_id = $1', [testUserId]);
+    await db.query('DELETE FROM user_streaks WHERE user_id = $1 AND activity_type = $2', [testUserId, activityType]);
+    await db.query('DELETE FROM daily_activities WHERE user_id = $1 AND activity_type = $2', [testUserId, activityType]);
 
-    // Now call updateStreak directly from GameService (it's static)
-    const streak = await (GameService as any).updateStreak(userId, activityType, d);
-    console.log('Streak after recording', d, ':', streak.current_streak, 'last_activity_date=', streak.last_activity_date);
-  }
+    // Record activities for each date
+    for (const d of dates) {
+      await db.query(`
+        INSERT INTO daily_activities (user_id, activity_type, activity_date, activity_count, cultural_context)
+        VALUES ($1, $2, $3::date, 1, $4)
+        ON CONFLICT (user_id, activity_type, activity_date)
+        DO UPDATE SET activity_count = daily_activities.activity_count + 1, cultural_context = $4
+      `, [testUserId, activityType, d, JSON.stringify({ test: true, date: d })]);
 
-  // Verify final streak
-  const final = await db.query('SELECT * FROM user_streaks WHERE user_id = $1 AND activity_type = $2', [userId, activityType]);
-  console.log('Final streak row:', final.rows[0]);
+      // Update streak
+      const streak = await GameService.updateStreak(testUserId, activityType, d);
+      expect(streak).toBeDefined();
+      expect(streak.user_id).toBe(testUserId);
+      expect(streak.activity_type).toBe(activityType);
+      expect(streak.current_streak).toBeGreaterThan(0);
+    }
 
-  await db.close();
-}
+    // Verify final streak
+    const final = await db.query('SELECT * FROM user_streaks WHERE user_id = $1 AND activity_type = $2', [testUserId, activityType]);
+    expect(final.rows).toHaveLength(1);
+    expect(final.rows[0].current_streak).toBe(3); // 3 consecutive days
+    expect(new Date(final.rows[0].last_activity_date).toISOString().split('T')[0]).toBe(dates[2]);
+  });
 
-run().catch(err => {
-  console.error('Test failed:', err);
-  process.exit(1);
+  afterAll(async () => {
+    // Cleanup will be handled by the global test cleanup
+  });
 });

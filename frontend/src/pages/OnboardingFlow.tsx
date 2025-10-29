@@ -30,6 +30,22 @@ export interface OnboardingData {
   
   // Introduction step
   completedTour: boolean
+
+  // Detailed mental health inputs
+  currentSymptoms?: string[]
+  symptomDuration?: string
+  symptomSeverity?: number
+  suicidalIdeation?: boolean
+  selfHarmRisk?: boolean
+  substanceUse?: boolean
+  therapyGoals?: string
+
+  // Therapist preferences
+  preferredTherapistGender?: string
+  preferredTherapistLanguage?: string
+  sessionPreference?: string // online, in_person, hybrid
+  affordabilityRange?: { min: number; max: number }
+  availabilityNotes?: string
 }
 
 const TOTAL_STEPS = 4
@@ -53,6 +69,22 @@ export default function OnboardingFlow() {
     },
     avatarSelection: 'default',
     completedTour: false
+    ,
+    // Detailed mental health inputs defaults
+    currentSymptoms: [],
+    symptomDuration: '',
+    symptomSeverity: 5,
+    suicidalIdeation: false,
+    selfHarmRisk: false,
+    substanceUse: false,
+    therapyGoals: '',
+
+    // Therapist preferences defaults
+    preferredTherapistGender: 'any',
+    preferredTherapistLanguage: 'en',
+    sessionPreference: 'online',
+    affordabilityRange: { min: 0, max: 0 },
+    availabilityNotes: ''
   })
 
   // Redirect if not authenticated

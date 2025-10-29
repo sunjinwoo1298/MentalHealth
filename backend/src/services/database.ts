@@ -3,7 +3,7 @@ import { types as pgTypes } from 'pg';
 import crypto from 'crypto';
 
 export class DatabaseService {
-  private pool: Pool;
+  protected _pool!: Pool;
   private encryptionKey: string;
 
   constructor() {
@@ -17,28 +17,57 @@ export class DatabaseService {
       // eslint-disable-next-line no-console
       console.warn('Warning: could not set pg type parser for DATE:', e?.message ?? e);
     }
-    this.pool = new Pool({
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT || '5432'),
-      database: process.env.DATABASE_NAME || 'mental_health_db',
-      user: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'admin',
-      max: 10, // Reduced max connections to prevent pool exhaustion
-      idleTimeoutMillis: 60000, // Increased to 60 seconds
-      connectionTimeoutMillis: 10000, // Increased to 10 seconds
-      keepAlive: true,
-      keepAliveInitialDelayMillis: 10000,
-    });
+    // Prefer a full DATABASE_URL if provided (e.g., postgres://user:pass@host:port/db)
+    const databaseUrl = process.env.DATABASE_URL;
+    if (databaseUrl) {
+      this._pool = new Pool({
+        connectionString: databaseUrl,
+        max: 10,
+        idleTimeoutMillis: 60000,
+        connectionTimeoutMillis: 10000,
+        keepAlive: true,
+        keepAliveInitialDelayMillis: 10000,
+      });
+    } else {
+      this._pool = new Pool({
+        host: process.env.DATABASE_HOST || 'localhost',
+        port: parseInt(process.env.DATABASE_PORT || '5432'),
+        database: process.env.DATABASE_NAME || 'mental_health_db',
+        user: process.env.DATABASE_USER || 'postgres',
+        password: process.env.DATABASE_PASSWORD || 'admin',
+        max: 10, // Reduced max connections to prevent pool exhaustion
+        idleTimeoutMillis: 60000, // Increased to 60 seconds
+        connectionTimeoutMillis: 10000, // Increased to 10 seconds
+        keepAlive: true,
+        keepAliveInitialDelayMillis: 10000,
+      });
+    }
 
     // Handle pool errors
-    this.pool.on('error', (err) => {
+    this._pool.on('error', (err: Error) => {
       console.error('Unexpected error on idle client', err);
     });
+
+    // Try a quick test connection to provide an earlier, clearer error message
+    (async () => {
+      try {
+        const client = await this.pool.connect();
+        client.release();
+        // eslint-disable-next-line no-console
+        console.info('Database connection test succeeded');
+      } catch (err: any) {
+        // Provide helpful debug info (do not print password)
+        // eslint-disable-next-line no-console
+        console.error('Database connection test failed. Check your DATABASE_URL or DATABASE_* env vars.');
+        // eslint-disable-next-line no-console
+        console.error('Connection error:', err?.message || err);
+      }
+    })();
   }
 
   // Get a client from the pool
   async getClient() {
-    return await this.pool.connect();
+    return await this._pool.connect();
   }
 
   // Encrypt sensitive data - Simplified for hackathon
@@ -73,10 +102,32 @@ export class DatabaseService {
     }
   }
 
+  private static instance: DatabaseService | null = null;
+  private isClosed = false;
+
+  // Get singleton instance
+  static getInstance() {
+    if (!DatabaseService.instance) {
+      DatabaseService.instance = new DatabaseService();
+    }
+    return DatabaseService.instance;
+  }
+
   // Close the pool
   async close() {
-    await this.pool.end();
+    if (!this.isClosed) {
+      this.isClosed = true;
+      await this.pool.end();
+      DatabaseService.instance = null;
+    }
+  }
+
+  // For testing purposes
+  get pool(): Pool {
+    return this._pool;
   }
 }
 
 export const db = new DatabaseService();
+// Export pool instance for testing
+export const { pool } = db;

@@ -1,6 +1,87 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
 
+// User preferences validation
+export const preferencesValidation: ValidationChain[] = [
+  body('communicationStyle')
+    .isString()
+    .withMessage('Communication style must be a string'),
+  
+  body('preferredTopics')
+    .isArray()
+    .withMessage('Preferred topics must be an array'),
+  
+  body('notificationPreferences')
+    .isObject()
+    .withMessage('Notification preferences must be an object'),
+  
+  body('notificationPreferences.dailyCheckins')
+    .isBoolean()
+    .withMessage('Daily check-ins must be a boolean'),
+  
+  body('notificationPreferences.moodReminders')
+    .isBoolean()
+    .withMessage('Mood reminders must be a boolean'),
+  
+  body('notificationPreferences.progressUpdates')
+    .isBoolean()
+    .withMessage('Progress updates must be a boolean'),
+  
+  body('avatarSelection')
+    .isString()
+    .withMessage('Avatar selection must be a string'),
+  
+  body('preferredTherapistGender')
+    .isString()
+    .isIn(['any', 'female', 'male', 'nonbinary'])
+    .withMessage('Invalid preferred therapist gender'),
+  
+  body('preferredTherapistLanguage')
+    .isString()
+    .isIn(['en', 'hi', 'bn', 'te', 'ta', 'mr', 'gu', 'kn', 'ml', 'pa'])
+    .withMessage('Invalid preferred therapist language'),
+  
+  body('sessionPreference')
+    .isString()
+    .isIn(['online', 'in_person', 'hybrid'])
+    .withMessage('Invalid session preference'),
+  
+  body('affordabilityRange')
+    .isObject()
+    .withMessage('Affordability range must be an object'),
+  
+  body('affordabilityRange.min')
+    .isInt({ min: 0 })
+    .withMessage('Minimum affordability must be non-negative'),
+  
+  body('affordabilityRange.max')
+    .isInt({ min: 0 })
+    .withMessage('Maximum affordability must be non-negative')
+    .custom((value, { req }) => {
+      if (value < req.body.affordabilityRange.min) {
+        throw new Error('Maximum affordability must be greater than minimum');
+      }
+      return true;
+    }),
+  
+  body('affordabilityRange.currency')
+    .isIn(['INR'])
+    .withMessage('Currency must be INR'),
+  
+  body('availabilityNotes')
+    .isString()
+    .withMessage('Availability notes must be a string'),
+  
+  body('preferredTherapyStyle')
+    .isArray()
+    .withMessage('Preferred therapy style must be an array'),
+  
+  body('culturalBackgroundNotes')
+    .optional()
+    .isString()
+    .withMessage('Cultural background notes must be a string')
+];
+
 export const validateRequest = (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -126,4 +207,114 @@ export const profileValidation: ValidationChain[] = [
     .optional()
     .isLength({ max: 1000 })
     .withMessage('Crisis plan cannot exceed 1000 characters')
+];
+
+export const onboardingValidation: ValidationChain[] = [
+  // Basic onboarding fields
+  body('hasConsent').isBoolean().withMessage('Consent is required'),
+  body('initialMoodScore')
+    .isInt({ min: 1, max: 10 })
+    .withMessage('Initial mood score must be between 1 and 10'),
+  body('primaryConcerns')
+    .isArray()
+    .withMessage('Primary concerns must be an array'),
+  body('therapyExperience')
+    .isString()
+    .withMessage('Therapy experience is required'),
+  body('stressLevel')
+    .isInt({ min: 1, max: 10 })
+    .withMessage('Stress level must be between 1 and 10'),
+  body('communicationStyle')
+    .isString()
+    .withMessage('Communication style is required'),
+  body('preferredTopics')
+    .isArray()
+    .withMessage('Preferred topics must be an array'),
+  body('notificationPreferences')
+    .isObject()
+    .withMessage('Notification preferences must be an object'),
+  body('notificationPreferences.dailyCheckins')
+    .isBoolean()
+    .withMessage('Daily check-ins preference must be boolean'),
+  body('notificationPreferences.moodReminders')
+    .isBoolean()
+    .withMessage('Mood reminders preference must be boolean'),
+  body('notificationPreferences.progressUpdates')
+    .isBoolean()
+    .withMessage('Progress updates preference must be boolean'),
+  body('avatarSelection')
+    .isString()
+    .withMessage('Avatar selection is required'),
+  body('completedTour')
+    .isBoolean()
+    .withMessage('Tour completion status is required'),
+
+  // New assessment fields
+  body('currentSymptoms')
+    .isArray()
+    .withMessage('Current symptoms must be an array'),
+  body('symptomSeverity')
+    .isInt({ min: 1, max: 10 })
+    .withMessage('Symptom severity must be between 1 and 10'),
+  body('symptomDuration')
+    .isIn(['1_week', '1_month', '6_months', '1_year', 'over_1_year'])
+    .withMessage('Invalid symptom duration'),
+  body('suicidalIdeationFlag')
+    .isBoolean()
+    .withMessage('Suicidal ideation flag must be boolean'),
+  body('selfHarmRiskFlag')
+    .isBoolean()
+    .withMessage('Self-harm risk flag must be boolean'),
+  body('substanceUseFlag')
+    .isBoolean()
+    .withMessage('Substance use flag must be boolean'),
+  body('therapyGoals')
+    .isArray()
+    .withMessage('Therapy goals must be an array'),
+
+  // Therapist preference fields
+  body('preferredTherapistGender')
+    .isIn(['any', 'female', 'male', 'nonbinary'])
+    .withMessage('Invalid preferred therapist gender'),
+  body('preferredTherapistLanguage')
+    .isString()
+    .withMessage('Preferred therapist language is required'),
+  body('sessionPreference')
+    .isIn(['online', 'in_person', 'hybrid'])
+    .withMessage('Invalid session preference'),
+  body('affordabilityRange')
+    .isObject()
+    .withMessage('Affordability range must be an object'),
+  body('affordabilityRange.min')
+    .isInt({ min: 0 })
+    .withMessage('Minimum affordability must be non-negative'),
+  body('affordabilityRange.max')
+    .isInt({ min: 0 })
+    .withMessage('Maximum affordability must be non-negative')
+    .custom((value, { req }) => {
+      if (value < req.body.affordabilityRange.min) {
+        throw new Error('Maximum affordability must be greater than minimum');
+      }
+      return true;
+    }),
+  body('affordabilityRange.currency')
+    .isIn(['INR'])
+    .withMessage('Currency must be INR'),
+  body('availabilityNotes')
+    .isString()
+    .withMessage('Availability notes are required'),
+  
+  // Optional fields
+  body('preferredTherapyStyle')
+    .optional()
+    .isArray()
+    .withMessage('Preferred therapy style must be an array'),
+  body('culturalBackgroundNotes')
+    .optional()
+    .isString()
+    .withMessage('Cultural background notes must be a string'),
+  body('previousTherapyExperienceNotes')
+    .optional()
+    .isString()
+    .withMessage('Previous therapy experience notes must be a string')
 ];

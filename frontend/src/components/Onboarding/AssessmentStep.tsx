@@ -55,6 +55,13 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
   const [stressLevel, setStressLevel] = useState(data.stressLevel || 5)
   const [concerns, setConcerns] = useState<string[]>(data.primaryConcerns || [])
   const [therapyExperience, setTherapyExperience] = useState(data.therapyExperience || '')
+  const [currentSymptoms, setCurrentSymptoms] = useState<string[]>(data.currentSymptoms || [])
+  const [symptomDuration, setSymptomDuration] = useState(data.symptomDuration || '')
+  const [symptomSeverity, setSymptomSeverity] = useState<number>(data.symptomSeverity || 5)
+  const [suicidalIdeation, setSuicidalIdeation] = useState<boolean>(data.suicidalIdeation || false)
+  const [selfHarmRisk, setSelfHarmRisk] = useState<boolean>(data.selfHarmRisk || false)
+  const [substanceUse, setSubstanceUse] = useState<boolean>(data.substanceUse || false)
+  const [therapyGoals, setTherapyGoals] = useState<string>(data.therapyGoals || '')
 
   const handleMoodChange = (_event: Event, newValue: number | number[]) => {
     const value = Array.isArray(newValue) ? newValue[0] : newValue
@@ -106,6 +113,50 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
   }
 
   const canProceed = concerns.length > 0 && therapyExperience !== ''
+
+  // Helpers for new symptom fields
+  const SYMPTOM_OPTIONS = [
+    'Persistent sadness',
+    'Excessive worry',
+    'Panic attacks',
+    'Sleep difficulties',
+    'Appetite changes',
+    'Low motivation',
+    'Self-harm thoughts',
+    'Substance use',
+    'Irritability',
+    'Concentration problems'
+  ]
+
+  const handleSymptomToggle = (symptom: string) => {
+    const next = currentSymptoms.includes(symptom)
+      ? currentSymptoms.filter(s => s !== symptom)
+      : [...currentSymptoms, symptom]
+    setCurrentSymptoms(next)
+    onUpdate({ currentSymptoms: next })
+  }
+
+  const handleSymptomDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSymptomDuration(e.target.value)
+    onUpdate({ symptomDuration: e.target.value })
+  }
+
+  const handleSymptomSeverityChange = (_e: Event, newValue: number | number[]) => {
+    const v = Array.isArray(newValue) ? newValue[0] : newValue
+    setSymptomSeverity(v)
+    onUpdate({ symptomSeverity: v })
+  }
+
+  const handleRiskToggle = (key: string, value: boolean) => {
+    if (key === 'suicidalIdeation') { setSuicidalIdeation(value); onUpdate({ suicidalIdeation: value }) }
+    if (key === 'selfHarmRisk') { setSelfHarmRisk(value); onUpdate({ selfHarmRisk: value }) }
+    if (key === 'substanceUse') { setSubstanceUse(value); onUpdate({ substanceUse: value }) }
+  }
+
+  const handleTherapyGoalsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTherapyGoals(e.target.value)
+    onUpdate({ therapyGoals: e.target.value })
+  }
 
   return (
     <Box className="p-8">
@@ -238,6 +289,42 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
               ))}
             </div>
           </FormGroup>
+        </Paper>
+
+        {/* Detailed Symptoms */}
+        <Paper className="p-6 bg-slate-700/50 backdrop-blur-md border border-slate-600/50">
+          <Typography variant="h6" className="font-semibold text-white mb-4">Describe symptoms and risks</Typography>
+          <Typography variant="body2" className="text-gray-300 mb-3">Select symptoms you are experiencing</Typography>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+            {SYMPTOM_OPTIONS.map(s => (
+              <Button
+                key={s}
+                variant={currentSymptoms.includes(s) ? 'contained' : 'outlined'}
+                onClick={() => handleSymptomToggle(s)}
+                size="small"
+                sx={{ color: currentSymptoms.includes(s) ? 'white' : '#D1D5DB', borderColor: '#64748B' }}
+              >
+                {s}
+              </Button>
+            ))}
+          </div>
+
+          <Typography variant="body2" className="text-gray-300 mb-2">How long have these symptoms been present?</Typography>
+          <input className="w-full p-2 rounded-md mb-3 bg-slate-600 text-white" placeholder="e.g., 3 months, 2 weeks" value={symptomDuration} onChange={handleSymptomDurationChange} />
+
+          <Typography variant="body2" className="text-gray-300 mb-2">Severity</Typography>
+          <Box className="px-4 mb-3">
+            <Slider value={symptomSeverity} onChange={handleSymptomSeverityChange} min={1} max={10} step={1} sx={{ color: '#EC4899' }} />
+          </Box>
+
+          <div className="flex gap-4 mb-3">
+            <FormControlLabel control={<Checkbox checked={suicidalIdeation} onChange={(e) => handleRiskToggle('suicidalIdeation', e.target.checked)} />} label={<span className="text-gray-300">Suicidal thoughts</span>} />
+            <FormControlLabel control={<Checkbox checked={selfHarmRisk} onChange={(e) => handleRiskToggle('selfHarmRisk', e.target.checked)} />} label={<span className="text-gray-300">Self-harm risk</span>} />
+            <FormControlLabel control={<Checkbox checked={substanceUse} onChange={(e) => handleRiskToggle('substanceUse', e.target.checked)} />} label={<span className="text-gray-300">Substance use</span>} />
+          </div>
+
+          <Typography variant="body2" className="text-gray-300 mb-2">What would you like to achieve in therapy?</Typography>
+          <input className="w-full p-2 rounded-md mb-2 bg-slate-600 text-white" placeholder="Your therapy goals (e.g., manage anxiety, improve sleep)" value={therapyGoals} onChange={handleTherapyGoalsChange} />
         </Paper>
 
         {/* Therapy Experience */}

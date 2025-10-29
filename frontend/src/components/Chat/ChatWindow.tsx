@@ -3,10 +3,12 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import io from 'socket.io-client';
 import { useVrmAvatar } from '../../hooks/useVrmAvatar';
 import { generateAndPlaySpeech, checkTTSStatus, audioManager } from '../../services/audioManager';
-// import { EmotionControls } from '../VrmControls'; // Unused - emotion control via analysis service
 import { useGamification } from '../../contexts/GamificationContext';
 import { mentalHealthContext } from '../../App';
 import { emotionAnalysisService, type EmotionAnalysisResult } from '../../services/emotionAnalysis';
+import CrisisAlert from './CrisisAlert';
+import AgentInfoPanel from './AgentInfoPanel';
+import ContextSelector from './ContextSelector';
 
 export type ChatMessage = {
   id: string;
@@ -14,10 +16,63 @@ export type ChatMessage = {
   text: string;
   timestamp: string;
   userId?: string;
-  context?: string; // Added support context
+  context?: string; // Support context
   emotional_context?: string[]; // Backend emotion detection
   avatar_emotion?: string; // Backend avatar emotion
   emotion_intensity?: number; // Backend emotion intensity
+  crisis_info?: {
+    severity_level: number;
+    immediate_action_required: boolean;
+    crisis_indicators: Array<{
+      type: string;
+      severity: number;
+      evidence: string;
+    }>;
+    resources: {
+      immediate_help: Array<{
+        name: string;
+        phone: string;
+        available: string;
+        language?: string;
+      }>;
+      general_support: Array<{
+        name: string;
+        phone: string;
+        available: string;
+        language?: string;
+      }>;
+      online_resources: Array<{
+        name: string;
+        url: string;
+        type: string;
+      }>;
+    };
+  };
+  agent_info?: {
+    agent_analysis: {
+      patterns: {
+        emotional: {
+          dominant: string[];
+          frequency: Record<string, number>;
+        };
+        behavioral: string[];
+        risk_factors: string[];
+        protective_factors: string[];
+      };
+      recommendations: string[];
+    } | null;
+    agent_intervention: {
+      type: string;
+      message: string;
+      urgency: 'low' | 'medium' | 'high';
+    } | null;
+    risk_trends: Array<{
+      timestamp: number;
+      level: number;
+      factors: string[];
+    }>;
+    has_agent_intervention: boolean;
+  };
 };
 
 // System welcome message (currently unused)
@@ -108,6 +163,10 @@ export default function ChatWindow() {
   const [showEmotionalIndicator, setShowEmotionalIndicator] = useState(false);
   const [conversationCount, setConversationCount] = useState(0);
   const [aiInitiative, setAiInitiative] = useState<string | null>(null); // Track current context
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [currentCrisisInfo, setCurrentCrisisInfo] = useState<ChatMessage['crisis_info'] | null>(null);
+  const [showAgentInfo, setShowAgentInfo] = useState(false);
+  const [currentAgentInfo, setCurrentAgentInfo] = useState<ChatMessage['agent_info'] | null>(null);
   const [isTTSEnabled, setIsTTSEnabled] = useState(true); // TTS toggle
   const [isPlayingAudio, setIsPlayingAudio] = useState(false); // Audio playback state
   const [ttsError, setTtsError] = useState<string | null>(null); // TTS error state
@@ -493,6 +552,22 @@ export default function ChatWindow() {
     socket.on('chat:message', (msg: ChatMessage) => {
       console.log('Received message:', msg);
       
+      // Handle crisis info if present
+      if (msg.type === 'ai' && msg.crisis_info) {
+        setCurrentCrisisInfo(msg.crisis_info);
+        if (msg.crisis_info.severity_level >= 3) {
+          setShowCrisisAlert(true);
+        }
+      }
+
+      // Handle agent info if present
+      if (msg.type === 'ai' && msg.agent_info) {
+        setCurrentAgentInfo(msg.agent_info);
+        if (msg.agent_info.has_agent_intervention) {
+          setShowAgentInfo(true);
+        }
+      }
+
       // For user messages or when TTS is disabled, show immediately
       if (msg.type === 'user' || !isTTSEnabled) {
         setMessages((prev) => [...prev, msg]);
@@ -649,6 +724,12 @@ export default function ChatWindow() {
   // Separate effect to handle chat completion on unmount with current state values
   useEffect(() => {
     return () => {
+      // Cleanup states
+      setShowCrisisAlert(false);
+      setCurrentCrisisInfo(null);
+      setShowAgentInfo(false);
+      setCurrentAgentInfo(null);
+
       // Award points for chat completion when component unmounts after meaningful conversation
       if (chatStartTime && messageCount >= 3) {
         const sessionDuration = Date.now() - chatStartTime.getTime();
@@ -727,7 +808,7 @@ export default function ChatWindow() {
       {/* VRM Avatar Background - Full Screen */}
       <div className="absolute inset-0">
         <canvas 
-          ref={canvasRef}
+          ref={canvasRef as React.RefObject<HTMLCanvasElement>}
           className="w-full h-full"
           style={{ 
             background: 'transparent',
@@ -793,35 +874,69 @@ export default function ChatWindow() {
 
         {/* Context Header - Top Right */}
         <div className="absolute top-4 right-4 z-10 pointer-events-auto">
-          <div className={`rounded-lg p-3 backdrop-blur-md ${
-            context?.currentContext === 'academic' 
-              ? 'bg-green-500/20 border border-green-400/50' 
-              : context?.currentContext === 'family'
-              ? 'bg-yellow-500/20 border border-yellow-400/50'
-              : 'bg-blue-500/20 border border-blue-400/50'
-          }`}>
-            <div className="flex items-center space-x-2">
-              <span className="text-lg">{getContextInfo(context?.currentContext || 'general').icon}</span>
-              <div>
-                <div className={`text-sm font-semibold ${
-                  context?.currentContext === 'academic' 
-                    ? 'text-green-300' 
-                    : context?.currentContext === 'family'
-                    ? 'text-yellow-300'
-                    : 'text-blue-300'
-                }`}>
-                  {getContextInfo(context?.currentContext || 'general').name}
-                </div>
-                <div className="text-xs text-gray-300 max-w-40">
-                  {getContextInfo(context?.currentContext || 'general').description}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ContextSelector
+            currentContext={context?.currentContext || 'general'}
+            contexts={{
+              general: {
+                name: 'General Support',
+                description: 'Overall mental health and emotional wellness support',
+                icon: '💙',
+                color: 'rgb(59, 130, 246)' // blue-500
+              },
+              academic: {
+                name: 'Academic Pressure Support',
+                description: 'Study stress, exam anxiety, career guidance',
+                icon: '📚',
+                color: 'rgb(34, 197, 94)' // green-500
+              },
+              family: {
+                name: 'Family Relationships Support',
+                description: 'Family dynamics and communication',
+                icon: '🏠',
+                color: 'rgb(234, 179, 8)' // yellow-500
+              }
+            }}
+            onContextChange={(newContext) => {
+              if (context?.setCurrentContext) {
+                context.setCurrentContext(newContext);
+                // Add system message about context change
+                const contextChangeMsg: ChatMessage = {
+                  id: `context-change-${Date.now()}`,
+                  type: 'system',
+                  text: `Switching to ${getContextInfo(newContext).name} context...`,
+                  timestamp: new Date().toISOString(),
+                  context: newContext
+                };
+                setMessages(prev => [...prev, contextChangeMsg]);
+                
+                // Reset any active crisis or agent info when context changes
+                setShowCrisisAlert(false);
+                setCurrentCrisisInfo(null);
+                setShowAgentInfo(false);
+                setCurrentAgentInfo(null);
+              }
+            }}
+          />
         </div>
 
         {/* Proactive Conversation Controls - Bottom Left */}
         
+
+        {/* Crisis Alert */}
+        {showCrisisAlert && currentCrisisInfo && (
+          <CrisisAlert
+            crisisInfo={currentCrisisInfo}
+            onClose={() => setShowCrisisAlert(false)}
+          />
+        )}
+
+        {/* Agent Info Panel */}
+        {showAgentInfo && currentAgentInfo && (
+          <AgentInfoPanel
+            agentInfo={currentAgentInfo}
+            isVisible={showAgentInfo}
+          />
+        )}
 
         {/* Chat Messages - Center/Bottom Area */}
         <div className="flex-1 flex flex-col justify-end p-6 pointer-events-none">

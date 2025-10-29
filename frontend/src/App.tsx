@@ -21,6 +21,7 @@ import JournalPage from './pages/JournalPage'
 import MoodPage from './pages/MoodPage'
 import CheckInPage from './pages/CheckInPage'
 import TestGamificationPage from './pages/TestGamificationPage'
+import TherapistFinder from './pages/TherapistFinder'
 // import './App.css'
 import './global.css'
 // import './styles/animations.css'
@@ -54,6 +55,7 @@ function App() {
             {/* Protected routes - require authentication */}
             <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<Index />} />
+              <Route path="/therapists" element={<TherapistFinder />} />
               <Route path="/gamification" element={<GamificationPage />} />
               <Route path="/meditation" element={<MeditationPage />} />
               <Route path="/mood" element={<MoodPage />} />

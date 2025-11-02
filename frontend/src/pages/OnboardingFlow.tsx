@@ -46,6 +46,7 @@ export interface OnboardingData {
   sessionPreference?: string // online, in_person, hybrid
   affordabilityRange?: { min: number; max: number }
   availabilityNotes?: string
+  conditionDescription?: string  // User's personal description of their condition
 }
 
 const TOTAL_STEPS = 4

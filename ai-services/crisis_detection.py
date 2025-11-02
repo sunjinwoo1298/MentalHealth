@@ -116,8 +116,25 @@ def analyze_crisis_indicators(
     recent_messages = conversation_history[-5:] if conversation_history else []
     recent_emotions = emotion_history[-3:] if emotion_history else []
     
-    # Build context for LLM
-    analysis_prompt = f"""You are a mental health crisis assessment expert. Analyze this conversation for crisis indicators.
+    # Define the expected JSON structure template
+    json_template = '''{
+    "crisis_indicators": [
+        {
+            "type": "string",
+            "severity": 5,
+            "evidence": "string",
+            "confidence": 0.9,
+            "timestamp": 1635588000
+        }
+    ],
+    "severity_level": 5,
+    "immediate_action_required": true,
+    "reasoning": "string",
+    "timestamp": 1635588000
+}'''
+
+    # Build context for LLM with strict JSON formatting
+    analysis_prompt = f"""You are a mental health crisis assessment expert. Your task is to analyze this conversation for crisis indicators and return ONLY a valid JSON response.
 
 Recent conversation context:
 {chr(10).join([f"{'User' if msg['type']=='human' else 'AI'}: {msg['content']}" for msg in recent_messages])}
@@ -127,56 +144,79 @@ Current message: {message}
 Recent emotional states:
 {chr(10).join([f"- {', '.join(state.get('emotions', ['unknown']))}" for state in recent_emotions])}
 
-Assessment Instructions:
-1. Evaluate the message and context for signs of:
-   - Suicidal ideation or self-harm thoughts
-   - Severe depression or hopelessness
-   - Substance abuse issues
-   - Eating disorders
-   - Panic attacks or severe anxiety
-   - Other mental health crises
+CRITICAL: Return ONLY a JSON object matching this exact schema. Do not include any other text or explanation:
 
-2. Consider cultural context (Indian youth mental health)
-3. Assess need for immediate professional intervention
-4. Evaluate overall risk level
+{json_template}
 
-Return ONLY a JSON object with this EXACT schema - do not modify or add fields:
-{{
-    "crisis_indicators": [
-        {{
-            "type": "string",
-            "severity": 5,
-            "evidence": "string",
-            "confidence": 0.9
-        }}
-    ],
-    "severity_level": 5,
-    "immediate_action_required": true,
-    "reasoning": "string"
-}}
+Rules for JSON response:
+1. Must be valid JSON - no trailing commas, proper quotes
+2. "type" must be one of: "suicidal_ideation", "self_harm", "severe_depression", "substance_abuse", "eating_disorder", "panic_attack"
+3. "severity" must be a number between 1 and 5
+4. "confidence" must be a number between 0.1 and 1.0
+5. "immediate_action_required" must be true or false
+6. "reasoning" must be a brief explanation string
 
-IMPORTANT: 
-- Only return valid JSON
-- Do not add or change field names
-- severity must be a number 1-5
-- confidence must be a number 0.1-1.0
-- Do not include any explanation text, ONLY the JSON object"""
+DO NOT include any text before or after the JSON object. Return ONLY the JSON."""
 
     
     try:
         # Get LLM analysis
         response = llm.invoke(analysis_prompt)
-        result = json.loads(response.content if hasattr(response, 'content') else response)
+        response_text = response.content if hasattr(response, 'content') else str(response)
         
-        # Add metadata
-        result['timestamp'] = time.time()
-        result['user_id'] = user_id
-        result['has_crisis_indicators'] = bool(result.get('crisis_indicators', []))
+        # Clean up the response text to ensure valid JSON
+        response_text = response_text.strip()
+        if response_text.startswith('```json'):
+            response_text = response_text[7:]
+        if response_text.endswith('```'):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
         
-        # Log analysis
-        print(f"🚨 Crisis Analysis for {user_id}:", json.dumps(result, indent=2))
-        
-        return result
+        try:
+            result = json.loads(response_text)
+            
+            # Validate required fields
+            required_fields = {
+                'crisis_indicators': list,
+                'severity_level': int,
+                'immediate_action_required': bool,
+                'reasoning': str
+            }
+            
+            for field, field_type in required_fields.items():
+                if field not in result:
+                    print(f"Missing required field: {field}")
+                    raise ValueError(f"Missing required field: {field}")
+                if not isinstance(result[field], field_type):
+                    print(f"Invalid type for field {field}: expected {field_type}, got {type(result[field])}")
+                    raise ValueError(f"Invalid type for field {field}")
+            
+            # Add metadata and timestamps
+            current_time = time.time()
+            result['timestamp'] = current_time
+            result['user_id'] = user_id
+            result['has_crisis_indicators'] = bool(result.get('crisis_indicators', []))
+            
+            # Add timestamps to crisis indicators if they don't have them
+            for indicator in result.get('crisis_indicators', []):
+                if 'timestamp' not in indicator:
+                    indicator['timestamp'] = current_time
+            
+            # Log analysis
+            print(f"🚨 Crisis Analysis for {user_id}:", json.dumps(result, indent=2))
+            
+            return result
+            
+        except json.JSONDecodeError as e:
+            print(f"JSON parsing error: {e}")
+            print(f"Response text: {response_text}")
+            return analyze_crisis_indicators_fallback(message, user_id, conversation_history, emotion_history)
+        except ValueError as e:
+            print(f"Validation error: {e}")
+            return analyze_crisis_indicators_fallback(message, user_id, conversation_history, emotion_history)
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return analyze_crisis_indicators_fallback(message, user_id, conversation_history, emotion_history)
         
     except Exception as e:
         print(f"Error in LLM crisis analysis: {e}")
@@ -261,11 +301,12 @@ def generate_therapist_context(
     """
     # Compile crisis incidents
     crisis_incidents = []
+    current_time = time.time()  # Get current timestamp
     for indicator in crisis_analysis.get('crisis_indicators', []):
         incident = {
             'type': indicator['type'],
             'severity': indicator['severity'],
-            'detected_at': datetime.fromtimestamp(indicator['timestamp']).strftime('%Y-%m-%d %H:%M:%S'),
+            'detected_at': datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S'),
             'evidence': indicator.get('keyword_matched', indicator.get('evidence', 'Pattern detected'))
         }
         crisis_incidents.append(incident)
@@ -351,38 +392,82 @@ def generate_ai_notes(
     return " | ".join(notes)
 
 def get_crisis_resources(severity_level: int) -> Dict:
-    """Get appropriate crisis resources based on severity"""
+    """Get appropriate crisis resources based on severity - formatted for frontend"""
     
-    resources = {
-        'emergency': {
-            'name': 'Emergency Services',
-            'number': '112',
-            'available': '24/7'
-        },
-        'crisis_helpline': {
-            'name': 'KIRAN Mental Health Helpline',
-            'number': '1800-599-0019',
+    # Immediate help resources (24/7 crisis lines)
+    immediate_help = [
+        {
+            'name': 'KIRAN Mental Health Helpline (India)',
+            'phone': '1800-599-0019',
             'available': '24/7',
-            'languages': ['Hindi', 'English']
+            'language': 'Hindi, English, and 13 regional languages'
         },
-        'suicide_prevention': {
-            'name': 'AASRA',
-            'number': '+91-9820466726',
-            'available': '24/7'
+        {
+            'name': 'AASRA Suicide Prevention',
+            'phone': '+91-9820466726',
+            'available': '24/7',
+            'language': 'English, Hindi'
         },
-        'counseling': {
-            'name': 'Snehi Helpline',
-            'number': '+91-9582208181',
-            'available': '24/7'
+        {
+            'name': 'Snehi Foundation',
+            'phone': '+91-9582208181',
+            'available': '10 AM - 10 PM',
+            'language': 'Hindi, English'
+        },
+        {
+            'name': 'Emergency Services',
+            'phone': '112',
+            'available': '24/7',
+            'language': 'All languages'
         }
-    }
+    ]
     
-    # Add severity-specific recommendations
-    if severity_level >= 4:
-        resources['recommended'] = ['emergency', 'crisis_helpline', 'suicide_prevention']
-    elif severity_level == 3:
-        resources['recommended'] = ['crisis_helpline', 'counseling']
-    else:
-        resources['recommended'] = ['counseling']
+    # General support resources
+    general_support = [
+        {
+            'name': 'Vandrevala Foundation',
+            'phone': '1860-266-2345',
+            'available': '24/7',
+            'language': 'Multiple languages'
+        },
+        {
+            'name': 'iCall - TISS',
+            'phone': '+91-22-25521111',
+            'available': 'Mon-Sat 8 AM - 10 PM',
+            'language': 'English, Hindi, Marathi'
+        },
+        {
+            'name': 'Fortis Stress Helpline',
+            'phone': '+91-8376804102',
+            'available': '24/7',
+            'language': 'English, Hindi'
+        }
+    ]
+    
+    # Online resources
+    online_resources = [
+        {
+            'name': 'National Mental Health Portal',
+            'url': 'https://www.nhp.gov.in/national-mental-health-programme_pg',
+            'type': 'Government mental health resources'
+        },
+        {
+            'name': 'Mpower 1on1',
+            'url': 'https://mpowerminds.com',
+            'type': 'Online counseling and support'
+        },
+        {
+            'name': 'YourDOST',
+            'url': 'https://yourdost.com',
+            'type': 'Online mental health platform'
+        }
+    ]
+    
+    # Build response based on severity
+    resources = {
+        'immediate_help': immediate_help if severity_level >= 3 else [],
+        'general_support': general_support,
+        'online_resources': online_resources
+    }
     
     return resources

@@ -1,90 +1,123 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
+// Updated: 2025-10-30 - Fixed preferences validation to allow optional fields
 
-// User preferences validation
+// User preferences validation - all fields optional for updates
 export const preferencesValidation: ValidationChain[] = [
   body('communicationStyle')
+    .optional()
     .isString()
-    .withMessage('Communication style must be a string'),
+    .isIn(['empathetic', 'professional', 'casual', 'supportive'])
+    .withMessage('Communication style must be empathetic, professional, casual, or supportive'),
   
   body('preferredTopics')
-    .isArray()
-    .withMessage('Preferred topics must be an array'),
+    .optional({ nullable: true })
+    .custom((value) => value === null || Array.isArray(value))
+    .withMessage('Preferred topics must be an array or null'),
   
   body('notificationPreferences')
+    .optional()
     .isObject()
     .withMessage('Notification preferences must be an object'),
   
   body('notificationPreferences.dailyCheckins')
+    .optional()
     .isBoolean()
     .withMessage('Daily check-ins must be a boolean'),
   
   body('notificationPreferences.moodReminders')
+    .optional()
     .isBoolean()
     .withMessage('Mood reminders must be a boolean'),
   
   body('notificationPreferences.progressUpdates')
+    .optional()
     .isBoolean()
     .withMessage('Progress updates must be a boolean'),
   
   body('avatarSelection')
-    .isString()
-    .withMessage('Avatar selection must be a string'),
+    .optional({ nullable: true })
+    .custom((value) => value === null || typeof value === 'string')
+    .withMessage('Avatar selection must be a string or null'),
   
   body('preferredTherapistGender')
+    .optional()
     .isString()
     .isIn(['any', 'female', 'male', 'nonbinary'])
     .withMessage('Invalid preferred therapist gender'),
   
   body('preferredTherapistLanguage')
+    .optional()
     .isString()
     .isIn(['en', 'hi', 'bn', 'te', 'ta', 'mr', 'gu', 'kn', 'ml', 'pa'])
     .withMessage('Invalid preferred therapist language'),
   
   body('sessionPreference')
+    .optional()
     .isString()
     .isIn(['online', 'in_person', 'hybrid'])
     .withMessage('Invalid session preference'),
   
   body('affordabilityRange')
+    .optional()
     .isObject()
     .withMessage('Affordability range must be an object'),
   
   body('affordabilityRange.min')
+    .optional()
     .isInt({ min: 0 })
     .withMessage('Minimum affordability must be non-negative'),
   
   body('affordabilityRange.max')
+    .optional()
     .isInt({ min: 0 })
     .withMessage('Maximum affordability must be non-negative')
     .custom((value, { req }) => {
-      if (value < req.body.affordabilityRange.min) {
+      if (req.body.affordabilityRange && value < req.body.affordabilityRange.min) {
         throw new Error('Maximum affordability must be greater than minimum');
       }
       return true;
     }),
   
   body('affordabilityRange.currency')
-    .isIn(['INR'])
-    .withMessage('Currency must be INR'),
+    .optional()
+    .isIn(['INR', 'USD', 'EUR'])
+    .withMessage('Currency must be INR, USD, or EUR'),
   
   body('availabilityNotes')
-    .isString()
-    .withMessage('Availability notes must be a string'),
+    .optional({ nullable: true })
+    .custom((value) => value === null || typeof value === 'string')
+    .withMessage('Availability notes must be a string or null'),
   
   body('preferredTherapyStyle')
-    .isArray()
-    .withMessage('Preferred therapy style must be an array'),
+    .optional({ nullable: true })
+    .custom((value) => value === null || Array.isArray(value))
+    .withMessage('Preferred therapy style must be an array or null'),
   
   body('culturalBackgroundNotes')
-    .optional()
-    .isString()
-    .withMessage('Cultural background notes must be a string')
+    .optional({ nullable: true })
+    .custom((value) => value === null || typeof value === 'string')
+    .withMessage('Cultural background notes must be a string or null'),
+  
+  body('preferredSupportContext')
+    .optional({ nullable: true })
+    .custom((value) => value === null || (typeof value === 'string' && ['general', 'academic', 'family'].includes(value)))
+    .withMessage('Support context must be general, academic, family, or null'),
+  
+  body('conditionDescription')
+    .optional({ nullable: true })
+    .custom((value) => value === null || (typeof value === 'string' && value.length <= 1000))
+    .withMessage('Condition description must be a string (max 1000 characters) or null')
 ];
 
 export const validateRequest = (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.error('[Validation] Request validation failed:', {
+      path: req.path,
+      errors: errors.array(),
+      body: req.body
+    });
     res.status(400).json({
       success: false,
       message: 'Validation failed',

@@ -35,7 +35,9 @@ def get_user_preferences(user_id: str) -> Dict:
                         therapy_goals,
                         previous_therapy_experience_notes,
                         wellness_preferences,
-                        notification_preferences
+                        notification_preferences,
+                        condition_description,
+                        preferred_support_context
                     FROM user_profiles
                     WHERE user_id = %s
                 """, (user_id,))
@@ -52,7 +54,9 @@ def get_user_preferences(user_id: str) -> Dict:
                         'goals': result[6],
                         'therapy_experience': result[7],
                         'wellness_prefs': result[8],
-                        'notification_prefs': result[9]
+                        'notification_prefs': result[9],
+                        'condition_description': result[10],
+                        'preferred_support_context': result[11]
                     }
     except Exception as e:
         print(f"Database connection failed: {e}, using default preferences")

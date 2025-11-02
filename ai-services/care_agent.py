@@ -22,20 +22,8 @@ class AICareAgent:
         """Analyze user patterns and identify potential intervention needs"""
         
         # Generate pattern analysis prompt
-        analysis_prompt = f"""You are an AI mental health care agent analyzing user patterns.
-
-Recent Conversations:
-{chr(10).join([f"- {msg['content'][:100]}..." for msg in conversation_history[-5:]])}
-
-Emotional History:
-{chr(10).join([f"- {', '.join(state.get('emotions', []))}" for state in emotion_history[-5:]])}
-
-Crisis History:
-{chr(10).join([f"- Level {crisis['severity_level']}: {crisis.get('reasoning', 'No reasoning provided')}"
-               for crisis in crisis_history[-3:]])}
-
-Analyze patterns and return a JSON object with:
-{
+        # Create the JSON template separately
+        json_template = '''{
     "identified_patterns": [
         {
             "pattern_type": "emotional|behavioral|crisis|engagement",
@@ -58,23 +46,79 @@ Analyze patterns and return a JSON object with:
         "engagement_quality": "high|moderate|low",
         "risk_trajectory": "decreasing|stable|increasing"
     }
-}"""
+}'''
+
+        # Now create the analysis prompt with proper f-string handling
+        analysis_prompt = f"""You are an AI mental health care agent analyzing user patterns.
+
+Recent Conversations:
+{chr(10).join([f"- {msg['content'][:100]}..." for msg in conversation_history[-5:]])}
+
+Emotional History:
+{chr(10).join([f"- {', '.join(state.get('emotions', []))}" for state in emotion_history[-5:]])}
+
+Crisis History:
+{chr(10).join([f"- Level {crisis['severity_level']}: {crisis.get('reasoning', 'No reasoning provided')}"
+               for crisis in crisis_history[-3:]])}
+
+Analyze patterns and return a JSON object with this exact structure:
+
+{json_template}"""
 
         try:
+            # Get response from LLM
             response = self.llm.invoke(analysis_prompt)
-            pattern_analysis = json.loads(response.content if hasattr(response, 'content') else response)
+            response_text = response.content if hasattr(response, 'content') else str(response)
             
-            # Store in user patterns
-            self.user_patterns[user_id] = {
-                'last_analysis': time.time(),
-                'patterns': pattern_analysis
-            }
+            # Clean up response text
+            response_text = response_text.strip()
+            # Remove markdown code blocks if present
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
             
-            return pattern_analysis
-            
+            # Parse JSON with validation
+            try:
+                pattern_analysis = json.loads(response_text)
+                
+                # Validate required fields and types
+                required_fields = {
+                    'identified_patterns': list,
+                    'recommended_actions': list,
+                    'wellness_trends': dict
+                }
+                
+                for field, expected_type in required_fields.items():
+                    if field not in pattern_analysis:
+                        raise ValueError(f"Missing required field: {field}")
+                    if not isinstance(pattern_analysis[field], expected_type):
+                        raise ValueError(f"Invalid type for {field}: expected {expected_type}")
+                
+                # Validate wellness_trends fields
+                required_trends = ['emotional_trajectory', 'engagement_quality', 'risk_trajectory']
+                for trend in required_trends:
+                    if trend not in pattern_analysis['wellness_trends']:
+                        raise ValueError(f"Missing required trend: {trend}")
+                
+                # Store in user patterns
+                self.user_patterns[user_id] = {
+                    'last_analysis': time.time(),
+                    'patterns': pattern_analysis
+                }
+                
+                print(f"✅ Successfully analyzed patterns for user {user_id}")
+                return pattern_analysis
+                
+            except json.JSONDecodeError as je:
+                print(f"JSON parsing error: {je}")
+                print(f"Response text was: {response_text[:200]}...")
+                raise
+                
         except Exception as e:
             print(f"Error in pattern analysis: {e}")
-            return {
+            fallback_response = {
                 'identified_patterns': [],
                 'recommended_actions': [],
                 'wellness_trends': {
@@ -83,6 +127,15 @@ Analyze patterns and return a JSON object with:
                     'risk_trajectory': 'stable'
                 }
             }
+            
+            # Store fallback in user patterns
+            self.user_patterns[user_id] = {
+                'last_analysis': time.time(),
+                'patterns': fallback_response,
+                'is_fallback': True
+            }
+            
+            return fallback_response
     
     def generate_wellness_activity(self, user_id: str, context: str = 'general') -> Dict:
         """Generate personalized wellness activity based on user patterns"""

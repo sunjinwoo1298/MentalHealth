@@ -91,7 +91,7 @@ export default function SketchCursor() {
         cursorEl.current.style.left = `${e.clientX}px`;
         cursorEl.current.style.top = `${e.clientY}px`;
       }
-      spawnAt(e.clientX, e.clientY);
+      // Removed spawnAt - particles only spawn on click now
     }
 
     function onPointerDown(e: PointerEvent) {

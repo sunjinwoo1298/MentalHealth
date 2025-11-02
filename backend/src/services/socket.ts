@@ -39,6 +39,12 @@ export class SocketService {
     emotional_context?: string[];
     conversation_count?: number;
     context?: string;
+    avatar_emotion?: string;
+    emotion_intensity?: number;
+    crisis_info?: any;
+    has_crisis?: boolean;
+    agent_analysis?: any;
+    agent_intervention?: any;
   }> {
     try {
       logger.info(`Sending message to AI service: ${message} (context: ${context})\n`);
@@ -60,7 +66,13 @@ export class SocketService {
         response: response.data.response || 'I understand how you\'re feeling. Everything will be okay. 🌟',
         emotional_context: response.data.emotional_context || [],
         conversation_count: response.data.conversation_count || 0,
-        context: response.data.context || context
+        context: response.data.context || context,
+        avatar_emotion: response.data.avatar_emotion,
+        emotion_intensity: response.data.emotion_intensity,
+        crisis_info: response.data.crisis_info,
+        has_crisis: response.data.has_crisis,
+        agent_analysis: response.data.agent_analysis,
+        agent_intervention: response.data.agent_intervention
       };
       
     } catch (error) {
@@ -193,15 +205,30 @@ export class SocketService {
           // Stop typing indicator
           socket.emit('chat:typing', false);
           
-          // Send AI response with emotional context
-          const aiMessage: ChatMessage = {
+          // Send AI response with emotional context, crisis info, and avatar emotion
+          const aiMessage: ChatMessage & any = {
             id: `ai-${Date.now()}`,
             type: 'ai',
             text: aiResponseData.response,
             timestamp: new Date().toISOString(),
             ...(message.userId && { userId: message.userId }),
-            ...(aiResponseData.context && { context: aiResponseData.context })
+            ...(aiResponseData.context && { context: aiResponseData.context }),
+            ...(aiResponseData.avatar_emotion && { avatar_emotion: aiResponseData.avatar_emotion }),
+            ...(aiResponseData.emotion_intensity && { emotion_intensity: aiResponseData.emotion_intensity }),
+            ...(aiResponseData.emotional_context && { emotional_context: aiResponseData.emotional_context }),
+            ...(aiResponseData.crisis_info && { crisis_info: aiResponseData.crisis_info }),
+            ...(aiResponseData.has_crisis !== undefined && { has_crisis: aiResponseData.has_crisis }),
+            ...(aiResponseData.agent_analysis && { agent_info: { 
+              agent_analysis: aiResponseData.agent_analysis,
+              agent_intervention: aiResponseData.agent_intervention,
+              has_agent_intervention: !!aiResponseData.agent_intervention
+            }})
           };
+          
+          logger.info('Sending AI message with crisis_info:', { 
+            hasCrisis: aiMessage.has_crisis, 
+            severity: aiMessage.crisis_info?.severity_level 
+          });
           
           socket.emit('chat:message', aiMessage);
           

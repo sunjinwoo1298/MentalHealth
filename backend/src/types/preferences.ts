@@ -18,4 +18,6 @@ export interface UserPreferences {
   availabilityNotes?: string;
   preferredTherapyStyle?: string[];  // ['CBT', 'mindfulness', 'psychodynamic']
   culturalBackgroundNotes?: string;  // For better cultural matching
+  preferredSupportContext?: 'general' | 'academic' | 'family';  // Context for AI chat support
+  conditionDescription?: string;  // User's personal description of their mental health condition
 }

@@ -8,7 +8,8 @@ import { mentalHealthContext } from '../../App';
 import { emotionAnalysisService, type EmotionAnalysisResult } from '../../services/emotionAnalysis';
 import CrisisAlert from './CrisisAlert';
 import AgentInfoPanel from './AgentInfoPanel';
-import ContextSelector from './ContextSelector';
+import PreferencesButton from './PreferencesButton';
+import InlineCrisisCard from './InlineCrisisCard';
 
 export type ChatMessage = {
   id: string;
@@ -872,48 +873,13 @@ export default function ChatWindow() {
           </div>
         )}
 
-        {/* Context Header - Top Right */}
+        {/* Preferences Button - Top Right */}
         <div className="absolute top-4 right-4 z-10 pointer-events-auto">
-          <ContextSelector
-            currentContext={context?.currentContext || 'general'}
-            contexts={{
-              general: {
-                name: 'General Support',
-                description: 'Overall mental health and emotional wellness support',
-                icon: '💙',
-                color: 'rgb(59, 130, 246)' // blue-500
-              },
-              academic: {
-                name: 'Academic Pressure Support',
-                description: 'Study stress, exam anxiety, career guidance',
-                icon: '📚',
-                color: 'rgb(34, 197, 94)' // green-500
-              },
-              family: {
-                name: 'Family Relationships Support',
-                description: 'Family dynamics and communication',
-                icon: '🏠',
-                color: 'rgb(234, 179, 8)' // yellow-500
-              }
-            }}
-            onContextChange={(newContext) => {
-              if (context?.setCurrentContext) {
-                context.setCurrentContext(newContext);
-                // Add system message about context change
-                const contextChangeMsg: ChatMessage = {
-                  id: `context-change-${Date.now()}`,
-                  type: 'system',
-                  text: `Switching to ${getContextInfo(newContext).name} context...`,
-                  timestamp: new Date().toISOString(),
-                  context: newContext
-                };
-                setMessages(prev => [...prev, contextChangeMsg]);
-                
-                // Reset any active crisis or agent info when context changes
-                setShowCrisisAlert(false);
-                setCurrentCrisisInfo(null);
-                setShowAgentInfo(false);
-                setCurrentAgentInfo(null);
+          <PreferencesButton 
+            onPreferencesUpdate={(preferences) => {
+              // Update context if preferredSupportContext changed
+              if (preferences.preferredSupportContext && context?.setCurrentContext) {
+                context.setCurrentContext(preferences.preferredSupportContext);
               }
             }}
           />
@@ -942,55 +908,66 @@ export default function ChatWindow() {
         <div className="flex-1 flex flex-col justify-end p-6 pointer-events-none">
           <div className="max-h-[60vh] overflow-y-auto space-y-4 pointer-events-auto">
             {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className="max-w-[30%]">
-                  {msg.type !== 'user' && (
-                    <div className="flex items-center space-x-2 mb-2">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        msg.id.includes('proactive') || msg.id.includes('checkin') 
-                          ? 'bg-gradient-to-r from-teal-500 to-blue-500' 
-                          : 'bg-gradient-to-r from-purple-500 to-pink-500'
-                      }`}>
-                        <span className="text-white text-sm font-bold">
-                          {msg.id.includes('proactive') || msg.id.includes('checkin') ? '🤗' : 'AI'}
-                        </span>
-                      </div>
-                      <span className="text-white/90 text-sm drop-shadow-lg">
-                        {msg.id.includes('proactive') || msg.id.includes('checkin') 
-                          ? 'MindCare AI (reaching out)' 
-                          : 'MindCare AI'
-                        }
-                      </span>
-                      {msg.id.includes('proactive') && (
-                        <span className="text-xs px-2 py-1 bg-teal-500/30 text-teal-200 rounded-full border border-teal-400/30">
-                          💡 proactive
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <div
-                    className={`px-6 py-4 rounded-2xl shadow-xl backdrop-blur-md border ${
-                      msg.type === 'user'
-                        ? 'bg-gradient-to-r from-pink-500/80 to-teal-500/80 text-white ml-auto border-pink-300/30'
-                        : msg.type === 'ai'
-                        ? msg.id.includes('proactive') || msg.id.includes('checkin')
-                          ? 'bg-gradient-to-r from-teal-500/80 to-blue-600/80 text-white border-teal-300/30'
-                          : 'bg-gradient-to-r from-purple-500/80 to-indigo-600/80 text-white border-purple-300/30'
-                        : 'bg-gray-800/60 border-gray-500/40 text-gray-100'
-                    }`}
-                  >
-                    {msg.type === 'system' && (
+              <React.Fragment key={msg.id}>
+                <div className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className="max-w-[30%]">
+                    {msg.type !== 'user' && (
                       <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-xs font-semibold text-blue-300">🔒 SECURE CONNECTION</span>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          msg.id.includes('proactive') || msg.id.includes('checkin') 
+                            ? 'bg-gradient-to-r from-teal-500 to-blue-500' 
+                            : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                        }`}>
+                          <span className="text-white text-sm font-bold">
+                            {msg.id.includes('proactive') || msg.id.includes('checkin') ? '🤗' : 'AI'}
+                          </span>
+                        </div>
+                        <span className="text-white/90 text-sm drop-shadow-lg">
+                          {msg.id.includes('proactive') || msg.id.includes('checkin') 
+                            ? 'MindCare AI (reaching out)' 
+                            : 'MindCare AI'
+                          }
+                        </span>
+                        {msg.id.includes('proactive') && (
+                          <span className="text-xs px-2 py-1 bg-teal-500/30 text-teal-200 rounded-full border border-teal-400/30">
+                            💡 proactive
+                          </span>
+                        )}
                       </div>
                     )}
-                    <p className="text-sm leading-relaxed drop-shadow-sm">{msg.text}</p>
-                    <span className="block text-xs opacity-75 mt-2 drop-shadow-sm">
-                      {new Date(msg.timestamp).toLocaleTimeString()}
-                    </span>
+                    <div
+                      className={`px-6 py-4 rounded-2xl shadow-xl backdrop-blur-md border ${
+                        msg.type === 'user'
+                          ? 'bg-gradient-to-r from-pink-500/80 to-teal-500/80 text-white ml-auto border-pink-300/30'
+                          : msg.type === 'ai'
+                          ? msg.id.includes('proactive') || msg.id.includes('checkin')
+                            ? 'bg-gradient-to-r from-teal-500/80 to-blue-600/80 text-white border-teal-300/30'
+                            : 'bg-gradient-to-r from-purple-500/80 to-indigo-600/80 text-white border-purple-300/30'
+                          : 'bg-gray-800/60 border-gray-500/40 text-gray-100'
+                      }`}
+                    >
+                      {msg.type === 'system' && (
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="text-xs font-semibold text-blue-300">🔒 SECURE CONNECTION</span>
+                        </div>
+                      )}
+                      <p className="text-sm leading-relaxed drop-shadow-sm">{msg.text}</p>
+                      <span className="block text-xs opacity-75 mt-2 drop-shadow-sm">
+                        {new Date(msg.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+                
+                {/* Show Inline Crisis Card if severity >= 3 */}
+                {msg.type === 'ai' && msg.crisis_info && msg.crisis_info.severity_level >= 3 && (
+                  <div className="flex justify-center w-full px-4">
+                    <div className="w-full max-w-2xl">
+                      <InlineCrisisCard crisisInfo={msg.crisis_info} />
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
             ))}
             
             {isTyping && (

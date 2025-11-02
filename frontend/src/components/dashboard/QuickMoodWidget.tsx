@@ -9,7 +9,9 @@
  * - Awards gamification points
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { wellnessAPI } from '../../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { Brain, CheckCircle2, Sparkles } from 'lucide-react';
@@ -38,6 +40,8 @@ const QuickMoodWidget: React.FC = () => {
   const [selectedEmotionIdx, setSelectedEmotionIdx] = useState<number>(0);
   
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
+  const [quickLogsState, setQuickLogsState] = useState<QuickMoodData[]>([]);
+  const { isAuthenticated } = useAuth();
 
   const [selectedTriggers, setSelectedTriggers] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
@@ -49,28 +53,54 @@ const QuickMoodWidget: React.FC = () => {
     'Social', 'Sleep', 'Academic', 'Exercise', 'Weather'
   ];
 
-  // Initialize today's state from localStorage
-  React.useEffect(() => {
-    try {
-      const logs = localStorage.getItem('quickMoodLogs');
-      if (!logs) return;
-      const parsed: QuickMoodData[] = JSON.parse(logs);
-      const today = new Date().toISOString().split('T')[0];
-      const todayEntry = parsed.find(l => l.timestamp && l.timestamp.startsWith(today));
-      if (todayEntry) {
-        setHasLoggedToday(true);
-        // if emotions object exists and has keys, prefer first key as primary emotion
-        const keys = todayEntry.emotions ? Object.keys(todayEntry.emotions) : [];
-        const first = keys.length > 0 ? keys[0] : (todayEntry.emotions && (todayEntry.emotions as any)[0]);
-        const idx = emotionOptions.findIndex(e => e.name === first);
-        if (idx >= 0) setSelectedEmotionIdx(idx);
-        setSelectedTriggers(todayEntry.triggers || []);
-        setNotes(todayEntry.notes || '');
+  // Initialize today's state from server when authenticated, otherwise from localStorage
+  useEffect(() => {
+    const init = async () => {
+      try {
+        if (isAuthenticated) {
+          // fetch server mood entries
+          const res = await wellnessAPI.getMoodEntries({ limit: 20 })
+          if (res && res.success && Array.isArray(res.data)) {
+            const parsed: QuickMoodData[] = res.data
+            setQuickLogsState(parsed)
+            const today = new Date().toISOString().split('T')[0]
+            const todayEntry = parsed.find(l => l.timestamp && l.timestamp.startsWith(today))
+            if (todayEntry) {
+              setHasLoggedToday(true)
+              const keys = todayEntry.emotions ? Object.keys(todayEntry.emotions) : []
+              const first = keys.length > 0 ? keys[0] : undefined
+              const idx = first ? emotionOptions.findIndex(e => e.name === first) : -1
+              if (idx >= 0) setSelectedEmotionIdx(idx)
+              setSelectedTriggers(todayEntry.triggers || [])
+              setNotes(todayEntry.notes || '')
+            }
+            return
+          }
+        }
+
+        // Fallback to localStorage
+        const logs = localStorage.getItem('quickMoodLogs')
+        if (!logs) return
+        const parsed: QuickMoodData[] = JSON.parse(logs)
+        setQuickLogsState(parsed)
+        const today = new Date().toISOString().split('T')[0]
+        const todayEntry = parsed.find(l => l.timestamp && l.timestamp.startsWith(today))
+        if (todayEntry) {
+          setHasLoggedToday(true)
+          const keys = todayEntry.emotions ? Object.keys(todayEntry.emotions) : []
+          const first = keys.length > 0 ? keys[0] : undefined
+          const idx = first ? emotionOptions.findIndex(e => e.name === first) : -1
+          if (idx >= 0) setSelectedEmotionIdx(idx)
+          setSelectedTriggers(todayEntry.triggers || [])
+          setNotes(todayEntry.notes || '')
+        }
+      } catch (err) {
+        // ignore parse errors
       }
-    } catch (err) {
-      // ignore parse errors
     }
-  }, []);
+
+    init()
+  }, [isAuthenticated]);
 
   const toggleTrigger = (trigger: string) => {
     setSelectedTriggers(prev => 
@@ -84,9 +114,10 @@ const QuickMoodWidget: React.FC = () => {
     // enforce once-per-day
     const today = new Date().toISOString().split('T')[0];
     try {
-      const existingLogs = localStorage.getItem('quickMoodLogs');
-      const logs: QuickMoodData[] = existingLogs ? JSON.parse(existingLogs) : [];
-      const todayExists = logs.some(l => l.timestamp && l.timestamp.startsWith(today));
+      const logsSource: QuickMoodData[] = quickLogsState && quickLogsState.length > 0
+        ? quickLogsState
+        : (localStorage.getItem('quickMoodLogs') ? JSON.parse(localStorage.getItem('quickMoodLogs') as string) : []);
+      const todayExists = logsSource.some(l => l.timestamp && l.timestamp.startsWith(today));
       if (todayExists) {
         setShowSuccess(false);
         setHasLoggedToday(true);
@@ -106,42 +137,38 @@ const QuickMoodWidget: React.FC = () => {
       timestamp: new Date().toISOString()
     };
 
+
     try {
       // Save to localStorage for immediate feedback
-      const existingLogs = localStorage.getItem('quickMoodLogs');
-      const logs: QuickMoodData[] = existingLogs ? JSON.parse(existingLogs) : [];
-      logs.unshift(moodData); // Add to beginning
-      localStorage.setItem('quickMoodLogs', JSON.stringify(logs));
+      const existingLogs = localStorage.getItem('quickMoodLogs')
+      const logs: QuickMoodData[] = existingLogs ? JSON.parse(existingLogs) : []
+      logs.unshift(moodData) // Add to beginning
+      localStorage.setItem('quickMoodLogs', JSON.stringify(logs))
+      setQuickLogsState(logs)
 
-      // Save to backend API
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3001/api/wellness/mood/quick', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+      // Save to backend API (if authenticated) using centralized api helper
+      if (isAuthenticated) {
+        try {
+          const result = await wellnessAPI.postQuickMood({
             emotions: moodData.emotions,
             triggers: selectedTriggers,
             notes: notes || undefined
           })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          console.log('Mood saved to backend:', result.data);
-        } else {
-          console.warn('Backend save failed:', result.message);
+          if (result && result.success) {
+            // prefer server copy by re-fetching a small set
+            const refetch = await wellnessAPI.getMoodEntries({ limit: 20 })
+            if (refetch && refetch.success && Array.isArray(refetch.data)) {
+              setQuickLogsState(refetch.data)
+            }
+          } else {
+            console.warn('Backend save failed:', result?.message)
+          }
+        } catch (backendError) {
+          console.error('Backend API error (continuing with localStorage):', backendError)
         }
-      } catch (backendError) {
-        console.error('Backend API error (continuing with localStorage):', backendError);
-        // Continue even if backend fails - data is in localStorage
       }
 
-      // Show success and lock for the day
+  // Show success and lock for the day
       setShowSuccess(true);
       setHasLoggedToday(true);
       setTimeout(() => setShowSuccess(false), 3000);
@@ -267,15 +294,11 @@ const QuickMoodWidget: React.FC = () => {
         {/* Quick Stats */}
         <div className="pt-3 border-t border-gray-200">
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>Tracked today: {
-              (() => {
-                const logs = localStorage.getItem('quickMoodLogs');
-                if (!logs) return 0;
-                const parsed: QuickMoodData[] = JSON.parse(logs);
-                const today = new Date().toISOString().split('T')[0];
-                return parsed.filter(log => log.timestamp.startsWith(today)).length;
-              })()
-            }</span>
+            <span>Tracked today: {quickLogsState.filter(log => {
+                  const today = new Date().toISOString().split('T')[0]
+                  return !!(log.timestamp && log.timestamp.startsWith(today))
+                }).length}
+                </span>
             <a href="/mood" className="text-purple-600 hover:text-purple-700 font-medium">
               View history →
             </a>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Smile, Heart, Zap, TrendingUp, Calendar, Clock, Sparkles, BarChart3, Activity, Brain } from 'lucide-react';
+import { wellnessAPI } from '../services/api';
 
 interface QuickMoodData {
   emotions: { [key: string]: number };
@@ -11,16 +12,36 @@ interface QuickMoodData {
 const MoodPage: React.FC = () => {
   const [quickMoodLogs, setQuickMoodLogs] = useState<QuickMoodData[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  // If you have an auth context, replace this with proper user from context (e.g. const { user } = useAuth();)
+  const user: any = null;
 
-  // Load quick mood logs from localStorage
+  // Load quick mood logs: prefer server when authenticated, fallback to localStorage
   useEffect(() => {
-    const quickLogs = localStorage.getItem('quickMoodLogs');
-    if (quickLogs) {
-      setQuickMoodLogs(JSON.parse(quickLogs));
+    const init = async () => {
+      try {
+        if (user) {
+          const res = await wellnessAPI.getMoodEntries({ limit: 100 });
+          if (res && res.success && Array.isArray(res.data)) {
+            setQuickMoodLogs(res.data as QuickMoodData[]);
+            return;
+          }
+        }
+
+        const quickLogs = localStorage.getItem('quickMoodLogs');
+        if (quickLogs) {
+          setQuickMoodLogs(JSON.parse(quickLogs));
+        }
+      } catch (err) {
+        console.error('Failed to load mood logs:', err);
+        const quickLogs = localStorage.getItem('quickMoodLogs');
+        if (quickLogs) setQuickMoodLogs(JSON.parse(quickLogs));
+      }
     }
+
+    init();
     // Trigger animations
     setTimeout(() => setIsLoaded(true), 100);
-  }, []);
+  }, [user]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

@@ -353,3 +353,25 @@ export const gamificationAPI = {
 }
 
 export default api
+
+// Wellness API methods (mood tracking)
+export const wellnessAPI = {
+  // Get mood entries for the authenticated user (server is scoped to user)
+  getMoodEntries: async (params: { limit?: number } = {}) => {
+    const query = params.limit ? `?limit=${params.limit}` : ''
+    const response = await api.get(`/wellness/mood${query}`)
+    return response.data
+  },
+
+  // Post a quick mood (server will upsert per-day)
+  postQuickMood: async (payload: { emotions: any; triggers?: string[]; notes?: string }) => {
+    const response = await api.post('/wellness/mood/quick', payload)
+    return response.data
+  },
+
+  // Create a full mood entry
+  postMoodEntry: async (payload: any) => {
+    const response = await api.post('/wellness/mood', payload)
+    return response.data
+  }
+}

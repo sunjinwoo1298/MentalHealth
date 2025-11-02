@@ -17,7 +17,6 @@ export function AvatarGemini({ name = "User" }: { name?: string }) {
         className="relative size-16 md:size-20 rounded-2xl shadow-bubbly border-2 border-white"
       />
       <div className="ml-3 z-10">
-        <div className="text-sm text-muted-foreground">Gemini</div>
         <div className="flex items-center gap-2 text-xl md:text-2xl font-extrabold tracking-tight">
           Hi {name}! <Sparkles className="size-5 text-amber-500" aria-hidden />
         </div>

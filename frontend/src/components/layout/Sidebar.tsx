@@ -2,8 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import { Bot, Home, MessageCircle, HeartHandshake, BarChart3, Sparkles, Brain, Moon, NotebookPen, Settings2 } from "lucide-react";
-import { set } from "date-fns";
+import { Bot, Home, MessageCircle, HeartHandshake, BarChart3, Sparkles, Brain, Moon, NotebookPen, Settings2, Dumbbell } from "lucide-react";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: Home, color: "blue" },
@@ -15,6 +14,7 @@ const navItems = [
     color: "red",
     children: [
       { to: "/meditation", label: "Meditation", icon: Moon },
+      { to: "/exercises", label: "Exercises", icon: Dumbbell },
       { to: "/journal", label: "Journal", icon: NotebookPen },
       { to: "/mood", label: "Mood Tracker", icon: Brain },
       { to: "/checkin", label: "Check-in", icon: Sparkles },

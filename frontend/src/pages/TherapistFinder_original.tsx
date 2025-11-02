@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import {
-  MapPin,
-  Star,
-  DollarSign,
-  Video,
-  Users,
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Search, 
+  MapPin, 
+  Star, 
+  DollarSign, 
+  Video, 
+  Users, 
   Calendar,
   Phone,
   Mail,
@@ -12,12 +13,16 @@ import {
   GraduationCap,
   Globe,
   ArrowLeft,
+  Filter,
+  X,
   ChevronRight,
   UserCheck,
   Briefcase,
   Clock,
   MapPinned
-} from 'lucide-react';// Mock therapist data (replace with API call in production)
+} from 'lucide-react';
+
+// Mock therapist data (replace with API call in production)
 interface Therapist {
   id: string;
   name: string;
@@ -40,10 +45,6 @@ interface Therapist {
     max: number;
   };
   verified: boolean;
-  phone: string;
-  email: string;
-  bio: string;
-  education: string;
 }
 
 const MOCK_THERAPISTS: Therapist[] = [
@@ -61,11 +62,7 @@ const MOCK_THERAPISTS: Therapist[] = [
     sessionType: ['in-person', 'online'],
     languages: ['English', 'Hindi'],
     fee: { min: 1500, max: 2500 },
-    verified: true,
-    phone: '+91 98765 43210',
-    email: 'dr.priya@therapy.in',
-    bio: 'Specialized in cognitive behavioral therapy with a focus on young adults facing academic and career pressures. Using evidence-based approaches to help clients develop healthy coping mechanisms.',
-    education: 'PhD in Clinical Psychology, AIIMS New Delhi'
+    verified: true
   },
   {
     id: '2',
@@ -81,11 +78,7 @@ const MOCK_THERAPISTS: Therapist[] = [
     sessionType: ['in-person', 'online'],
     languages: ['English', 'Hindi', 'Punjabi'],
     fee: { min: 2000, max: 3000 },
-    verified: true,
-    phone: '+91 98765 43211',
-    email: 'dr.rajesh@therapy.in',
-    bio: 'Expert in family dynamics and relationship issues with over a decade of experience in marriage counseling and trauma recovery.',
-    education: 'MD Psychiatry, PGI Chandigarh'
+    verified: true
   },
   {
     id: '3',
@@ -101,11 +94,7 @@ const MOCK_THERAPISTS: Therapist[] = [
     sessionType: ['online'],
     languages: ['English', 'Hindi', 'Malayalam'],
     fee: { min: 1200, max: 2000 },
-    verified: true,
-    phone: '+91 98765 43212',
-    email: 'dr.ananya@therapy.in',
-    bio: 'Passionate about helping teenagers navigate academic pressures and build healthy self-esteem through compassionate counseling.',
-    education: 'MSc Clinical Psychology, Delhi University'
+    verified: true
   },
   {
     id: '4',
@@ -121,11 +110,7 @@ const MOCK_THERAPISTS: Therapist[] = [
     sessionType: ['in-person'],
     languages: ['English', 'Hindi'],
     fee: { min: 2500, max: 3500 },
-    verified: true,
-    phone: '+91 98765 43213',
-    email: 'dr.vikram@therapy.in',
-    bio: 'Senior psychologist specializing in trauma recovery and anxiety disorders with evidence-based therapeutic approaches.',
-    education: 'PhD Clinical Psychology, NIMHANS Bangalore'
+    verified: true
   },
   {
     id: '5',
@@ -141,11 +126,7 @@ const MOCK_THERAPISTS: Therapist[] = [
     sessionType: ['in-person', 'online'],
     languages: ['English', 'Hindi', 'Tamil'],
     fee: { min: 1800, max: 2800 },
-    verified: true,
-    phone: '+91 98765 43214',
-    email: 'dr.meera@therapy.in',
-    bio: 'Integrating traditional mindfulness practices with modern therapeutic techniques for holistic wellness and stress management.',
-    education: 'MSc Psychology, Mumbai University'
+    verified: true
   },
   {
     id: '6',
@@ -161,11 +142,7 @@ const MOCK_THERAPISTS: Therapist[] = [
     sessionType: ['in-person', 'online'],
     languages: ['English', 'Hindi', 'Gujarati'],
     fee: { min: 2200, max: 3200 },
-    verified: true,
-    phone: '+91 98765 43215',
-    email: 'dr.arjun@therapy.in',
-    bio: 'Compassionate approach to addiction recovery with proven track record in substance abuse treatment and behavioral modification.',
-    education: 'MD Psychiatry, KGMU Lucknow'
+    verified: true
   }
 ];
 
@@ -173,13 +150,12 @@ const SPECIALTIES = ['Anxiety', 'Depression', 'Stress Management', 'Family Thera
   'Trauma', 'Teen Counseling', 'Academic Stress', 'OCD', 'PTSD', 'Mindfulness', 'Burnout', 'Addiction Recovery'];
 
 export default function TherapistFinder() {
-  const [therapists] = useState<Therapist[]>(MOCK_THERAPISTS);
+  const [therapists, setTherapists] = useState<Therapist[]>(MOCK_THERAPISTS);
   const [filteredTherapists, setFilteredTherapists] = useState<Therapist[]>(MOCK_THERAPISTS);
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'list' | 'detail'>('list');
   
   // Filters
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
@@ -187,23 +163,23 @@ export default function TherapistFinder() {
   const [selectedSessionType, setSelectedSessionType] = useState<string>('');
   const [selectedAvailability, setSelectedAvailability] = useState<string>('');
   
-  const detailMapRef = useRef<HTMLDivElement>(null);
-  const googleMapRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const googleMapRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
 
   // Trigger animations on mount
   useEffect(() => {
     setTimeout(() => setIsLoaded(true), 100);
   }, []);
 
-  // Initialize Google Map for Detail Page Only
+  // Initialize Google Map
   useEffect(() => {
-    if (!detailMapRef.current || currentPage !== 'detail' || !selectedTherapist) return;
+    if (!mapRef.current) return;
 
-    // Initialize map centered on selected therapist
-    const map = new (window as any).google.maps.Map(detailMapRef.current, {
-      center: selectedTherapist.location,
-      zoom: 15,
+    // Initialize map centered on Delhi
+    const map = new google.maps.Map(mapRef.current, {
+      center: { lat: 28.6139, lng: 77.2090 },
+      zoom: 11,
       styles: [
         {
           featureType: 'water',
@@ -240,20 +216,70 @@ export default function TherapistFinder() {
 
     googleMapRef.current = map;
 
-    // Add single marker for selected therapist
-    const marker = new (window as any).google.maps.Marker({
-      position: selectedTherapist.location,
-      map: map,
-      title: selectedTherapist.name,
-      animation: (window as any).google.maps.Animation.DROP,
-      icon: {
-        url: `data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 40 50"><path fill="${selectedTherapist.availability === 'available' ? '%2310b981' : selectedTherapist.availability === 'limited' ? '%23f59e0b' : '%23ef4444'}" d="M20 0C9 0 0 9 0 20c0 15 20 30 20 30s20-15 20-30c0-11-9-20-20-20z"/><circle cx="20" cy="20" r="8" fill="white"/></svg>`,
-        scaledSize: new (window as any).google.maps.Size(40, 50),
-      },
+    // Add search box
+    const input = document.getElementById('map-search') as HTMLInputElement;
+    if (input) {
+      const searchBox = new google.maps.places.SearchBox(input);
+      map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+      searchBox.addListener('places_changed', () => {
+        const places = searchBox.getPlaces();
+        if (!places || places.length === 0) return;
+
+        const bounds = new google.maps.LatLngBounds();
+        places.forEach((place) => {
+          if (!place.geometry || !place.geometry.location) return;
+          bounds.extend(place.geometry.location);
+        });
+        map.fitBounds(bounds);
+      });
+    }
+
+    updateMarkers(filteredTherapists);
+  }, []);
+
+  // Update markers when filtered therapists change
+  useEffect(() => {
+    updateMarkers(filteredTherapists);
+  }, [filteredTherapists]);
+
+  const updateMarkers = (therapistsToShow: Therapist[]) => {
+    if (!googleMapRef.current) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+
+    // Add new markers
+    const bounds = new google.maps.LatLngBounds();
+    
+    therapistsToShow.forEach((therapist) => {
+      const marker = new google.maps.Marker({
+        position: therapist.location,
+        map: googleMapRef.current!,
+        title: therapist.name,
+        animation: google.maps.Animation.DROP,
+        icon: {
+          url: `data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 40 50"><path fill="${therapist.availability === 'available' ? '%2310b981' : therapist.availability === 'limited' ? '%23f59e0b' : '%23ef4444'}" d="M20 0C9 0 0 9 0 20c0 15 20 30 20 30s20-15 20-30c0-11-9-20-20-20z"/><circle cx="20" cy="20" r="8" fill="white"/></svg>`,
+          scaledSize: new google.maps.Size(40, 50),
+        },
+      });
+
+      marker.addListener('click', () => {
+        setSelectedTherapist(therapist);
+        googleMapRef.current?.panTo(therapist.location);
+        googleMapRef.current?.setZoom(14);
+      });
+
+      markersRef.current.push(marker);
+      bounds.extend(therapist.location);
     });
 
-    markerRef.current = marker;
-  }, [currentPage, selectedTherapist]);
+    // Fit map to show all markers
+    if (therapistsToShow.length > 0) {
+      googleMapRef.current.fitBounds(bounds);
+    }
+  };
 
   // Apply filters
   useEffect(() => {
@@ -298,14 +324,10 @@ export default function TherapistFinder() {
     setSelectedAvailability('');
   };
 
-  const handleViewDetails = (therapist: Therapist) => {
+  const handleTherapistClick = (therapist: Therapist) => {
     setSelectedTherapist(therapist);
-    setCurrentPage('detail');
-    googleMapRef.current = null; // Reset map to reinitialize
-  };
-
-  const handleBackToList = () => {
-    setCurrentPage('list');
+    googleMapRef.current?.panTo(therapist.location);
+    googleMapRef.current?.setZoom(14);
   };
 
   return (
@@ -317,20 +339,12 @@ export default function TherapistFinder() {
         <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-gradient-to-br from-teal-200/40 to-emerald-300/30 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
-      {/* PAGE 1: LIST VIEW */}
-      <div
-        className={`relative transition-all duration-700 ease-in-out ${
-          currentPage === 'list'
-            ? 'opacity-100 translate-x-0'
-            : 'opacity-0 -translate-x-full absolute inset-0 pointer-events-none'
-        }`}
-      >
-        <main className="relative z-10 p-6 max-w-[1400px] mx-auto">
+      <main className="relative z-10 p-6 max-w-[1800px] mx-auto">
         {/* Header */}
         <div className={`mb-8 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-xl rounded-full px-6 py-3 shadow-lg border border-blue-200/50 mb-4 hover:shadow-xl transition-all duration-300">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center shadow-md">
-              <MapPinned className="w-6 h-6 text-white" />
+              <span className="text-2xl">🗺️</span>
             </div>
             <div>
               <p className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
@@ -425,10 +439,44 @@ export default function TherapistFinder() {
           </div>
         </div>
 
-        {/* Main Content: Therapist Cards */}
-        <div className={`transition-all duration-700 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        {/* Main Content: Map + Results */}
+        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-700 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          
+          {/* Map Section */}
+          <div className="lg:sticky lg:top-6 h-[600px] lg:h-[calc(100vh-12rem)]">
+            <div className="h-full bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 overflow-hidden">
+              <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-cyan-50">
+                <input
+                  id="map-search"
+                  type="text"
+                  placeholder="Search locations on map..."
+                  className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300"
+                />
+              </div>
+              <div ref={mapRef} className="w-full h-[calc(100%-5rem)]" />
+              
+              {/* Map Legend */}
+              <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-gray-200">
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                    <span className="font-medium">Available</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                    <span className="font-medium">Limited</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span className="font-medium">Busy</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Therapist Cards Section */}
-          <div className="space-y-6 max-w-5xl mx-auto">
+          <div className="space-y-6">
             {isLoading ? (
               // Skeleton Loader
               <div className="space-y-4">
@@ -465,8 +513,12 @@ export default function TherapistFinder() {
               filteredTherapists.map((therapist, index) => (
                 <div
                   key={therapist.id}
-                  onClick={() => handleViewDetails(therapist)}
-                  className="group bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-lg border-2 border-gray-200/50 hover:border-blue-300 hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2"
+                  onClick={() => handleTherapistClick(therapist)}
+                  className={`group bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-lg border-2 hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2 ${
+                    selectedTherapist?.id === therapist.id 
+                      ? 'border-blue-400 ring-4 ring-blue-100' 
+                      : 'border-gray-200/50 hover:border-blue-300'
+                  }`}
                   style={{
                     animation: `slideInUp 0.5s ease-out ${index * 0.1}s both`
                   }}
@@ -474,12 +526,12 @@ export default function TherapistFinder() {
                   <div className="flex gap-6">
                     {/* Avatar */}
                     <div className="flex-shrink-0">
-                      <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                        <Users className="w-12 h-12 text-white" />
+                      <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-3xl flex items-center justify-center text-6xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                        {therapist.image}
                       </div>
                       {therapist.verified && (
                         <div className="mt-2 flex items-center gap-1 text-xs font-semibold text-emerald-600">
-                          <UserCheck className="w-4 h-4" />
+                          <span>✓</span>
                           <span>Verified</span>
                         </div>
                       )}
@@ -508,7 +560,7 @@ export default function TherapistFinder() {
                       {/* Rating & Experience */}
                       <div className="flex items-center gap-4 mb-3">
                         <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                          <span className="text-yellow-500">★</span>
                           <span className="font-bold text-gray-800">{therapist.rating}</span>
                           <span className="text-sm text-gray-500">({therapist.reviews} reviews)</span>
                         </div>
@@ -532,11 +584,11 @@ export default function TherapistFinder() {
                       {/* Session Types & Languages */}
                       <div className="flex flex-wrap gap-3 mb-4 text-sm text-gray-600">
                         <div className="flex items-center gap-2">
-                          <Video className="w-4 h-4" />
+                          <span>💻</span>
                           <span>{therapist.sessionType.join(', ')}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Globe className="w-4 h-4" />
+                          <span>🗣️</span>
                           <span>{therapist.languages.join(', ')}</span>
                         </div>
                       </div>
@@ -549,9 +601,8 @@ export default function TherapistFinder() {
                             ₹{therapist.fee.min} - ₹{therapist.fee.max}
                           </div>
                         </div>
-                        <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl flex items-center gap-2">
-                          View Details
-                          <ChevronRight className="w-5 h-5" />
+                        <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                          Book Session
                         </button>
                       </div>
                     </div>
@@ -562,235 +613,6 @@ export default function TherapistFinder() {
           </div>
         </div>
       </main>
-      </div>
-
-      {/* PAGE 2: DETAIL VIEW */}
-      <div
-        className={`relative transition-all duration-700 ease-in-out ${
-          currentPage === 'detail'
-            ? 'opacity-100 translate-x-0'
-            : 'opacity-0 translate-x-full absolute inset-0 pointer-events-none'
-        }`}
-      >
-        {selectedTherapist && (
-          <div className="min-h-screen">
-            {/* Back Button Header */}
-            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-sm">
-              <div className="container mx-auto px-6 py-4 max-w-[1400px]">
-                <button
-                  onClick={handleBackToList}
-                  className="flex items-center gap-2 text-gray-700 hover:text-purple-600 transition-all font-semibold group"
-                >
-                  <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                  Back to List
-                </button>
-              </div>
-            </div>
-
-            <div className="container mx-auto px-6 py-8 max-w-[1400px]">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column - Profile & Details */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Profile Card */}
-                  <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-gray-100">
-                    <div className="flex items-start gap-6 mb-6">
-                      <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-3xl flex items-center justify-center shadow-lg flex-shrink-0">
-                        <Users className="w-12 h-12 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h1 className="text-4xl font-bold text-gray-800">{selectedTherapist.name}</h1>
-                          {selectedTherapist.verified && (
-                            <div className="flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full">
-                              <UserCheck className="w-4 h-4" />
-                              <span className="text-xs font-semibold">Verified</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-gray-600 mb-3">
-                          <div className="flex items-center gap-2">
-                            <Briefcase className="w-5 h-5" />
-                            <span className="font-medium">{selectedTherapist.experience} years experience</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 rounded-2xl w-fit">
-                          <Star className="w-5 h-5 text-white fill-white" />
-                          <span className="text-xl font-bold text-white">{selectedTherapist.rating}</span>
-                          <span className="text-sm text-white/90">({selectedTherapist.reviews} reviews)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bio */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-bold text-gray-800 mb-3">About</h3>
-                      <p className="text-gray-600 leading-relaxed">{selectedTherapist.bio}</p>
-                    </div>
-
-                    {/* Education */}
-                    <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-2xl mb-6">
-                      <GraduationCap className="w-6 h-6 text-purple-600 flex-shrink-0 mt-1" />
-                      <div>
-                        <h4 className="font-bold text-gray-800 mb-1">Education</h4>
-                        <p className="text-gray-600">{selectedTherapist.education}</p>
-                      </div>
-                    </div>
-
-                    {/* Specialties */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <Award className="w-5 h-5 text-purple-600" />
-                        Specializations
-                      </h3>
-                      <div className="flex flex-wrap gap-3">
-                        {selectedTherapist.specialty.map((spec, idx) => (
-                          <span
-                            key={idx}
-                            className="px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 font-medium rounded-xl"
-                          >
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Session Types */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-bold text-gray-800 mb-3">Session Options</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        {selectedTherapist.sessionType.includes('online') && (
-                          <div className="flex items-center gap-3 px-4 py-3 bg-blue-50 rounded-xl">
-                            <Video className="w-5 h-5 text-blue-600" />
-                            <span className="font-medium text-blue-700">Online Sessions</span>
-                          </div>
-                        )}
-                        {selectedTherapist.sessionType.includes('in-person') && (
-                          <div className="flex items-center gap-3 px-4 py-3 bg-purple-50 rounded-xl">
-                            <Users className="w-5 h-5 text-purple-600" />
-                            <span className="font-medium text-purple-700">In-Person Sessions</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Languages */}
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <Globe className="w-5 h-5 text-teal-600" />
-                        Languages
-                      </h3>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {selectedTherapist.languages.map((lang, idx) => (
-                          <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                            {lang}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Map Card */}
-                  <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-purple-600" />
-                      Location
-                    </h3>
-                    <div className="mb-4">
-                      <p className="text-gray-600">{selectedTherapist.location.address}</p>
-                    </div>
-                    <div ref={detailMapRef} className="w-full h-96 rounded-2xl overflow-hidden shadow-lg"></div>
-                  </div>
-                </div>
-
-                {/* Right Column - Contact & Booking */}
-                <div className="space-y-6">
-                  {/* Price Card */}
-                  <div className="bg-gradient-to-br from-green-400 to-emerald-600 rounded-3xl p-6 shadow-xl text-white sticky top-24">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-3 bg-white/20 rounded-2xl">
-                        <DollarSign className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-white/80">Session Fee</p>
-                        <p className="text-3xl font-bold">₹{selectedTherapist.fee.min}-₹{selectedTherapist.fee.max}</p>
-                      </div>
-                    </div>
-                    <button className="w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-lg hover:shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
-                      <Calendar className="w-5 h-5" />
-                      Book Appointment
-                    </button>
-                  </div>
-
-                  {/* Contact Card */}
-                  <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">Contact Information</h3>
-                    <div className="space-y-4">
-                      <a
-                        href={`tel:${selectedTherapist.phone}`}
-                        className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-2xl transition-all group"
-                      >
-                        <div className="p-2 bg-blue-500 rounded-xl group-hover:scale-110 transition-transform">
-                          <Phone className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Phone</p>
-                          <p className="font-semibold text-gray-800">{selectedTherapist.phone}</p>
-                        </div>
-                      </a>
-                      <a
-                        href={`mailto:${selectedTherapist.email}`}
-                        className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-2xl transition-all group"
-                      >
-                        <div className="p-2 bg-purple-500 rounded-xl group-hover:scale-110 transition-transform">
-                          <Mail className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Email</p>
-                          <p className="font-semibold text-gray-800">{selectedTherapist.email}</p>
-                        </div>
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Quick Stats */}
-                  <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Stats</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Award className="w-5 h-5" />
-                          <span className="font-medium">Experience</span>
-                        </div>
-                        <span className="font-bold text-gray-800">{selectedTherapist.experience} years</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Star className="w-5 h-5" />
-                          <span className="font-medium">Reviews</span>
-                        </div>
-                        <span className="font-bold text-gray-800">{selectedTherapist.reviews}</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Clock className="w-5 h-5" />
-                          <span className="font-medium">Availability</span>
-                        </div>
-                        <span className={`font-bold capitalize ${
-                          selectedTherapist.availability === 'available' ? 'text-green-600' :
-                          selectedTherapist.availability === 'limited' ? 'text-amber-600' :
-                          'text-red-600'
-                        }`}>
-                          {selectedTherapist.availability}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
 
       <style>{`
         @keyframes slideInUp {

@@ -1,15 +1,17 @@
-
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import io from 'socket.io-client';
 import { useVrmAvatar } from '../../hooks/useVrmAvatar';
 import { generateAndPlaySpeech, checkTTSStatus, audioManager } from '../../services/audioManager';
 import { useGamification } from '../../contexts/GamificationContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { mentalHealthContext } from '../../App';
 import { emotionAnalysisService, type EmotionAnalysisResult } from '../../services/emotionAnalysis';
 import CrisisAlert from './CrisisAlert';
 import AgentInfoPanel from './AgentInfoPanel';
 import PreferencesButton from './PreferencesButton';
 import InlineCrisisCard from './InlineCrisisCard';
+import ContextSelector from './ContextSelector';
+import ChatHistorySidebar from './ChatHistorySidebar';
 import FloatingCrisisButton from './FloatingCrisisButton';
 
 export type ChatMessage = {
@@ -19,6 +21,7 @@ export type ChatMessage = {
   timestamp: string;
   userId?: string;
   context?: string; // Support context
+  sessionId?: string; // Track chat session
   emotional_context?: string[]; // Backend emotion detection
   avatar_emotion?: string; // Backend avatar emotion
   emotion_intensity?: number; // Backend emotion intensity
@@ -154,6 +157,8 @@ const createContextWelcome = (context: string): ChatMessage => {
 export default function ChatWindow() {
   // Access context from App
   const context=useContext(mentalHealthContext);
+  const { user } = useAuth(); // Get authenticated user
+  
   // const contextInfo = getContextInfo(context?.currentContext || 'general'); // Currently unused
   const [messages, setMessages] = useState<ChatMessage[]>([createContextWelcome(context?.currentContext || 'general')]);
   const [input, setInput] = useState('');
@@ -176,6 +181,11 @@ export default function ChatWindow() {
   const [isLipSyncSetup, setIsLipSyncSetup] = useState(false); // Lip sync setup state
   const [isProcessingAudio, setIsProcessingAudio] = useState(false); // Audio processing state
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // Chat history sidebar state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
 
   // Gamification integration
   const { addPendingReward } = useGamification();
@@ -513,6 +523,7 @@ export default function ChatWindow() {
 
   useEffect(() => {
     // Connect to socket
+    console.log('🔌 Attempting to connect to socket at:', SOCKET_URL);
     socket.connect();
 
     // Reset emotion analysis for new chat session
@@ -520,15 +531,17 @@ export default function ChatWindow() {
 
     // Socket event listeners
     socket.on('connect', () => {
-      console.log('Connected to server:', socket.id);
+      console.log('✅ Connected to server:', socket.id);
       setIsConnected(true);
       
       // Start tracking chat session
       setChatStartTime(new Date());
       setMessageCount(0);
       
-      // Join user room (using socket.id as temporary user ID)
-      socket.emit('join_room', socket.id);
+      // Join user room with actual user ID
+      const userId = user?.id || socket.id;
+      socket.emit('join_room', userId);
+      console.log(`Joined room for user: ${userId}`);
     });
 
     socket.on('disconnect', () => {
@@ -554,6 +567,11 @@ export default function ChatWindow() {
 
     socket.on('chat:message', (msg: ChatMessage) => {
       console.log('Received message:', msg);
+      
+      // Update session ID if provided from backend
+      if (msg.sessionId) {
+        setCurrentSessionId(msg.sessionId);
+      }
       
       // Handle crisis info if present
       if (msg.type === 'ai' && msg.crisis_info) {
@@ -716,6 +734,15 @@ export default function ChatWindow() {
       // You can use this data to show emotional trends or insights
     });
 
+    // Socket error handlers
+    socket.on('connect_error', (error) => {
+      console.error('❌ Socket connection error:', error);
+    });
+
+    socket.on('error', (error) => {
+      console.error('❌ Socket error:', error);
+    });
+
     // Cleanup on unmount
     return () => {
       socket.off('connect');
@@ -726,6 +753,8 @@ export default function ChatWindow() {
       socket.off('chat:error');
       socket.off('chat:emotional_awareness');
       socket.off('emotional_status_update');
+      socket.off('connect_error');
+      socket.off('error');
       socket.disconnect();
     };
   }, []);
@@ -768,14 +797,23 @@ export default function ChatWindow() {
       return;
     }
     
+    const userId = user?.id || socket.id; // Use authenticated user ID
+    console.log('🚀 Sending message with userId:', userId);
+    console.log('🔐 User object:', user);
+    console.log('🔌 Socket ID:', socket.id);
+    console.log('📋 Current SessionId:', currentSessionId);
+    
     const msg: ChatMessage = {
       id: `user-${Date.now()}`,
       type: 'user',
       text: input,
       timestamp: new Date().toISOString(),
-      userId: socket.id,
+      userId: userId,
       context: context?.currentContext, // Include support context
+      sessionId: currentSessionId || undefined, // Include current session if exists
     };
+
+    console.log('📤 Full message being sent:', msg);
 
     // Update avatar emotion based on user message immediately
     updateAvatarEmotion(msg.text, 'user');
@@ -812,8 +850,106 @@ export default function ChatWindow() {
   //   }
   // };
 
+  // Load previous session messages
+  const loadSession = async (sessionId: string) => {
+    try {
+      setIsLoadingSession(true);
+      console.log('📂 Loading session:', sessionId);
+      
+      const response = await fetch(`${SOCKET_URL}/api/chat/sessions/${sessionId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Convert backend messages to ChatMessage format
+        const loadedMessages: ChatMessage[] = data.messages.map((msg: any) => ({
+          id: msg.id,
+          type: msg.type,
+          text: msg.text,
+          timestamp: msg.timestamp,
+          context: data.session.session_type,
+          emotion_tags: msg.emotion_tags,
+          metadata: msg.metadata
+        }));
+
+        setMessages(loadedMessages);
+        setCurrentSessionId(sessionId);
+        setIsSidebarOpen(false); // Close sidebar after loading
+        
+        console.log(`✅ Loaded ${loadedMessages.length} messages from session ${sessionId}`);
+      } else {
+        console.error('❌ Failed to load session:', response.statusText);
+      }
+    } catch (error) {
+      console.error('❌ Error loading session:', error);
+    } finally {
+      setIsLoadingSession(false);
+    }
+  };
+
+  // Create new chat session
+  const createNewChat = async () => {
+    console.log('➕ Creating new chat session');
+    
+    // End current session if it exists
+    if (currentSessionId && user?.id) {
+      try {
+        console.log('🔚 Ending current session:', currentSessionId);
+        await fetch(`${SOCKET_URL}/api/chat/sessions/${currentSessionId}/end`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            moodAfter: 5 // Default neutral mood
+          })
+        });
+        console.log('✅ Session ended successfully');
+      } catch (error) {
+        console.error('❌ Error ending session:', error);
+      }
+    }
+    
+    // Clear current session
+    setCurrentSessionId(null);
+    
+    // Reset messages to welcome message
+    setMessages([createContextWelcome(context?.currentContext || 'general')]);
+    
+    // Reset counters
+    setMessageCount(0);
+    setConversationCount(0);
+    setChatStartTime(new Date());
+    
+    // Reset emotional state
+    emotionAnalysisService.resetConversation();
+    setEmotionalContext([]);
+    setShowEmotionalIndicator(false);
+    
+    // Close sidebar
+    setIsSidebarOpen(false);
+    
+    console.log('✅ New chat session ready to start');
+  };
+
   return (
-    <div className="h-full relative bg-transparent overflow-hidden">
+    <div className="flex h-full">
+      {/* Chat History Sidebar */}
+      <ChatHistorySidebar
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        onSessionSelect={loadSession}
+        onNewChat={createNewChat}
+        currentSessionId={currentSessionId || undefined}
+      />
+      
+      {/* Main Chat Area */}
+    <div className="flex-1 h-full relative bg-transparent overflow-hidden">
       {/* VRM Avatar Background - Full Screen */}
       <div className="absolute inset-0">
         <canvas 
@@ -914,6 +1050,16 @@ export default function ChatWindow() {
 
         {/* Chat Messages - Center/Bottom Area */}
         <div className="flex-1 flex flex-col justify-end p-6 pointer-events-none">
+          {/* Loading Session Indicator */}
+          {isLoadingSession && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-20">
+              <div className="bg-white/10 border border-white/20 rounded-lg p-6 backdrop-blur-md">
+                <div className="animate-spin w-12 h-12 border-3 border-purple-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                <p className="text-white text-center font-medium">Loading conversation...</p>
+              </div>
+            </div>
+          )}
+          
           <div className="max-h-[60vh] overflow-y-auto space-y-4 pointer-events-auto">
             {messages.map((msg) => (
               <React.Fragment key={msg.id}>
@@ -1134,6 +1280,9 @@ export default function ChatWindow() {
           </form>
         </div>
       </div>
+      {/* Close Main Chat Area div */}
+      </div>
+      {/* Close flex container div */}
 
       {/* Floating Crisis Button - appears when crisis level >= 3 */}
       {showFloatingCrisisButton && currentCrisisInfo && (

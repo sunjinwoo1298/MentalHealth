@@ -156,4 +156,212 @@ router.post('/context', authMiddleware, async (req: Request, res: Response): Pro
   }
 });
 
+// GET /api/chat/sessions - Get user's chat sessions
+router.get('/sessions', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      logger.warn('Unauthorized access attempt to /sessions endpoint');
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    logger.info(`📋 Fetching sessions for user: ${userId}`);
+    const { limit = 50, offset = 0, context, status = 'all' } = req.query;
+
+    let query = `
+      SELECT 
+        cs.id,
+        cs.session_type,
+        cs.status,
+        cs.mood_before,
+        cs.mood_after,
+        cs.intervention_triggered,
+        cs.started_at,
+        cs.ended_at,
+        COUNT(cm.id) as message_count,
+        (
+          SELECT pgp_sym_decrypt(cm2.message_content_encrypted::bytea, $1)::text
+          FROM chat_messages cm2
+          WHERE cm2.session_id = cs.id 
+            AND cm2.sender_type = 'user'
+          ORDER BY cm2.timestamp ASC
+          LIMIT 1
+        ) as first_message_preview
+      FROM chat_sessions cs
+      LEFT JOIN chat_messages cm ON cm.session_id = cs.id
+      WHERE cs.user_id = $2
+    `;
+
+    const params: any[] = [process.env.DB_ENCRYPTION_KEY || 'default_key', userId];
+    let paramIndex = 3;
+
+    // Add context filter
+    if (context && context !== 'all') {
+      query += ` AND cs.session_type = $${paramIndex}`;
+      params.push(context);
+      paramIndex++;
+    }
+
+    // Add status filter
+    if (status && status !== 'all') {
+      query += ` AND cs.status = $${paramIndex}`;
+      params.push(status);
+      paramIndex++;
+    }
+
+    query += `
+      GROUP BY cs.id
+      ORDER BY cs.started_at DESC
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+    `;
+
+    params.push(Number(limit), Number(offset));
+
+    const result = await db.query(query, params);
+    
+    logger.info(`✅ Found ${result.rows.length} sessions for user ${userId}`);
+    logger.debug(`Session query params: limit=${limit}, offset=${offset}, context=${context}, status=${status}`);
+
+    // Get total count
+    const countQuery = `
+      SELECT COUNT(DISTINCT cs.id) as total
+      FROM chat_sessions cs
+      WHERE cs.user_id = $1
+      ${context && context !== 'all' ? `AND cs.session_type = $2` : ''}
+    `;
+    const countParams = context && context !== 'all' ? [userId, context] : [userId];
+    const countResult = await db.query(countQuery, countParams);
+
+    const sessionsData = {
+      sessions: result.rows.map(row => ({
+        ...row,
+        message_count: parseInt(row.message_count)
+      })),
+      total: parseInt(countResult.rows[0].total),
+      hasMore: result.rows.length === Number(limit)
+    };
+    
+    logger.info(`📤 Sending response: ${sessionsData.sessions.length} sessions, total: ${sessionsData.total}`);
+    res.json(sessionsData);
+  } catch (error) {
+    logger.error('Error fetching sessions:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/chat/sessions/:sessionId - Get full session with messages
+router.get('/sessions/:sessionId', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    const { sessionId } = req.params;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Get session info
+    const sessionQuery = `
+      SELECT * FROM chat_sessions 
+      WHERE id = $1 AND user_id = $2
+    `;
+    const sessionResult = await db.query(sessionQuery, [sessionId, userId]);
+
+    if (sessionResult.rows.length === 0) {
+      res.status(404).json({ error: 'Session not found' });
+      return;
+    }
+
+    // Get all messages
+    const messagesQuery = `
+      SELECT 
+        id,
+        sender_type,
+        pgp_sym_decrypt(message_content_encrypted::bytea, $1)::text as content,
+        emotion_tags,
+        timestamp,
+        metadata
+      FROM chat_messages
+      WHERE session_id = $2
+      ORDER BY timestamp ASC
+    `;
+
+    const messagesResult = await db.query(messagesQuery, [
+      process.env.DB_ENCRYPTION_KEY || 'default_key',
+      sessionId
+    ]);
+
+    res.json({
+      session: sessionResult.rows[0],
+      messages: messagesResult.rows.map(msg => ({
+        id: msg.id,
+        type: msg.sender_type,
+        text: msg.content,
+        timestamp: msg.timestamp,
+        emotion_tags: msg.emotion_tags,
+        metadata: msg.metadata
+      }))
+    });
+  } catch (error) {
+    logger.error('Error fetching session:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/chat/sessions/:sessionId - Delete a session
+router.delete('/sessions/:sessionId', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    const { sessionId } = req.params;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Delete session (cascade will delete messages)
+    const result = await db.query(`
+      DELETE FROM chat_sessions 
+      WHERE id = $1 AND user_id = $2
+      RETURNING id
+    `, [sessionId, userId]);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Session not found' });
+      return;
+    }
+
+    res.json({ success: true, message: 'Session deleted' });
+  } catch (error) {
+    logger.error('Error deleting session:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/chat/sessions/:sessionId/end - End a session
+router.post('/sessions/:sessionId/end', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    const { sessionId } = req.params;
+    const { moodAfter } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    await db.query(`
+      UPDATE chat_sessions 
+      SET status = 'ended', ended_at = NOW(), mood_after = $3
+      WHERE id = $1 AND user_id = $2
+    `, [sessionId, userId, moodAfter]);
+
+    res.json({ success: true, message: 'Session ended' });
+  } catch (error) {
+    logger.error('Error ending session:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

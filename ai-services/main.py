@@ -68,7 +68,7 @@ Session(app)
 # Configure global constants
 ANALYSIS_CACHE_TIME = 300  # 5 minutes
 CLEANUP_INTERVAL = 86400 * 7  # 7 days
-RATE_LIMIT_INTERVAL = 60  # 1 minute between interventions
+RATE_LIMIT_INTERVAL = 2  # 2 seconds between messages (much more reasonable for chat)
 SESSION_CHECK_INTERVAL = 3600  # 1 hour between session checks
 
 # Custom middleware for session management and rate limiting
@@ -241,7 +241,7 @@ def validate_response_format(response_data):
 analysis_cache = {}
 ANALYSIS_CACHE_TIME = 300  # 5 minutes
 CLEANUP_INTERVAL = 86400 * 7  # 7 days
-RATE_LIMIT_INTERVAL = 60  # 1 minute between interventions
+RATE_LIMIT_INTERVAL = 2  # 2 seconds between messages (reasonable for chat)
 
 # Initialize AI components with simpler approach
 geminiLlm = None

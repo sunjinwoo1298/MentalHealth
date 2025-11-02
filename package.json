@@ -27,6 +27,8 @@
     "lint:frontend": "cd frontend && npm run lint",
     "lint:backend": "cd backend && npm run lint",
     "setup:db": "cd database && npm run migrate:up",
+    "update:db": "node update-database.js",
+    "update:db:powershell": "powershell -ExecutionPolicy Bypass -File .\\update-database.ps1",
     "seed:db": "cd backend && npm run db:seed",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",

@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import axios from 'axios';
 import { logger } from '../utils/logger';
+import { db } from './database';
 
 export interface ChatMessage {
   id: string;
@@ -9,15 +10,18 @@ export interface ChatMessage {
   timestamp: string;
   userId?: string;
   context?: string; // Added support context
+  sessionId?: string; // Track session
 }
 
 export class SocketService {
   private io: Server;
   private aiServiceUrl: string;
+  private userSessions: Map<string, string>; // Map userId to sessionId
 
   constructor(io: Server) {
     this.io = io;
     this.aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:5010';
+    this.userSessions = new Map();
     this.setupSocketHandlers();
     this.checkAIServiceHealth();
   }
@@ -30,6 +34,70 @@ export class SocketService {
     } catch (error) {
       logger.warn('AI Service not available:', (error instanceof Error ? error.message : String(error)));
       logger.info('Will use fallback responses until AI service is ready');
+    }
+  }
+
+  // Get or create active session for user
+  private async getOrCreateSession(userId: string, context: string = 'general'): Promise<string> {
+    try {
+      logger.info(`🔍 Attempting to get/create session for userId: ${userId}, context: ${context}`);
+      
+      // Check if user has an active session
+      const existingSession = await db.query(`
+        SELECT id FROM chat_sessions
+        WHERE user_id = $1 AND status = 'active' AND session_type = $2
+        ORDER BY started_at DESC
+        LIMIT 1
+      `, [userId, context]);
+
+      if (existingSession.rows.length > 0) {
+        const sessionId = existingSession.rows[0].id;
+        this.userSessions.set(userId, sessionId);
+        logger.info(`♻️ Reusing existing session ${sessionId} for user ${userId}`);
+        return sessionId;
+      }
+
+      // Create new session
+      logger.info(`➕ Creating new session for userId: ${userId}`);
+      const newSession = await db.query(`
+        INSERT INTO chat_sessions (user_id, session_type, status, started_at)
+        VALUES ($1, $2, 'active', NOW())
+        RETURNING id
+      `, [userId, context]);
+
+      const sessionId = newSession.rows[0].id;
+      this.userSessions.set(userId, sessionId);
+      logger.info(`✅ Created new session ${sessionId} for user ${userId}`);
+      return sessionId;
+    } catch (error) {
+      logger.error(`❌ Error getting/creating session for userId ${userId}:`, error);
+      throw error;
+    }
+  }
+
+  // Save message to database
+  private async saveMessage(
+    sessionId: string,
+    senderType: 'user' | 'ai' | 'system',
+    content: string,
+    metadata?: any
+  ): Promise<void> {
+    try {
+      await db.query(`
+        INSERT INTO chat_messages 
+        (session_id, sender_type, message_content_encrypted, timestamp, metadata)
+        VALUES ($1, $2, pgp_sym_encrypt($3, $4), NOW(), $5)
+      `, [
+        sessionId,
+        senderType,
+        content,
+        process.env.DB_ENCRYPTION_KEY || 'default_key',
+        JSON.stringify(metadata || {})
+      ]);
+      logger.info(`Saved ${senderType} message to session ${sessionId}`);
+    } catch (error) {
+      logger.error('Error saving message:', error);
+      // Don't throw - we don't want to stop chat if DB save fails
     }
   }
 
@@ -143,13 +211,15 @@ export class SocketService {
   }
 
   private setupSocketHandlers() {
+    logger.info('🔧 Setting up Socket.IO handlers...');
+    
     this.io.on('connection', (socket) => {
-      logger.info('User connected:', socket.id);
+      logger.info('👥 User connected:', socket.id);
 
       // Handle user joining their personal room
       socket.on('join_room', async (userId: string) => {
         socket.join(`user_${userId}`);
-        logger.info(`User ${userId} joined their room`);
+        logger.info(`🏠 User ${userId} joined their room`);
 
         // Check for proactive conversation starter
         try {
@@ -178,17 +248,37 @@ export class SocketService {
       // Handle chat messages
       socket.on('chat:message', async (message: ChatMessage) => {
         try {
-          logger.info('Received chat message:', message);
+          logger.info('📨 Received chat message:', message);
           
-          // Echo the user message back to confirm receipt
-          socket.emit('chat:message', message);
+          const userId = message.userId || socket.id;
+          const context = message.context || 'general';
+          
+          logger.info(`👤 User ID: ${userId} (type: ${typeof userId})`);
+          logger.info(`📍 Context: ${context}`);
+          logger.info(`💬 Message text: ${message.text.substring(0, 50)}...`);
+          
+          console.log(`💬 Processing message from user: ${userId}, context: ${context}`);
+          
+          // Get or create session for this user
+          const sessionId = await this.getOrCreateSession(userId, context);
+          console.log(`📝 Using session: ${sessionId}`);
+          
+          // Save user message to database
+          await this.saveMessage(sessionId, 'user', message.text, {
+            context,
+            socketId: socket.id,
+            clientMessageId: message.id
+          });
+          console.log(`✅ User message saved to database`);
+          
+          // Echo the user message back to confirm receipt (with sessionId)
+          socket.emit('chat:message', { ...message, sessionId });
           
           // Show typing indicator
           socket.emit('chat:typing', true);
           
           // Get AI response with emotional awareness and context
-          const context = message.context || 'general';
-          const aiResponseData = await this.getAIResponse(message.text, message.userId || socket.id, context);
+          const aiResponseData = await this.getAIResponse(message.text, userId, context);
           
           // Stop typing indicator
           socket.emit('chat:typing', false);
@@ -199,9 +289,18 @@ export class SocketService {
             type: 'ai',
             text: aiResponseData.response,
             timestamp: new Date().toISOString(),
-            ...(message.userId && { userId: message.userId }),
-            ...(aiResponseData.context && { context: aiResponseData.context })
+            userId: userId,
+            context: aiResponseData.context || context,
+            sessionId: sessionId
           };
+          
+          // Save AI message to database
+          await this.saveMessage(sessionId, 'ai', aiResponseData.response, {
+            emotional_context: aiResponseData.emotional_context,
+            conversation_count: aiResponseData.conversation_count,
+            context: aiResponseData.context
+          });
+          console.log(`✅ AI message saved to database`);
           
           socket.emit('chat:message', aiMessage);
           
@@ -211,7 +310,8 @@ export class SocketService {
               emotions: aiResponseData.emotional_context,
               conversation_count: aiResponseData.conversation_count,
               context: aiResponseData.context,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              sessionId: sessionId
             });
           }
           

@@ -10,6 +10,7 @@ import CrisisAlert from './CrisisAlert';
 import AgentInfoPanel from './AgentInfoPanel';
 import PreferencesButton from './PreferencesButton';
 import InlineCrisisCard from './InlineCrisisCard';
+import FloatingCrisisButton from './FloatingCrisisButton';
 
 export type ChatMessage = {
   id: string;
@@ -166,6 +167,7 @@ export default function ChatWindow() {
   const [aiInitiative, setAiInitiative] = useState<string | null>(null); // Track current context
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [currentCrisisInfo, setCurrentCrisisInfo] = useState<ChatMessage['crisis_info'] | null>(null);
+  const [showFloatingCrisisButton, setShowFloatingCrisisButton] = useState(false);
   const [showAgentInfo, setShowAgentInfo] = useState(false);
   const [currentAgentInfo, setCurrentAgentInfo] = useState<ChatMessage['agent_info'] | null>(null);
   const [isTTSEnabled, setIsTTSEnabled] = useState(true); // TTS toggle
@@ -555,10 +557,16 @@ export default function ChatWindow() {
       
       // Handle crisis info if present
       if (msg.type === 'ai' && msg.crisis_info) {
-        setCurrentCrisisInfo(msg.crisis_info);
+        // Only update crisis info if severity level >= 3, or if we don't have one yet
         if (msg.crisis_info.severity_level >= 3) {
+          setCurrentCrisisInfo(msg.crisis_info);
           setShowCrisisAlert(true);
+          setShowFloatingCrisisButton(true); // Show floating button for crisis level >= 3 - NEVER turns off
+        } else if (!currentCrisisInfo) {
+          // Only set lower severity crisis info if we don't have a crisis yet
+          setCurrentCrisisInfo(msg.crisis_info);
         }
+        // If severity < 3 and we already have crisis info, keep the existing crisis info
       }
 
       // Handle agent info if present
@@ -725,9 +733,9 @@ export default function ChatWindow() {
   // Separate effect to handle chat completion on unmount with current state values
   useEffect(() => {
     return () => {
-      // Cleanup states
+      // Cleanup states (but keep crisis button visible - don't reset showFloatingCrisisButton or currentCrisisInfo)
       setShowCrisisAlert(false);
-      setCurrentCrisisInfo(null);
+      // DO NOT reset currentCrisisInfo and showFloatingCrisisButton - they should persist
       setShowAgentInfo(false);
       setCurrentAgentInfo(null);
 
@@ -1126,6 +1134,11 @@ export default function ChatWindow() {
           </form>
         </div>
       </div>
+
+      {/* Floating Crisis Button - appears when crisis level >= 3 */}
+      {showFloatingCrisisButton && currentCrisisInfo && (
+        <FloatingCrisisButton crisisInfo={currentCrisisInfo} />
+      )}
     </div>
   );
 };

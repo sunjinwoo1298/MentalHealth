@@ -151,10 +151,12 @@ router.post('/onboarding',
           preferred_therapy_style = $23,
           cultural_background_notes = $24,
           previous_therapy_experience_notes = $25,
+          condition_description = $26,
+          condition_description_updated_at = CASE WHEN $26 IS NOT NULL THEN CURRENT_TIMESTAMP ELSE NULL END,
           -- Mark as complete
           onboarding_completed = true,
           updated_at = CURRENT_TIMESTAMP
-        WHERE user_id = $26
+        WHERE user_id = $27
       `;
 
       await db.query(query, [
@@ -183,6 +185,7 @@ router.post('/onboarding',
         data.preferredTherapyStyle || [],
         data.culturalBackgroundNotes || null,
         data.previousTherapyExperienceNotes || null,
+        data.conditionDescription || null,
         userId
       ]);
 
@@ -216,7 +219,9 @@ router.get('/preferences', authMiddleware, async (req: Request, res: Response): 
         affordability_range,
         availability_notes,
         preferred_therapy_style,
-        cultural_background_notes
+        cultural_background_notes,
+        preferred_support_context,
+        condition_description
       FROM user_profiles
       WHERE user_id = $1
     `;
@@ -242,7 +247,9 @@ router.get('/preferences', authMiddleware, async (req: Request, res: Response): 
         affordabilityRange: prefs.affordability_range,
         availabilityNotes: prefs.availability_notes,
         preferredTherapyStyle: prefs.preferred_therapy_style,
-        culturalBackgroundNotes: prefs.cultural_background_notes
+        culturalBackgroundNotes: prefs.cultural_background_notes,
+        preferredSupportContext: prefs.preferred_support_context,
+        conditionDescription: prefs.condition_description
       }
     });
   } catch (error) {
@@ -270,7 +277,9 @@ router.put('/preferences',
         affordabilityRange,
         availabilityNotes,
         preferredTherapyStyle,
-        culturalBackgroundNotes
+        culturalBackgroundNotes,
+        preferredSupportContext,
+        conditionDescription
       } = req.body;
 
       const query = `
@@ -287,8 +296,11 @@ router.put('/preferences',
           availability_notes = COALESCE($9, availability_notes),
           preferred_therapy_style = COALESCE($10, preferred_therapy_style),
           cultural_background_notes = COALESCE($11, cultural_background_notes),
+          preferred_support_context = COALESCE($12, preferred_support_context),
+          condition_description = COALESCE($13, condition_description),
+          condition_description_updated_at = CASE WHEN $13 IS NOT NULL THEN CURRENT_TIMESTAMP ELSE condition_description_updated_at END,
           updated_at = CURRENT_TIMESTAMP
-        WHERE user_id = $12
+        WHERE user_id = $14
         RETURNING *
       `;
 
@@ -304,6 +316,8 @@ router.put('/preferences',
         availabilityNotes,
         preferredTherapyStyle,
         culturalBackgroundNotes,
+        preferredSupportContext,
+        conditionDescription,
         userId
       ]);
 
@@ -324,7 +338,9 @@ router.put('/preferences',
         affordabilityRange: result.rows[0].affordability_range,
         availabilityNotes: result.rows[0].availability_notes,
         preferredTherapyStyle: result.rows[0].preferred_therapy_style,
-        culturalBackgroundNotes: result.rows[0].cultural_background_notes
+        culturalBackgroundNotes: result.rows[0].cultural_background_notes,
+        preferredSupportContext: result.rows[0].preferred_support_context,
+        conditionDescription: result.rows[0].condition_description
       };
 
       res.json({

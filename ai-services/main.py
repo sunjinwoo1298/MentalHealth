@@ -68,7 +68,7 @@ Session(app)
 # Configure global constants
 ANALYSIS_CACHE_TIME = 300  # 5 minutes
 CLEANUP_INTERVAL = 86400 * 7  # 7 days
-RATE_LIMIT_INTERVAL = 2  # 2 seconds between messages (much more reasonable for chat)
+RATE_LIMIT_INTERVAL = 2  # 2 seconds between messages (reduced from 60s to allow natural conversation)
 SESSION_CHECK_INTERVAL = 3600  # 1 hour between session checks
 
 # Custom middleware for session management and rate limiting
@@ -94,9 +94,12 @@ def pre_request_middleware():
                 user_id = data.get('userId', 'anonymous')
                 
                 if rate_limit_check(user_id):
+                    last_interaction = user_conversation_context.get(user_id, {}).get('last_interaction', 0)
+                    time_since_last = time.time() - last_interaction
+                    print(f"⚠️ [RATE LIMIT] User {user_id} hit rate limit - {time_since_last:.2f}s since last message (limit: {RATE_LIMIT_INTERVAL}s)")
                     return jsonify({
                         'error': 'Rate limit exceeded',
-                        'message': 'Please wait a moment before sending another message',
+                        'message': f'Please wait {RATE_LIMIT_INTERVAL - time_since_last:.1f} more seconds before sending another message',
                         'retry_after': RATE_LIMIT_INTERVAL,
                         'timestamp': current_time
                     }), 429
@@ -241,7 +244,7 @@ def validate_response_format(response_data):
 analysis_cache = {}
 ANALYSIS_CACHE_TIME = 300  # 5 minutes
 CLEANUP_INTERVAL = 86400 * 7  # 7 days
-RATE_LIMIT_INTERVAL = 2  # 2 seconds between messages (reasonable for chat)
+RATE_LIMIT_INTERVAL = 2  # 2 seconds between messages (reduced from 60s to allow natural conversation)
 
 # Initialize AI components with simpler approach
 geminiLlm = None
@@ -639,31 +642,64 @@ Analyze for: Indian youth cultural context, mental health support needs, subtle 
 Response must be valid JSON - no explanation text, ONLY the JSON object."""
 
             try:
-                import json  # Move import to top of function
+                # Get response from LLM
                 response = geminiLlm.invoke(emotion_prompt)
                 emotion_content = response.content if hasattr(response, 'content') else str(response)
                 
-                # Parse JSON response
-                emotion_data = json.loads(emotion_content.strip())
+                # Clean up response text
+                emotion_content = emotion_content.strip()
+                if emotion_content.startswith('```json'):
+                    emotion_content = emotion_content[7:]
+                if emotion_content.endswith('```'):
+                    emotion_content = emotion_content[:-3]
+                emotion_content = emotion_content.strip()
                 
-                detected_emotions = [emotion_data.get("primary_emotion", "neutral")]
+                print(f"Raw emotion response: {emotion_content[:200]}...")
+                
+                # Parse JSON with validation
+                emotion_data = json.loads(emotion_content)
+                
+                # Validate required fields
+                required_fields = {
+                    'primary_emotion': str,
+                    'secondary_emotions': list,
+                    'intensity': (int, float),
+                    'emotional_context': str,
+                    'avatar_emotion': str
+                }
+                
+                for field, expected_type in required_fields.items():
+                    if field not in emotion_data:
+                        raise ValueError(f"Missing required field: {field}")
+                    if not isinstance(emotion_data[field], expected_type):
+                        if field == 'intensity' and isinstance(emotion_data[field], (int, float)):
+                            continue
+                        raise ValueError(f"Invalid type for {field}: expected {expected_type}")
+                
+                # Validate avatar_emotion is one of the allowed values
+                allowed_avatars = ['neutral', 'happy', 'sad', 'concerned', 'supportive', 'excited']
+                if emotion_data['avatar_emotion'] not in allowed_avatars:
+                    emotion_data['avatar_emotion'] = 'neutral'
+                
+                detected_emotions = [emotion_data["primary_emotion"]]
                 if emotion_data.get("secondary_emotions"):
                     detected_emotions.extend(emotion_data["secondary_emotions"][:2])  # Max 3 total
                 
                 # Store additional emotion analysis data
                 emotion_analysis = {
                     'emotions': detected_emotions,
-                    'intensity': emotion_data.get("intensity", 3),
-                    'context': emotion_data.get("emotional_context", ""),
-                    'avatar_emotion': emotion_data.get("avatar_emotion", "neutral"),
+                    'intensity': int(emotion_data["intensity"]),
+                    'context': emotion_data["emotional_context"],
+                    'avatar_emotion': emotion_data["avatar_emotion"],
                     'timestamp': time.time(),
                     'message': message_text[:100]
                 }
                 
-                print(f"🎭 Emotion Analysis for user {user_id}: {emotion_analysis}")
+                print(f"✅ Emotion Analysis for user {user_id}: {emotion_analysis}")
                 
-            except (json.JSONDecodeError, Exception) as e:
-                print(f"Error parsing emotion analysis: {e}, falling back to keyword detection")
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"Error parsing emotion analysis: {e}")
+                print("Falling back to keyword detection")
                 detected_emotions = analyze_emotions_fallback(message_text)
                 emotion_analysis = {
                     'emotions': detected_emotions,
@@ -862,7 +898,7 @@ def enhance_conversation_with_therapeutic_elements(conversation_text, emotions, 
 
 def create_conversation_prompt(user_id, current_message, context='general'):
     """Create a conversation prompt with personalized context, history, emotional awareness"""
-    from preference_mapping import get_style_modifiers, get_response_guidelines
+    from preference_mapping import get_style_modifiers, get_response_guidelines, get_user_preferences
     
     # Initialize user context if not exists
     if user_id not in user_conversation_context:
@@ -905,8 +941,11 @@ def create_conversation_prompt(user_id, current_message, context='general'):
     risk_level = user_ctx.get('risk_level', 'low')
     risk_factors = user_ctx.get('risk_factors', [])
     
+    # Fetch user preferences from database including condition_description
+    user_preferences = get_user_preferences(user_id)
+    
     # Get style modifiers and response guidelines from preferences
-    preferences = user_ctx.get('preferences', {})
+    preferences = user_ctx.get('preferences', {}) or user_preferences or {}
     style_mods = get_style_modifiers(preferences)
     guidelines = get_response_guidelines(style_mods)
     
@@ -928,6 +967,22 @@ Risk Awareness Required:
     
     # Build the conversation context with emotional intelligence and vector context
     conversation_text = f"System Instructions: {context_prompt}\n\n"
+    
+    # Add user's condition description if available
+    if user_preferences and user_preferences.get('condition_description'):
+        condition_desc = user_preferences['condition_description']
+        conversation_text += f"""
+User's Self-Described Condition:
+"{condition_desc}"
+
+IMPORTANT: Use this information to:
+1. Better understand the user's specific challenges and symptoms
+2. Tailor your responses to their exact situation
+3. Show empathy by acknowledging their specific struggles
+4. Provide more relevant and personalized advice
+5. Track progress based on what they initially described
+
+"""
     
     # Add response guidelines based on preferences
     conversation_text += f"""
@@ -1092,15 +1147,19 @@ def chat():
     """Enhanced chat endpoint with performance monitoring, rate limiting and error handling"""
     
     start_time = time.time()
+    # Unique request id for tracing in logs
+    request_id = int(start_time * 1000)
     response_data = {
+        'request_id': request_id,
         'timestamp': start_time,
         'performance_metrics': {}
     }
+    print(f"[{request_id}] START chat request")
     
     try:
         data = request.get_json()
-        print("Received chat request:", data)
-        
+        print(f"[{request_id}] Received chat request:", data)
+            
         message = data.get("message", "")
         user_id = data.get("userId", "anonymous")
         support_context = data.get("context", "general")  # New: support context
@@ -1128,9 +1187,9 @@ def chat():
         
         emotional_state = user_emotional_states.get(user_id, {})
         emotion_history = emotional_state.get('emotion_history', [])
-        
+            
         # First check for crisis indicators using LLM
-        print("🚨 Analyzing message for crisis indicators...")
+        print(f"[{user_id}] 🚨 Analyzing message for crisis indicators...")
         crisis_analysis = analyze_crisis_indicators(
             message=message,
             user_id=user_id,
@@ -1143,9 +1202,9 @@ def chat():
         )
         
         # If crisis detected, generate comprehensive therapist context
-        if crisis_analysis['has_crisis_indicators']:
-            print(f"⚠️ Crisis indicators detected for user {user_id}")
-            print(f"Severity Level: {crisis_analysis['severity_level']}")
+        if crisis_analysis.get('has_crisis_indicators'):
+            print(f"[{request_id}] ⚠️ Crisis indicators detected for user {user_id}")
+            print(f"[{request_id}] Severity Level: {crisis_analysis.get('severity_level')}")
             
             therapist_context = generate_therapist_context(
                 user_id=user_id,
@@ -1174,90 +1233,21 @@ def chat():
                 'immediate_action_required': crisis_analysis['immediate_action_required']
             })
             
-            # Run AI Care Agent analysis if available
-            agent_analysis = None
-            agent_intervention = None
-            if care_agent:
-                try:
-                    # Get crisis history
-                    crisis_history = [
-                        ctx.get('crisis_analysis', {})
-                        for ctx in user_conversation_context.get(user_id, {}).get('session_history', [])
-                        if 'crisis_analysis' in ctx
-                    ]
-                    
-                    # Analyze patterns
-                    print("🤖 AI Care Agent analyzing patterns...")
-                    agent_analysis = care_agent.analyze_user_patterns(
-                        user_id=user_id,
-                        conversation_history=[
-                            {'content': msg.content, 'type': 'human' if isinstance(msg, HumanMessage) else 'ai'}
-                            for msg in conversation_history
-                        ],
-                        emotion_history=emotion_history,
-                        crisis_history=crisis_history
-                    )
-                    
-                    # Track risk trends
-                    risk_trends = care_agent.track_risk_trends(
-                        user_id=user_id,
-                        current_risk=crisis_analysis['severity_level']
-                    )
-                    
-                    # Check if intervention needed
-                    should_intervene, reason, urgency = care_agent.should_intervene(
-                        user_id=user_id,
-                        current_patterns=agent_analysis
-                    )
-                    
-                    if should_intervene:
-                        print(f"🤖 AI Care Agent generating intervention for {user_id}")
-                        print(f"Reason: {reason}, Urgency: {urgency}")
-                        
-                        agent_intervention = care_agent.generate_intervention(
-                            user_id=user_id,
-                            intervention_reason=reason,
-                            urgency_level=urgency,
-                            context=support_context
-                        )
-                    
-                    # Store in user context
-                    user_conversation_context[user_id].update({
-                        'agent_analysis': agent_analysis,
-                        'risk_trends': risk_trends,
-                        'agent_intervention': agent_intervention
-                    })
-                    
-                except Exception as e:
-                    print(f"Error in AI Care Agent analysis: {e}")
-                    import traceback
-                    traceback.print_exc()
-        else:
-            # Regular update without crisis
-            if user_id not in user_conversation_context:
-                user_conversation_context[user_id] = {
-                    'total_messages': 1,
-                    'support_context': support_context,
-                    'first_interaction': True,
-                    'last_interaction': time.time(),
-                    'needs_check_in': False
-                }
-            else:
-                user_conversation_context[user_id]['total_messages'] += 1
-                user_conversation_context[user_id]['last_interaction'] = time.time()
-        
+            
         # Now analyze emotional state for ongoing emotional tracking
+        print(f"[{request_id}] 🔍 Running emotional analysis")
         detected_emotions = analyze_emotional_state(message, user_id)
         avatar_emotion = map_emotions_to_avatar(detected_emotions)
-        
-        # Validate context
+        print(f"[{request_id}] 🔍 Emotional analysis complete: {detected_emotions}")
+            
+            # Validate context
         available_contexts = get_available_contexts()
         if support_context not in available_contexts:
             support_context = "general"
         
         # Check if GEMINI_API_KEY is configured
         if not os.environ.get("GEMINI_API_KEY") or not geminiLlm:
-            print("Warning: GEMINI_API_KEY not configured or LLM not initialized, using fallback response")
+            print(f"[{request_id}] Warning: GEMINI_API_KEY not configured or LLM not initialized, using fallback response")
             fallback_responses = {
                 'general': [
                     "Everything will be okay. 🌟 I'm here to support you through whatever you're going through.",
@@ -1279,13 +1269,17 @@ def chat():
             
             import random
             context_fallbacks = fallback_responses.get(support_context, fallback_responses['general'])
-            return jsonify({
+            fallback_body = {
                 "response": random.choice(context_fallbacks),
                 "userId": user_id,
                 "timestamp": time.time(),
                 "context": support_context,
-                "fallback": True
-            })
+                "fallback": True,
+                "fallback_source": "gemini_unavailable",
+                'request_id': request_id
+            }
+            print(f"[{request_id}] Returning fallback response due to LLM unavailability")
+            return jsonify(fallback_body)
         
         # Create conversation prompt with emotional intelligence and context
         conversation_prompt = create_conversation_prompt(user_id, message, support_context)
@@ -1320,14 +1314,16 @@ def chat():
         
         # Prepare crisis information for response if detected
         crisis_info = None
-        if user_conversation_context.get(user_id, {}).get('crisis_analysis', {}).get('has_crisis_indicators', False):
+        stored_crisis_analysis = user_conversation_context.get(user_id, {}).get('crisis_analysis', {})
+        if stored_crisis_analysis.get('has_crisis_indicators', False):
             crisis_info = {
-                'severity_level': crisis_analysis['severity_level'],
-                'immediate_action_required': crisis_analysis['immediate_action_required'],
-                'crisis_indicators': crisis_analysis['crisis_indicators'],
+                'severity_level': stored_crisis_analysis['severity_level'],
+                'immediate_action_required': stored_crisis_analysis['immediate_action_required'],
+                'crisis_indicators': stored_crisis_analysis['crisis_indicators'],
                 'resources': user_conversation_context[user_id].get('crisis_resources', {}),
                 'needs_professional_help': user_conversation_context[user_id].get('needs_professional_help', False)
             }
+            print(f"[{request_id}] 🚨 Including crisis_info in response: severity={crisis_info['severity_level']}")
 
         return jsonify({
             "response": formatted_response,

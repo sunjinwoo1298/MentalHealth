@@ -62,6 +62,7 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
   const [selfHarmRisk, setSelfHarmRisk] = useState<boolean>(data.selfHarmRisk || false)
   const [substanceUse, setSubstanceUse] = useState<boolean>(data.substanceUse || false)
   const [therapyGoals, setTherapyGoals] = useState<string>(data.therapyGoals || '')
+  const [conditionDescription, setConditionDescription] = useState<string>(data.conditionDescription || '')
 
   const handleMoodChange = (_event: Event, newValue: number | number[]) => {
     const value = Array.isArray(newValue) ? newValue[0] : newValue
@@ -316,6 +317,25 @@ export default function AssessmentStep({ data, onUpdate, onNext, onPrev }: Asses
           <Box className="px-4 mb-3">
             <Slider value={symptomSeverity} onChange={handleSymptomSeverityChange} min={1} max={10} step={1} sx={{ color: '#EC4899' }} />
           </Box>
+
+          <Typography variant="body2" className="text-gray-300 mb-2">Describe your condition (Optional)</Typography>
+          <Typography variant="caption" className="text-gray-400 mb-2 block">
+            Share more about what you're experiencing. This helps us provide better personalized support.
+          </Typography>
+          <textarea
+            className="w-full p-3 rounded-md mb-3 bg-slate-600 text-white border border-slate-500 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 resize-none"
+            placeholder="E.g., I've been feeling anxious about work deadlines and have trouble sleeping. I also experience occasional panic attacks..."
+            rows={4}
+            maxLength={1000}
+            value={conditionDescription}
+            onChange={(e) => {
+              setConditionDescription(e.target.value);
+              onUpdate({ conditionDescription: e.target.value });
+            }}
+          />
+          <Typography variant="caption" className="text-gray-500 block mb-4">
+            {conditionDescription.length}/1000 characters
+          </Typography>
 
           <div className="flex gap-4 mb-3">
             <FormControlLabel control={<Checkbox checked={suicidalIdeation} onChange={(e) => handleRiskToggle('suicidalIdeation', e.target.checked)} />} label={<span className="text-gray-300">Suicidal thoughts</span>} />

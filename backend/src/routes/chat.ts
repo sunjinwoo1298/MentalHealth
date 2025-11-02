@@ -24,12 +24,16 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
         communication_style,
         preferred_topics,
         cultural_background_notes,
-        preferred_support_context
+        preferred_support_context,
+        condition_description
       FROM user_profiles
       WHERE user_id = $1
     `;
     const prefsResult = await db.query(prefsQuery, [userId]);
     const userPrefs = prefsResult.rows[0];
+
+    // Use preferred_support_context from user profile, fallback to provided context or 'general'
+    const supportContext = userPrefs?.preferred_support_context || context || 'general';
 
     // Create or get active chat session
     let sessionId = req.body.sessionId;
@@ -39,7 +43,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
         (user_id, session_type, status)
         VALUES ($1, $2, 'active')
         RETURNING id
-      `, [userId, context || 'general']);
+      `, [userId, supportContext]);
       sessionId = sessionResult.rows[0].id;
     }
 
@@ -53,9 +57,9 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
     // TODO: In real implementation, call AI service here
     // For now, return a simple response based on context and preferences
     let response = "I understand you're feeling stressed. ";
-    if (context === 'academic') {
+    if (supportContext === 'academic') {
       response += "Let's talk about managing academic pressures. ";
-    } else if (context === 'family') {
+    } else if (supportContext === 'family') {
       response += "Family relationships can be challenging. ";
     }
     
@@ -75,7 +79,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
     // Award points for chat interaction
     const pointsResult = await GameService.awardPoints(userId, 'chat_session', {
       message_count: 1,
-      context,
+      context: supportContext,
       timestamp: new Date().toISOString()
     });
 
@@ -83,10 +87,10 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
       success: true,
       message: 'Chat message received',
       response,
-      context,
+      context: supportContext,
       sessionId,
-      emotional_context: context === 'academic' ? 'focused' : 'supportive',
-      avatar_emotion: context === 'academic' ? 'determined' : 'empathetic',
+      emotional_context: supportContext === 'academic' ? 'focused' : 'supportive',
+      avatar_emotion: supportContext === 'academic' ? 'determined' : 'empathetic',
       points_awarded: pointsResult.points_earned,
       level_up: pointsResult.level_up,
       new_level: pointsResult.new_level,

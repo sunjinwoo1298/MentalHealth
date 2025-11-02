@@ -37,6 +37,7 @@ export interface UserOnboardingData {
   preferredTherapyStyle?: string[];  // Optional: ['CBT', 'mindfulness', 'psychodynamic']
   culturalBackgroundNotes?: string;  // Optional: For better cultural matching
   previousTherapyExperienceNotes?: string;  // Optional: What worked/didn't work
+  conditionDescription?: string;  // User's personal description of their mental health condition
 }
 
 // Input validation schema
@@ -96,5 +97,6 @@ export const onboardingDataSchema = {
   availabilityNotes: { type: 'string', required: true },
   preferredTherapyStyle: { type: 'array', items: { type: 'string' }, required: false },
   culturalBackgroundNotes: { type: 'string', required: false },
-  previousTherapyExperienceNotes: { type: 'string', required: false }
+  previousTherapyExperienceNotes: { type: 'string', required: false },
+  conditionDescription: { type: 'string', required: false }
 };

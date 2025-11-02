@@ -17,6 +17,7 @@ import SettingsPage from './pages/SettingsPage'
 import VrmAvatarPage from './pages/VrmAvatarPage'
 import GamificationPage from './pages/GamificationPage'
 import MeditationPage from './pages/NewMeditationPage'
+import ExercisesPage from './pages/ExercisesPage'
 import JournalPage from './pages/JournalPage'
 import MoodPage from './pages/MoodPage'
 import CheckInPage from './pages/CheckInPage'
@@ -58,6 +59,7 @@ function App() {
               <Route path="/therapists" element={<TherapistFinder />} />
               <Route path="/gamification" element={<GamificationPage />} />
               <Route path="/meditation" element={<MeditationPage />} />
+              <Route path="/exercises" element={<ExercisesPage />} />
               <Route path="/mood" element={<MoodPage />} />
               <Route path="/checkin" element={<CheckInPage />} />
               <Route path="/test-gamification" element={<TestGamificationPage />} />

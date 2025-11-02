@@ -380,6 +380,12 @@ const GamificationPage: React.FC = () => {
                 <div className="text-pink-600/70 text-xs mt-1">ध्यान साधना</div>
               </Link>
               
+              <Link to="/exercises" className="bg-white/80 backdrop-blur rounded-2xl p-4 border border-amber-200/50 hover:shadow-bubbly font-medium transition-all duration-300 hover:scale-105 group block shadow-sm">
+                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🏃‍♀️</div>
+                <div className="text-amber-700">Exercises</div>
+                <div className="text-amber-600/70 text-xs mt-1">व्यायाम</div>
+              </Link>
+              
               <Link to="/journal" className="bg-white/80 backdrop-blur rounded-2xl p-4 border border-teal-200/50 hover:shadow-bubbly font-medium transition-all duration-300 hover:scale-105 group block shadow-sm">
                 <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">📝</div>
                 <div className="text-teal-700">Journal Entry</div>

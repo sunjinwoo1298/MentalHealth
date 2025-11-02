@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react'
 import type { ReactNode } from 'react'
-import { authAPI } from '../services/api'
+import { authAPI, wellnessAPI } from '../services/api'
 
 // Types
 interface User {
@@ -131,6 +131,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
           const user = JSON.parse(storedUser)
           dispatch({ type: 'AUTH_SUCCESS', payload: user })
+          // migrate any local quick mood logs to server
+          try {
+            await migrateLocalQuickMoodLogs()
+          } catch (mErr) {
+            console.warn('Failed to migrate quick mood logs during auth check:', mErr)
+          }
           return
         } catch (e) {
           console.error('Failed to parse stored user:', e)
@@ -141,6 +147,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const response = await authAPI.getCurrentUser()
       if (response.success) {
         dispatch({ type: 'AUTH_SUCCESS', payload: response.data.user })
+        // Migrate any local quick mood logs to server (best-effort)
+        try {
+          await migrateLocalQuickMoodLogs()
+        } catch (mErr) {
+          console.warn('Failed to migrate quick mood logs after auth check:', mErr)
+        }
       } else {
         // Token is invalid
         localStorage.removeItem('token')
@@ -175,6 +187,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.setItem('user', JSON.stringify(user))
 
         dispatch({ type: 'AUTH_SUCCESS', payload: user })
+        // Migrate local quick mood logs after successful login
+        try {
+          await migrateLocalQuickMoodLogs()
+        } catch (mErr) {
+          console.warn('Failed to migrate quick mood logs after login:', mErr)
+        }
       } else {
         dispatch({ type: 'AUTH_FAILURE', payload: response.message || 'Login failed' })
       }
@@ -219,7 +237,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.removeItem('token')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('user')
+      // Note: do NOT clear quickMoodLogs here - keep until user explicitly clears or migration completes
       dispatch({ type: 'LOGOUT' })
+    }
+  }
+
+  // Migrate local quickMoodLogs to server for the authenticated user
+  const migrateLocalQuickMoodLogs = async () => {
+    try {
+      const logsRaw = localStorage.getItem('quickMoodLogs')
+      if (!logsRaw) return
+      const logs = JSON.parse(logsRaw)
+      if (!Array.isArray(logs) || logs.length === 0) return
+
+      // Post each entry to the server; server will upsert by date
+      for (const entry of logs) {
+        try {
+          await wellnessAPI.postQuickMood({
+            emotions: entry.emotions,
+            triggers: entry.triggers,
+            notes: entry.notes
+          })
+        } catch (err) {
+          // continue with other entries even if one fails
+          console.warn('Failed to post quick mood entry during migration:', err)
+        }
+      }
+
+      // After attempting migration, remove local entries to avoid duplication
+      localStorage.removeItem('quickMoodLogs')
+    } catch (err) {
+      console.warn('Migration of quickMoodLogs failed:', err)
     }
   }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation/Navigation';
 import { useAuth } from '../contexts/AuthContext';
+import { wellnessAPI } from '../services/api';
 
 interface QuickMoodData {
   emotions: { [key: string]: number };
@@ -18,13 +19,31 @@ const MoodPage: React.FC = () => {
     await logout();
   };
 
-  // Load quick mood logs from localStorage
+  // Load quick mood logs: prefer server when authenticated, fallback to localStorage
   useEffect(() => {
-    const quickLogs = localStorage.getItem('quickMoodLogs');
-    if (quickLogs) {
-      setQuickMoodLogs(JSON.parse(quickLogs));
+    const init = async () => {
+      try {
+        if (user) {
+          const res = await wellnessAPI.getMoodEntries({ limit: 100 });
+          if (res && res.success && Array.isArray(res.data)) {
+            setQuickMoodLogs(res.data as QuickMoodData[]);
+            return;
+          }
+        }
+
+        const quickLogs = localStorage.getItem('quickMoodLogs');
+        if (quickLogs) {
+          setQuickMoodLogs(JSON.parse(quickLogs));
+        }
+      } catch (err) {
+        console.error('Failed to load mood logs:', err);
+        const quickLogs = localStorage.getItem('quickMoodLogs');
+        if (quickLogs) setQuickMoodLogs(JSON.parse(quickLogs));
+      }
     }
-  }, []);
+
+    init();
+  }, [user]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

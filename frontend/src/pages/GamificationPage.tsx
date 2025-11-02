@@ -9,6 +9,7 @@ import TestPoints from '../components/Gamification/TestPoints';
 import GamificationDebug from '../components/Debug/GamificationDebug';
 import Navigation from '../components/Navigation/Navigation';
 import { useAuth } from '../contexts/AuthContext';
+import { wellnessAPI } from '../services/api';
 import { useGamification } from '../contexts/GamificationContext';
 
 interface QuickMoodData {
@@ -30,10 +31,28 @@ const GamificationPage: React.FC = () => {
 
   // Load mood logs
   useEffect(() => {
-    const quickLogs = localStorage.getItem('quickMoodLogs');
-    if (quickLogs) {
-      setQuickMoodLogs(JSON.parse(quickLogs));
+    const load = async () => {
+      try {
+        if (user) {
+          const res = await wellnessAPI.getMoodEntries({ limit: 20 })
+          if (res && res.success && Array.isArray(res.data)) {
+            setQuickMoodLogs(res.data)
+            return
+          }
+        }
+
+        const quickLogs = localStorage.getItem('quickMoodLogs')
+        if (quickLogs) {
+          setQuickMoodLogs(JSON.parse(quickLogs))
+        }
+      } catch (err) {
+        console.error('Failed to load quick mood logs:', err)
+        const quickLogs = localStorage.getItem('quickMoodLogs')
+        if (quickLogs) setQuickMoodLogs(JSON.parse(quickLogs))
+      }
     }
+
+    load()
   }, []);
 
   // Process pending rewards when page opens

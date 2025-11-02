@@ -934,6 +934,7 @@ export default function ChatWindow() {
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         onSessionSelect={loadSession}
+        onNewChat={createNewChat}
         currentSessionId={currentSessionId || undefined}
       />
       
@@ -966,36 +967,6 @@ export default function ChatWindow() {
         {/* Connection Status - Top Center */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 pointer-events-auto">
           <div className="flex items-center space-x-2">
-            {/* New Chat Button */}
-            <button
-              onClick={createNewChat}
-              className="px-3 py-1 rounded-full bg-purple-500/30 text-purple-300 border border-purple-500/50 backdrop-blur-md hover:bg-purple-500/40 transition-all text-xs font-medium"
-              title="Start a new conversation"
-            >
-              ➕ New Chat
-            </button>
-            
-            {/* History Toggle Button */}
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="px-3 py-1 rounded-full bg-blue-500/30 text-blue-300 border border-blue-500/50 backdrop-blur-md hover:bg-blue-500/40 transition-all text-xs font-medium"
-              title={`Toggle chat history${user ? '' : ' (Login required)'}`}
-            >
-              📚 {isSidebarOpen ? 'Hide' : 'Show'} History
-            </button>
-            
-            {/* User Status Indicator */}
-            {user && (
-              <span className="text-xs px-3 py-1 rounded-full bg-green-500/30 text-green-300 border border-green-500/50 backdrop-blur-md">
-                👤 {user.username || user.email}
-              </span>
-            )}
-            {!user && (
-              <span className="text-xs px-3 py-1 rounded-full bg-yellow-500/30 text-yellow-300 border border-yellow-500/50 backdrop-blur-md">
-                ⚠️ Guest Mode
-              </span>
-            )}
-            
             <span className={`text-xs px-3 py-1 rounded-full backdrop-blur-md ${
               isConnected 
                 ? 'bg-green-500/30 text-green-300 border border-green-500/50' 

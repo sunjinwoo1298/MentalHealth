@@ -28,6 +28,7 @@ interface ChatHistorySidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onSessionSelect: (sessionId: string) => void;
+  onNewChat: () => void;
   currentSessionId?: string;
 }
 
@@ -35,6 +36,7 @@ export default function ChatHistorySidebar({
   isOpen,
   onToggle,
   onSessionSelect,
+  onNewChat,
   currentSessionId
 }: ChatHistorySidebarProps) {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -45,7 +47,7 @@ export default function ChatHistorySidebar({
     if (isOpen) {
       loadSessions();
     }
-  }, [isOpen]);
+  }, [isOpen, currentSessionId]); // Re-fetch when sidebar opens or current session changes
 
   const loadSessions = async () => {
     setLoading(true);
@@ -107,9 +109,9 @@ export default function ChatHistorySidebar({
 
   const getContextColor = (type: string) => {
     const colors: { [key: string]: string } = {
-      general: 'bg-blue-100 text-blue-800 border-blue-200',
-      academic: 'bg-green-100 text-green-800 border-green-200',
-      family: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      general: 'bg-blue-500/20 text-blue-200 border-blue-400/30',
+      academic: 'bg-green-500/20 text-green-200 border-green-400/30',
+      family: 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30'
     };
     return colors[type] || colors.general;
   };
@@ -171,15 +173,15 @@ export default function ChatHistorySidebar({
     return (
       <motion.div
         initial={{ width: 0 }}
-        animate={{ width: 48 }}
-        className="border-r border-gray-200 bg-gray-50 flex flex-col items-center py-4"
+        animate={{ width: 56 }}
+        className="bg-black/20 backdrop-blur-md border-r border-white/10 flex flex-col items-center py-4 gap-3"
       >
         <button
           onClick={onToggle}
-          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+          className="p-2.5 hover:bg-white/10 rounded-lg transition-all duration-200"
           title="Open chat history"
         >
-          <History className="w-5 h-5 text-gray-600" />
+          <ChevronRight className="w-5 h-5 text-white/80" />
         </button>
       </motion.div>
     );
@@ -187,64 +189,79 @@ export default function ChatHistorySidebar({
 
   return (
     <motion.div
-      initial={{ width: 0 }}
-      animate={{ width: 320 }}
-      exit={{ width: 0 }}
-      className="border-r border-gray-200 bg-gray-50 flex flex-col h-full"
+      initial={{ width: 0, opacity: 0 }}
+      animate={{ width: 360, opacity: 1 }}
+      exit={{ width: 0, opacity: 0 }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      className="bg-black/30 backdrop-blur-xl border-r border-white/10 flex flex-col h-full"
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 bg-white">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <History className="w-5 h-5 text-gray-700" />
-            <h2 className="text-lg font-semibold text-gray-900">Chat History</h2>
+      <div className="p-4 border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <History className="w-5 h-5 text-purple-300" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white drop-shadow-lg">Chat History</h2>
+              <p className="text-xs text-white/60">
+                {sessions.length} conversation{sessions.length !== 1 ? 's' : ''}
+              </p>
+            </div>
           </div>
           <button
             onClick={onToggle}
-            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200"
             title="Close sidebar"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <ChevronLeft className="w-5 h-5 text-white/80" />
           </button>
         </div>
-        <p className="text-xs text-gray-500">
-          {sessions.length} conversation{sessions.length !== 1 ? 's' : ''}
-        </p>
       </div>
 
       {/* Sessions List */}
-      <div className="flex-1 overflow-y-auto p-3">
-        {loading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div className="flex-1 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">{loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-3 border-purple-500/30 border-t-purple-400"></div>
+              <div className="absolute inset-0 rounded-full bg-purple-500/10 blur-xl"></div>
+            </div>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
-            {error}
-            <button 
-              onClick={loadSessions}
-              className="block mt-2 text-red-800 underline hover:text-red-900"
-            >
-              Try again
-            </button>
-            {error.includes('log in') && (
-              <button 
-                onClick={() => window.location.href = '/login'}
-                className="block mt-2 text-red-800 underline hover:text-red-900"
-              >
-                Go to Login
-              </button>
-            )}
+          <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-4 text-sm text-red-200 backdrop-blur-md">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-medium mb-2">{error}</p>
+                <button 
+                  onClick={loadSessions}
+                  className="px-3 py-1.5 bg-red-400/20 hover:bg-red-400/30 rounded-lg transition-all text-xs font-medium"
+                >
+                  Try again
+                </button>
+                {error.includes('log in') && (
+                  <button 
+                    onClick={() => window.location.href = '/login'}
+                    className="ml-2 px-3 py-1.5 bg-red-400/20 hover:bg-red-400/30 rounded-lg transition-all text-xs font-medium"
+                  >
+                    Go to Login
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
         {!loading && !error && sessions.length === 0 && (
-          <div className="text-center py-12">
-            <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">No chat history yet</p>
-            <p className="text-xs text-gray-400 mt-1">Start a conversation to see it here</p>
+          <div className="text-center py-16">
+            <div className="mb-4 relative">
+              <MessageCircle className="w-16 h-16 text-white/20 mx-auto" />
+              <div className="absolute inset-0 bg-purple-500/10 blur-3xl"></div>
+            </div>
+            <p className="text-sm text-white/70 font-medium">No chat history yet</p>
+            <p className="text-xs text-white/40 mt-2">Start a conversation to see it here</p>
           </div>
         )}
 
@@ -259,73 +276,81 @@ export default function ChatHistorySidebar({
           };
 
           return (
-            <div key={group} className="mb-4">
-              <div className="flex items-center gap-2 px-2 py-1 mb-2">
-                <Calendar className="w-3 h-3 text-gray-400" />
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <div key={group} className="mb-5">
+              <div className="flex items-center gap-2 px-2 py-2 mb-3">
+                <Calendar className="w-3.5 h-3.5 text-purple-300/60" />
+                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">
                   {groupLabels[group]}
                 </h3>
+                <div className="flex-1 h-px bg-white/10"></div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {groupSessions.map(session => (
                   <motion.div
                     key={session.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ scale: 1.02, x: 4 }}
+                    transition={{ duration: 0.2 }}
                     onClick={() => onSessionSelect(session.id)}
                     className={`
-                      p-3 rounded-lg cursor-pointer transition-all
-                      border-2 group relative
+                      p-3.5 rounded-xl cursor-pointer transition-all duration-200
+                      border backdrop-blur-md group relative overflow-hidden
                       ${currentSessionId === session.id 
-                        ? 'bg-blue-50 border-blue-300 shadow-sm' 
-                        : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                        ? 'bg-gradient-to-br from-purple-500/30 to-blue-500/20 border-purple-400/50 shadow-lg shadow-purple-500/20' 
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-black/20'
                       }
                     `}
                   >
+                    {/* Active indicator glow */}
+                    {currentSessionId === session.id && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 blur-xl -z-10"></div>
+                    )}
+
                     {/* Context Badge */}
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-2.5">
                       <span className={`
-                        text-xs px-2 py-0.5 rounded-full border font-medium
+                        text-xs px-2.5 py-1 rounded-full border font-medium backdrop-blur-sm
                         ${getContextColor(session.session_type)}
                       `}>
                         {getContextIcon(session.session_type)} {session.session_type}
                       </span>
                       
                       {session.intervention_triggered && (
-                        <span className="text-xs text-yellow-600 flex items-center gap-1">
+                        <span className="text-xs text-yellow-300/80 flex items-center gap-1 bg-yellow-500/20 px-2 py-1 rounded-full">
                           <AlertTriangle className="w-3 h-3" />
                         </span>
                       )}
                     </div>
 
                     {/* Preview */}
-                    <p className="text-sm text-gray-700 line-clamp-2 mb-2">
+                    <p className="text-sm text-white/80 line-clamp-2 mb-2.5 leading-relaxed">
                       {session.first_message_preview || 'No messages'}
                     </p>
 
                     {/* Meta Info */}
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" />
-                        {session.message_count}
+                    <div className="flex items-center justify-between text-xs text-white/50">
+                      <span className="flex items-center gap-1.5">
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span className="font-medium">{session.message_count}</span>
                       </span>
-                      <span>{formatTime(session.started_at)}</span>
+                      <span className="font-medium">{formatTime(session.started_at)}</span>
                     </div>
 
                     {/* Delete Button */}
                     <button
                       onClick={(e) => deleteSession(session.id, e)}
                       className="
-                        absolute top-2 right-2 p-1.5 rounded-md
-                        bg-white border border-gray-200
+                        absolute top-2 right-2 p-1.5 rounded-lg
+                        bg-black/40 backdrop-blur-md border border-white/10
                         opacity-0 group-hover:opacity-100
-                        hover:bg-red-50 hover:border-red-300
-                        transition-all
+                        hover:bg-red-500/30 hover:border-red-400/50
+                        transition-all duration-200
                       "
                       title="Delete conversation"
                     >
-                      <Trash2 className="w-3.5 h-3.5 text-gray-600 hover:text-red-600" />
+                      <Trash2 className="w-3.5 h-3.5 text-white/70 hover:text-red-300" />
                     </button>
                   </motion.div>
                 ))}
@@ -336,12 +361,16 @@ export default function ChatHistorySidebar({
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-gray-200 bg-white">
+      <div className="p-3 border-t border-white/10 bg-gradient-to-t from-black/20 to-transparent">
         <button
-          onClick={loadSessions}
-          className="w-full py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+          onClick={() => {
+            onNewChat();
+            onToggle(); // Close sidebar after creating new chat
+          }}
+          className="w-full py-2.5 text-sm text-white font-semibold bg-gradient-to-r from-purple-500/40 to-blue-500/40 hover:from-purple-500/50 hover:to-blue-500/50 rounded-lg transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50 backdrop-blur-sm shadow-lg hover:shadow-purple-500/25 flex items-center justify-center gap-2"
         >
-          Refresh
+          <span className="text-lg">➕</span>
+          <span>New Chat</span>
         </button>
       </div>
     </motion.div>

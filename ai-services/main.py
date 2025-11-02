@@ -1104,12 +1104,28 @@ def chat():
         message = data.get("message", "")
         user_id = data.get("userId", "anonymous")
         support_context = data.get("context", "general")  # New: support context
+        session_history = data.get("sessionHistory", [])  # New: session history for context
         
         if not message:
             return jsonify({"error": "Message is required"}), 400
         
+        print(f"📚 Received {len(session_history)} previous messages for context")
+        
         # Get conversation and emotion history
         conversation_history = get_conversation_history(user_id)
+        
+        # If session history is provided, prepend it to conversation history for context
+        if session_history:
+            print(f"🔄 Integrating session history into conversation context")
+            # Convert session history to message format
+            for hist_msg in session_history:
+                role = hist_msg.get('role', 'user')
+                content = hist_msg.get('content', '')
+                if role == 'user':
+                    conversation_history.insert(0, HumanMessage(content=content))
+                elif role == 'assistant':
+                    conversation_history.insert(0, AIMessage(content=content))
+        
         emotional_state = user_emotional_states.get(user_id, {})
         emotion_history = emotional_state.get('emotion_history', [])
         

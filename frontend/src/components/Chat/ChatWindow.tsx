@@ -181,6 +181,7 @@ export default function ChatWindow() {
   // Chat history sidebar state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
 
   // Gamification integration
   const { addPendingReward } = useGamification();
@@ -790,6 +791,7 @@ export default function ChatWindow() {
     console.log('🚀 Sending message with userId:', userId);
     console.log('🔐 User object:', user);
     console.log('🔌 Socket ID:', socket.id);
+    console.log('📋 Current SessionId:', currentSessionId);
     
     const msg: ChatMessage = {
       id: `user-${Date.now()}`,
@@ -798,6 +800,7 @@ export default function ChatWindow() {
       timestamp: new Date().toISOString(),
       userId: userId,
       context: context?.currentContext, // Include support context
+      sessionId: currentSessionId || undefined, // Include current session if exists
     };
 
     console.log('📤 Full message being sent:', msg);
@@ -840,7 +843,10 @@ export default function ChatWindow() {
   // Load previous session messages
   const loadSession = async (sessionId: string) => {
     try {
-      const response = await fetch(`/api/chat/sessions/${sessionId}`, {
+      setIsLoadingSession(true);
+      console.log('📂 Loading session:', sessionId);
+      
+      const response = await fetch(`${SOCKET_URL}/api/chat/sessions/${sessionId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -862,12 +868,63 @@ export default function ChatWindow() {
 
         setMessages(loadedMessages);
         setCurrentSessionId(sessionId);
+        setIsSidebarOpen(false); // Close sidebar after loading
         
-        console.log(`Loaded ${loadedMessages.length} messages from session ${sessionId}`);
+        console.log(`✅ Loaded ${loadedMessages.length} messages from session ${sessionId}`);
+      } else {
+        console.error('❌ Failed to load session:', response.statusText);
       }
     } catch (error) {
-      console.error('Error loading session:', error);
+      console.error('❌ Error loading session:', error);
+    } finally {
+      setIsLoadingSession(false);
     }
+  };
+
+  // Create new chat session
+  const createNewChat = async () => {
+    console.log('➕ Creating new chat session');
+    
+    // End current session if it exists
+    if (currentSessionId && user?.id) {
+      try {
+        console.log('🔚 Ending current session:', currentSessionId);
+        await fetch(`${SOCKET_URL}/api/chat/sessions/${currentSessionId}/end`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            moodAfter: 5 // Default neutral mood
+          })
+        });
+        console.log('✅ Session ended successfully');
+      } catch (error) {
+        console.error('❌ Error ending session:', error);
+      }
+    }
+    
+    // Clear current session
+    setCurrentSessionId(null);
+    
+    // Reset messages to welcome message
+    setMessages([createContextWelcome(context?.currentContext || 'general')]);
+    
+    // Reset counters
+    setMessageCount(0);
+    setConversationCount(0);
+    setChatStartTime(new Date());
+    
+    // Reset emotional state
+    emotionAnalysisService.resetConversation();
+    setEmotionalContext([]);
+    setShowEmotionalIndicator(false);
+    
+    // Close sidebar
+    setIsSidebarOpen(false);
+    
+    console.log('✅ New chat session ready to start');
   };
 
   return (
@@ -909,6 +966,15 @@ export default function ChatWindow() {
         {/* Connection Status - Top Center */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 pointer-events-auto">
           <div className="flex items-center space-x-2">
+            {/* New Chat Button */}
+            <button
+              onClick={createNewChat}
+              className="px-3 py-1 rounded-full bg-purple-500/30 text-purple-300 border border-purple-500/50 backdrop-blur-md hover:bg-purple-500/40 transition-all text-xs font-medium"
+              title="Start a new conversation"
+            >
+              ➕ New Chat
+            </button>
+            
             {/* History Toggle Button */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -1038,8 +1104,17 @@ export default function ChatWindow() {
 
         {/* Chat Messages - Center/Bottom Area */}
         <div className="flex-1 flex flex-col justify-end p-6 pointer-events-none">
-          <div className="max-h-[60vh] overflow-y-auto space-y-4 pointer-events-auto">
-            {messages.map((msg) => (
+          {/* Loading Session Indicator */}
+          {isLoadingSession && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-20">
+              <div className="bg-white/10 border border-white/20 rounded-lg p-6 backdrop-blur-md">
+                <div className="animate-spin w-12 h-12 border-3 border-purple-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                <p className="text-white text-center font-medium">Loading conversation...</p>
+              </div>
+            </div>
+          )}
+          
+          <div className="max-h-[60vh] overflow-y-auto space-y-4 pointer-events-auto">{messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className="max-w-[30%]">
                   {msg.type !== 'user' && (

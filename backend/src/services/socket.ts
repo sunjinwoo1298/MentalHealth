@@ -38,26 +38,28 @@ export class SocketService {
   }
 
   // Get or create active session for user
-  private async getOrCreateSession(userId: string, context: string = 'general'): Promise<string> {
+  private async getOrCreateSession(userId: string, context: string = 'general', sessionId?: string): Promise<string> {
     try {
-      logger.info(`🔍 Attempting to get/create session for userId: ${userId}, context: ${context}`);
+      logger.info(`🔍 Attempting to get/create session for userId: ${userId}, context: ${context}, sessionId: ${sessionId || 'none'}`);
       
-      // Check if user has an active session
-      const existingSession = await db.query(`
-        SELECT id FROM chat_sessions
-        WHERE user_id = $1 AND status = 'active' AND session_type = $2
-        ORDER BY started_at DESC
-        LIMIT 1
-      `, [userId, context]);
+      // If sessionId is provided, use that session (loading old conversation)
+      if (sessionId) {
+        const existingSession = await db.query(`
+          SELECT id FROM chat_sessions
+          WHERE id = $1 AND user_id = $2
+        `, [sessionId, userId]);
 
-      if (existingSession.rows.length > 0) {
-        const sessionId = existingSession.rows[0].id;
-        this.userSessions.set(userId, sessionId);
-        logger.info(`♻️ Reusing existing session ${sessionId} for user ${userId}`);
-        return sessionId;
+        if (existingSession.rows.length > 0) {
+          this.userSessions.set(userId, sessionId);
+          logger.info(`♻️ Using provided session ${sessionId} for user ${userId}`);
+          return sessionId;
+        } else {
+          logger.warn(`⚠️ Provided sessionId ${sessionId} not found, creating new session`);
+        }
       }
-
-      // Create new session
+      
+      // If no sessionId provided, create a NEW session (user clicked "New Chat" or first message)
+      // We deliberately DON'T reuse active sessions here anymore
       logger.info(`➕ Creating new session for userId: ${userId}`);
       const newSession = await db.query(`
         INSERT INTO chat_sessions (user_id, session_type, status, started_at)
@@ -65,13 +67,41 @@ export class SocketService {
         RETURNING id
       `, [userId, context]);
 
-      const sessionId = newSession.rows[0].id;
-      this.userSessions.set(userId, sessionId);
-      logger.info(`✅ Created new session ${sessionId} for user ${userId}`);
-      return sessionId;
+      const newSessionId = newSession.rows[0].id;
+      this.userSessions.set(userId, newSessionId);
+      logger.info(`✅ Created new session ${newSessionId} for user ${userId}`);
+      return newSessionId;
     } catch (error) {
       logger.error(`❌ Error getting/creating session for userId ${userId}:`, error);
       throw error;
+    }
+  }
+
+  // Get session message history
+  private async getSessionHistory(sessionId: string, limit: number = 20): Promise<Array<{role: string, content: string}>> {
+    try {
+      const result = await db.query(`
+        SELECT 
+          sender_type,
+          pgp_sym_decrypt(message_content_encrypted::bytea, $1)::text as content,
+          timestamp
+        FROM chat_messages
+        WHERE session_id = $2
+        ORDER BY timestamp ASC
+        LIMIT $3
+      `, [
+        process.env.DB_ENCRYPTION_KEY || 'default_key',
+        sessionId,
+        limit
+      ]);
+
+      return result.rows.map(row => ({
+        role: row.sender_type === 'user' ? 'user' : 'assistant',
+        content: row.content
+      }));
+    } catch (error) {
+      logger.error('Error fetching session history:', error);
+      return [];
     }
   }
 
@@ -102,7 +132,12 @@ export class SocketService {
   }
 
   // Get AI response from Python service
-  private async getAIResponse(message: string, userId: string, context: string = 'general'): Promise<{
+  private async getAIResponse(
+    message: string, 
+    userId: string, 
+    context: string = 'general',
+    sessionHistory: Array<{role: string, content: string}> = []
+  ): Promise<{
     response: string;
     emotional_context?: string[];
     conversation_count?: number;
@@ -110,11 +145,13 @@ export class SocketService {
   }> {
     try {
       logger.info(`Sending message to AI service: ${message} (context: ${context})\n`);
+      logger.info(`Including ${sessionHistory.length} previous messages for context`);
       
       const response = await axios.post(`${this.aiServiceUrl}/chat`, {
         message: message,
         userId: userId,
-        context: context
+        context: context,
+        sessionHistory: sessionHistory // Pass conversation history to AI
       }, {
         timeout: 15000, // 15 second timeout
         headers: {
@@ -252,16 +289,22 @@ export class SocketService {
           
           const userId = message.userId || socket.id;
           const context = message.context || 'general';
+          const providedSessionId = message.sessionId; // Get sessionId if provided from frontend
           
           logger.info(`👤 User ID: ${userId} (type: ${typeof userId})`);
           logger.info(`📍 Context: ${context}`);
           logger.info(`💬 Message text: ${message.text.substring(0, 50)}...`);
+          logger.info(`📋 Provided SessionId: ${providedSessionId || 'none'}`);
           
           console.log(`💬 Processing message from user: ${userId}, context: ${context}`);
           
-          // Get or create session for this user
-          const sessionId = await this.getOrCreateSession(userId, context);
+          // Get or create session for this user (pass sessionId if loading old conversation)
+          const sessionId = await this.getOrCreateSession(userId, context, providedSessionId);
           console.log(`📝 Using session: ${sessionId}`);
+          
+          // Get session history for AI context
+          const sessionHistory = await this.getSessionHistory(sessionId, 20);
+          logger.info(`📚 Retrieved ${sessionHistory.length} previous messages for context`);
           
           // Save user message to database
           await this.saveMessage(sessionId, 'user', message.text, {
@@ -277,8 +320,8 @@ export class SocketService {
           // Show typing indicator
           socket.emit('chat:typing', true);
           
-          // Get AI response with emotional awareness and context
-          const aiResponseData = await this.getAIResponse(message.text, userId, context);
+          // Get AI response with emotional awareness, context, and session history
+          const aiResponseData = await this.getAIResponse(message.text, userId, context, sessionHistory);
           
           // Stop typing indicator
           socket.emit('chat:typing', false);

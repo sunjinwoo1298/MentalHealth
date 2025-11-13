@@ -30,7 +30,7 @@ export function Sidebar() {
   return (
     <aside
       className="hidden md:flex fixed left-0 top-0 h-screen w-64 flex-col border-r bg-sidebar text-sidebar-foreground/90 backdrop-blur-sm/20 motion-safe:animate-float-soft z-30"
-      aria-label="Primary"
+      aria-label="Primary" 
     >
       <div className="h-16 flex items-center gap-2 px-4 border-b">
         <div className="size-9 rounded-xl bg-gradient-to-br from-red-500 via-yellow-500 to-purple-600 animate-shimmer bg-[length:200%_200%] shadow-bubbly motion-safe:animate-pulse-glow" aria-hidden >

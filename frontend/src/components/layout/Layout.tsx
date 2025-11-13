@@ -1,15 +1,15 @@
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
-import { Background3D } from "../Background3D";
+import { Background3D } from "../background3d";
 import BackgroundRipple from "../BackgroundRipple";
 import SketchCursor from "../SketchCursor";
 import { Outlet } from "react-router-dom";
 
 export default function Layout() {
   return (
-    <div className="min-h-screen relative z-10">
-      {/* <Background3D /> */}
-      <BackgroundRipple />
+    <div className="min-h-screen w-[100vw] relative z-10">
+      <Background3D />
+      {/* <BackgroundRipple /> */}
       <SketchCursor />
       <Sidebar />
       <div className="flex flex-col md:ml-64">

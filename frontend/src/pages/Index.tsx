@@ -52,7 +52,7 @@ export default function Index() {
   // }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20 relative overflow-hidden pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/20 via-white to-purple-50/15 relative overflow-hidden pb-12 bg-none">
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -right-20 w-96 h-96 bg-gradient-to-br from-violet-200/40 to-purple-300/30 rounded-full blur-3xl animate-blob"></div>
